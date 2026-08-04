@@ -16,7 +16,7 @@
 | Android: guest wasm in assets; instrumented vector-add (abi-mvp) | Done (green) |
 | Android CM: CM-patched `.so` + `vector_add_cm.wasm` instrumented test | Done (green) |
 | Desktop CM: `desktop-natives/` (no Gradle cache mutation) + CM test gate | Done |
-| On-screen | Not done |
+| On-screen | Demo: Kotlin→Dawn `SurfaceView` red triangle (not via L2); Guest/wasi-gfx not done |
 
 Path (abi-mvp):
 

@@ -31,9 +31,10 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
 | L1 + CM | `runtime-wasmtime` (`runtime.cm`) + `abi-cm` | ComponentLinker ↔ typed WIT imports |
 | Guest | `guest/vector-add` | abi-mvp `.wat` + prebuilt `.wasm` |
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + prebuilt `.wasm` |
-| Consumer | `android-demo` | Dawn / Guest instrumented tests / thin UI |
+| Consumer | `android-demo` | Dawn compute / Guest instrumented tests / SurfaceView triangle demo |
 
-**Explicitly out of scope (this phase):** on-screen / wasi-gfx, compliant full wasi:webgpu world, Maven Central publishing.
+**Explicitly out of scope (this phase):** Guest / wasi-gfx on-screen, compliant full wasi:webgpu world, Maven Central publishing.  
+(Demo has a Kotlin→Dawn `SurfaceView` red triangle; **not** wired into L2 Host / WIT.)
 
 ## Repository layout
 
@@ -162,6 +163,11 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `experimental:webgpu-cm@0.2.0`: `buffer-descriptor` + usage/map flags; `create-buffer` / `map-async`
 - [x] Dropped alternate-runtime mentions from docs / scheme
+
+### On-screen demo (Kotlin)
+
+- [x] `android-demo`: `SurfaceView` + `TriangleRenderer` (Kotlin→androidx.webgpu; not via L2/Guest)
+- [ ] Lift surface/render into `WasiWebGpuHost` / WIT (not done)
 
 ## References
 

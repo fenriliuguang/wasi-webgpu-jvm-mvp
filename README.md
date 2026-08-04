@@ -31,9 +31,10 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2
 | L1 + CM | `runtime-wasmtime` (`runtime.cm`) + `abi-cm` | ComponentLinker ↔ typed WIT imports |
 | Guest | `guest/vector-add` | abi-mvp `.wat` + 预编译 `.wasm` |
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + 预编译 `.wasm` |
-| Consumer | `android-demo` | Dawn / Guest 仪器测试 / 薄 UI |
+| Consumer | `android-demo` | Dawn compute / Guest 仪器测试 / SurfaceView 红三角 demo |
 
-**明确不做（本阶段）：** 上屏 / wasi-gfx、合规 wasi:webgpu 全量 world、Maven Central 发布。
+**明确不做（本阶段）：** Guest / wasi-gfx 上屏、合规 wasi:webgpu 全量 world、Maven Central 发布。  
+（demo 已有 Kotlin→Dawn `SurfaceView` 红三角，**未**进 L2 Host / WIT。）
 
 ## 仓库布局
 
@@ -162,6 +163,11 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `experimental:webgpu-cm@0.2.0`：`buffer-descriptor` + usage/map flags；`create-buffer` / `map-async`
 - [x] 文档与方案中移除备用 Runtime 路线表述
+
+### 上屏 demo（Kotlin）
+
+- [x] `android-demo`：`SurfaceView` + `TriangleRenderer`（Kotlin→androidx.webgpu，不经 L2/Guest）
+- [ ] Surface/render 抬升进 `WasiWebGpuHost` / WIT（未做）
 
 ## 参考
 

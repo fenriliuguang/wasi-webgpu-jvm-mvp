@@ -16,7 +16,7 @@
 | **P1 · Runtime** | **完成**：桌面 Wasmtime + Android 嵌 Wasmtime → 同一 `abi-mvp` / L2；仍是 experimental / 非 CM |
 | **CM 切片** | **完成（experimental）**：`experimental:webgpu-cm` WIT resources + Guest + `abi-cm` + 桌面 ComponentLinker → 同一 L2；Android CM → Dawn 仪器测试；仍非合规 wasi:webgpu |
 | **交付巩固** | **完成**：桌面 CM → `desktop-natives`（不改 Gradle cache）；CM 测试门控；GitHub Actions（JVM + assemble）；`CHANGELOG` / `patches/UPSTREAM` |
-| **语义扩展** | **完成（第一刀）**：CM `buffer-descriptor` + usage/map flags（`experimental:webgpu-cm@0.2.0`）；后续可选：上屏 / 更多 records（bind-group 等） |
+| **语义扩展** | **进行中**：CM buffer records/flags（`@0.2.0`）已完成；**上屏 demo（Kotlin→Dawn SurfaceView 红三角）**已验证；后续可选：抬升进 L2 / 更多 records / wasi-gfx |
 
 ## 硬原则（摘录）
 

@@ -5,6 +5,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### On-screen demo (Kotlin)
+
+- `android-demo`: `SurfaceView` + `TriangleRenderer` red triangle via androidx.webgpu (not L2/Guest/wasi-gfx)
+
 ### Semantic expansion (CM buffer records/flags)
 
 - `experimental:webgpu-cm` **0.1.0 → 0.2.0**: `buffer-descriptor`, `buffer-usage-flags` / `map-mode-flags` (u32 aliases)
@@ -29,5 +33,5 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 ### Explicitly out of scope
 
 - Maven Central / GitHub Packages publishing
-- On-screen / wasi-gfx, full wasi:webgpu compliance
+- Guest / wasi-gfx on-screen; full wasi:webgpu compliance
 - Opening upstream PRs to tegmentum/wasmtime4j (notes only)
