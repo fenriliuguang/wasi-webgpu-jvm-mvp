@@ -1,9 +1,12 @@
 # Cross-compile wasmtime4j-native for Android and install into runtime-wasmtime/android-natives/jniLibs.
-# Applies tracked patches/wasmtime4j-v47.0.2-1.5.0-android.patch (JNI 1_6 + unsigned handle checks).
+# Applies (in order):
+#   1) patches/wasmtime4j-v47.0.2-1.5.0-android.patch   — JNI 1_6 + unsigned handle checks
+#   2) patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch — CM WIT resources (Android CM path)
 param(
     [string]$NdkVersion = "28.2.13676358",
     [string]$Wasmtime4jTag = "v47.0.2-1.5.0",
-    [int]$ApiLevel = 24
+    [int]$ApiLevel = 24,
+    [switch]$SkipCmResourcesPatch
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,9 +18,13 @@ if (-not (Test-Path $Ndk)) {
 }
 
 $Deps = Join-Path $Root ".deps\wasmtime4j"
-$Patch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-android.patch"
-if (-not (Test-Path $Patch)) {
-    throw "Missing tracked patch: $Patch"
+$AndroidPatch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-android.patch"
+$CmPatch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-cm-resources.patch"
+if (-not (Test-Path $AndroidPatch)) {
+    throw "Missing tracked patch: $AndroidPatch"
+}
+if (-not $SkipCmResourcesPatch -and -not (Test-Path $CmPatch)) {
+    throw "Missing tracked patch: $CmPatch"
 }
 
 if (-not (Test-Path (Join-Path $Deps "wasmtime4j-native\Cargo.toml"))) {
@@ -25,12 +32,19 @@ if (-not (Test-Path (Join-Path $Deps "wasmtime4j-native\Cargo.toml"))) {
     git clone --depth 1 --branch $Wasmtime4jTag https://github.com/tegmentum/wasmtime4j.git $Deps
 }
 
+function Apply-TrackedPatch([string]$Patch) {
+    git -C $Deps apply --check -- "$Patch"
+    if ($LASTEXITCODE -ne 0) { throw "git apply --check failed for $Patch" }
+    git -C $Deps apply -- "$Patch"
+    if ($LASTEXITCODE -ne 0) { throw "git apply failed for $Patch" }
+    Write-Host "Applied $Patch"
+}
+
 git -C $Deps checkout -- .
-git -C $Deps apply --check -- "$Patch"
-if ($LASTEXITCODE -ne 0) { throw "git apply --check failed for $Patch" }
-git -C $Deps apply -- "$Patch"
-if ($LASTEXITCODE -ne 0) { throw "git apply failed for $Patch" }
-Write-Host "Applied $Patch"
+Apply-TrackedPatch $AndroidPatch
+if (-not $SkipCmResourcesPatch) {
+    Apply-TrackedPatch $CmPatch
+}
 
 $Out = Join-Path $Root "runtime-wasmtime\android-natives\jniLibs"
 New-Item -ItemType Directory -Force -Path $Out | Out-Null

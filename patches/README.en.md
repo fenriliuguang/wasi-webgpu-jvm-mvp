@@ -7,7 +7,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 
 | File | Purpose | Touched files |
 |------|---------|---------------|
-| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | Desktop CM WIT resources | `component/linker.rs`, `jni/component_linker.rs` |
+| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | Desktop + Android CM WIT resources | `component/linker.rs`, `jni/component_linker.rs` |
 | [`wasmtime4j-v47.0.2-1.5.0-android.patch`](wasmtime4j-v47.0.2-1.5.0-android.patch) | Android Bionic / ART | `async_runtime.rs`, `jni/memory.rs` |
 
 Source checkout under `.deps/wasmtime4j` is **not** committed (see root `.gitignore`).  
@@ -19,8 +19,9 @@ Patches themselves are committed; build scripts clone the tag then `git apply`.
 # Desktop CM (resources + marshalling / global registry replay)
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 
-# Android .so (JNI 1_6 + unsigned handle checks)
+# Android .so (default: JNI 1_6 + unsigned handle checks + CM resources)
 ./scripts/build-wasmtime4j-android.ps1
+# abi-mvp only (skip CM): ./scripts/build-wasmtime4j-android.ps1 -SkipCmResourcesPatch
 ```
 
 Manual:

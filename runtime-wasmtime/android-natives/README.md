@@ -26,9 +26,12 @@ Requires: Rust **≥ 1.94** (1.97+ recommended), `cargo-ndk`, Android NDK, targe
 
 Version pin matches `gradle/libs.versions.toml` (`wasmtime4j`). Source checkout lives under `.deps/wasmtime4j` (gitignored).
 
-The build script `git apply`s tracked [`patches/wasmtime4j-v47.0.2-1.5.0-android.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-android.patch):
+The build script `git apply`s (in order):
 
-1. `JNI_OnLoad` → `JNI_VERSION_1_6` (ART rejects `1_8` / `65544`)
-2. `memory.rs` handle checks use unsigned compare (MTE/TBI tagged pointers)
+1. [`patches/wasmtime4j-v47.0.2-1.5.0-android.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-android.patch):
+   - `JNI_OnLoad` → `JNI_VERSION_1_6` (ART rejects `1_8` / `65544`)
+   - `memory.rs` handle checks use unsigned compare (MTE/TBI tagged pointers)
+2. [`patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) (default; skip with `-SkipCmResourcesPatch`):
+   - WIT resource ↔ `U32(rep)` marshalling for Android CM instrumented tests
 
 Progress, pitfalls, and Java-side Validation shim: [`docs/android-wasmtime.md`](../../docs/android-wasmtime.md).

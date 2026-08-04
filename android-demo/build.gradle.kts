@@ -3,13 +3,18 @@ plugins {
 }
 
 val guestWasm = rootProject.file("guest/vector-add/vector_add.wasm")
+val guestCmWasm = rootProject.file("guest/vector-add-cm/vector_add_cm.wasm")
 // Plain File (not Provider): AGP 9 rejects Provider in SourceSet.assets.srcDir.
 val generatedAssetsDir = layout.buildDirectory.get().asFile.resolve("generated/assets")
 
 val syncGuestAssets by tasks.registering(Copy::class) {
-    from(guestWasm)
+    from(guestWasm) {
+        rename { "vector_add.wasm" }
+    }
+    from(guestCmWasm) {
+        rename { "vector_add_cm.wasm" }
+    }
     into(generatedAssetsDir.resolve("guest"))
-    rename { "vector_add.wasm" }
 }
 
 // Strip upstream Validation.class so our Android-tolerant copy wins (ARM64 jlong handles).
@@ -119,4 +124,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    // Lets AGP/UTP install androidx.test.services (needed on API 30+ / OEM devices).
+    androidTestUtil(libs.androidx.test.services)
 }

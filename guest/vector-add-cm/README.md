@@ -25,4 +25,5 @@ wasm-tools component new target/wasm32-unknown-unknown/release/vector_add_cm.was
   -o vector_add_cm.wasm
 ```
 
-Committed `vector_add_cm.wasm` is what desktop tests load.
+Committed `vector_add_cm.wasm` is what desktop tests and Android assets load
+(`android-demo` syncs it to `assets/guest/vector_add_cm.wasm`).

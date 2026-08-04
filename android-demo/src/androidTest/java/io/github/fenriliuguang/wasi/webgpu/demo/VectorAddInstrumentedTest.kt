@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
  * Requires a device/emulator with a usable WebGPU/Vulkan backend.
  *
  * Guest → Wasmtime → Dawn: see [WasmtimeVectorAddInstrumentedTest].
+ * CM Guest → Wasmtime CM → Dawn: see [WasmtimeCmVectorAddInstrumentedTest].
  */
 @RunWith(AndroidJUnit4::class)
 class VectorAddInstrumentedTest {

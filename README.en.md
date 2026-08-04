@@ -18,7 +18,9 @@ P0: Kotlin / Demo → WasiWebGpuHost (L2) → Dawn (Android) or CpuHost (desktop
 P1: Guest.wasm → Wasmtime (L1) + abi-mvp → same L2
     Desktop: CpuWasiWebGpuHost
     Android: DawnWasiWebGpuHost + Bionic libwasmtime4j.so
-CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2 (desktop CpuHost)
+CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
+    Desktop: CpuWasiWebGpuHost
+    Android: DawnWasiWebGpuHost + CM-patched Bionic libwasmtime4j.so
 ```
 
 | Layer | Module | Notes |
@@ -72,8 +74,21 @@ Instrumented tests (device/emulator + WebGPU/Vulkan): in Android Studio, right-c
 
 - P0 Kotlin→Dawn: `VectorAddInstrumentedTest.kt` → **Run**  
 - Guest→Wasmtime→Dawn: `WasmtimeVectorAddInstrumentedTest.kt` → **Run**  
+- CM Guest→Wasmtime CM→Dawn: `WasmtimeCmVectorAddInstrumentedTest.kt` → **Run**  
 
-(Gradle panels may not list verification tasks; that is default IDE behavior. Prefer the desktop CM path; Android CM instrumented tests are not required for this slice.)
+(Gradle panels may not list verification tasks; that is default IDE behavior.)
+
+If Studio / `:connectedDebugAndroidTest` reports `Process crashed` or `No UID for androidx.test.services`, see [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md) §7; reliable bypass:
+
+```powershell
+./scripts/run-android-instrumented.ps1
+```
+
+Instrumented test checklist:
+
+- P0 Kotlin→Dawn: `VectorAddInstrumentedTest.kt`
+- P1 Guest→Wasmtime→Dawn: `WasmtimeVectorAddInstrumentedTest.kt`
+- CM Guest→Wasmtime CM→Dawn: `WasmtimeCmVectorAddInstrumentedTest.kt` (needs CM-resources-patched Bionic `.so`)
 
 ### Android Wasmtime `.so`
 
@@ -130,7 +145,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `wit/compute-cm` + `abi-cm` + CM Guest → same L2 (desktop `:runtime-wasmtime:test`)
 - [x] WIT resources replace flat u32 (adapter/device/queue/buffer/…; still not compliant wasi:webgpu)
-- [ ] Android CM instrumented tests (optional follow-up)
+- [x] Android CM instrumented tests (`WasmtimeCmVectorAddInstrumentedTest`; needs CM-patched Bionic `.so`)
 
 ## References
 

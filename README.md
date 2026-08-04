@@ -18,7 +18,9 @@ P0: Kotlin / Demo → WasiWebGpuHost (L2) → Dawn (Android) 或 CpuHost (桌面
 P1: Guest.wasm → Wasmtime (L1) + abi-mvp → 同一 L2
     桌面：CpuWasiWebGpuHost
     Android：DawnWasiWebGpuHost + Bionic libwasmtime4j.so
-CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2（桌面 CpuHost）
+CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2
+    桌面：CpuWasiWebGpuHost
+    Android：DawnWasiWebGpuHost + CM-patched Bionic libwasmtime4j.so
 ```
 
 | 层 | 模块 | 说明 |
@@ -72,8 +74,21 @@ wasi-webgpu-jvm-mvp/
 
 - P0 Kotlin→Dawn：`VectorAddInstrumentedTest.kt` → **Run**  
 - Guest→Wasmtime→Dawn：`WasmtimeVectorAddInstrumentedTest.kt` → **Run**  
+- CM Guest→Wasmtime CM→Dawn：`WasmtimeCmVectorAddInstrumentedTest.kt` → **Run**  
 
-（Gradle 面板未必列出 verification task，属 IDE 默认行为。CM 桌面路径优先；Android CM 仪器测试未强制本切片。）
+（Gradle 面板未必列出 verification task，属 IDE 默认行为。）
+
+若 Studio / `:connectedDebugAndroidTest` 报 `Process crashed` 或 `No UID for androidx.test.services`，先看 [`docs/android-wasmtime.md`](docs/android-wasmtime.md) §7；可靠旁路：
+
+```powershell
+./scripts/run-android-instrumented.ps1
+```
+
+仪器测试清单：
+
+- P0 Kotlin→Dawn：`VectorAddInstrumentedTest.kt`
+- P1 Guest→Wasmtime→Dawn：`WasmtimeVectorAddInstrumentedTest.kt`
+- CM Guest→Wasmtime CM→Dawn：`WasmtimeCmVectorAddInstrumentedTest.kt`（需带 CM resources 补丁的 Bionic `.so`）
 
 ### Android Wasmtime `.so`
 
@@ -130,7 +145,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `wit/compute-cm` + `abi-cm` + CM Guest → 同一 L2（桌面 `:runtime-wasmtime:test`）
 - [x] WIT resources 替换 flat u32（adapter/device/queue/buffer/…；仍非合规 wasi:webgpu）
-- [ ] Android CM 仪器测试（可选后续）
+- [x] Android CM 仪器测试（`WasmtimeCmVectorAddInstrumentedTest`；需 CM-patched Bionic `.so`）
 
 ## 参考
 

@@ -7,7 +7,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 
 | 文件 | 用途 | 改动文件 |
 |------|------|----------|
-| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | 桌面 CM WIT resources | `component/linker.rs`, `jni/component_linker.rs` |
+| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | 桌面 + Android CM WIT resources | `component/linker.rs`, `jni/component_linker.rs` |
 | [`wasmtime4j-v47.0.2-1.5.0-android.patch`](wasmtime4j-v47.0.2-1.5.0-android.patch) | Android Bionic / ART | `async_runtime.rs`, `jni/memory.rs` |
 
 源码检出目录 `.deps/wasmtime4j` **不入库**（见根 `.gitignore`）。  
@@ -19,8 +19,9 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 # 桌面 CM（resources + 编组 / 全局 registry 重放）
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 
-# Android .so（JNI 1_6 + 句柄无符号校验）
+# Android .so（默认：JNI 1_6 + 句柄无符号校验 + CM resources）
 ./scripts/build-wasmtime4j-android.ps1
+# 仅 abi-mvp（跳过 CM）：./scripts/build-wasmtime4j-android.ps1 -SkipCmResourcesPatch
 ```
 
 手动：
