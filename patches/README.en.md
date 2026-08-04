@@ -13,10 +13,12 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 Source checkout under `.deps/wasmtime4j` is **not** committed (see root `.gitignore`).  
 Patches themselves are committed; build scripts clone the tag then `git apply`.
 
+Upstream contribution brief (not an opened PR): [`UPSTREAM.en.md`](UPSTREAM.en.md).
+
 ## Apply
 
 ```powershell
-# Desktop CM (resources + marshalling / global registry replay)
+# Desktop CM → runtime-wasmtime/desktop-natives/ (does not mutate Gradle cache)
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 
 # Android .so (default: JNI 1_6 + unsigned handle checks + CM resources)

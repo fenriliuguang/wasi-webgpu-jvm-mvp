@@ -24,5 +24,8 @@ captures/
 *.keystore
 !debug.keystore
 .deps/
+# Desktop CM-patched natives (rebuild via scripts/build-wasmtime4j-desktop-cm.ps1)
+runtime-wasmtime/desktop-natives/**
+!runtime-wasmtime/desktop-natives/README.md
 guest/**/target/
 guest/**/Cargo.lock

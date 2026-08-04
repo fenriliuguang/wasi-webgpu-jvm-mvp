@@ -26,7 +26,8 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
  *
  * Note: wasmtime4j 47.0.2-1.5.0 `createComponentEngine()` does not attach the runtime to
  * [ComponentEngine.getEngine]; we create a CM-enabled [Engine] separately for linker/store.
- * Desktop CM needs [scripts/build-wasmtime4j-desktop-cm.ps1].
+ * Desktop CM: run `scripts/build-wasmtime4j-desktop-cm.ps1` to populate
+ * `runtime-wasmtime/desktop-natives/`.
  */
 class WasmtimeCmLinker(
     private val host: WasiWebGpuHost,

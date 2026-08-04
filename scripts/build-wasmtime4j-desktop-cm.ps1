@@ -1,4 +1,5 @@
-# Apply tracked CM resources patch, build desktop wasmtime4j-native, install into Maven cache jars.
+# Apply tracked CM resources patch, build desktop wasmtime4j-native,
+# install into runtime-wasmtime/desktop-natives/<platform>/ (does NOT mutate Gradle cache).
 # Prerequisites: rustc/cargo (1.97+), network for first clone.
 param(
     [string]$Wasmtime4jTag = "v47.0.2-1.5.0"
@@ -8,6 +9,7 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $Deps = Join-Path $Root ".deps\wasmtime4j"
 $Patch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-cm-resources.patch"
+$OutRoot = Join-Path $Root "runtime-wasmtime\desktop-natives"
 
 if (-not (Test-Path $Patch)) {
     throw "Missing tracked patch: $Patch"
@@ -44,48 +46,48 @@ try {
 }
 
 # Workspace cargo target lives at .deps/wasmtime4j/target.
-$Dll = Join-Path $Deps "target\release\wasmtime4j.dll"
-if (-not (Test-Path $Dll)) {
-    throw "Patched DLL not found at $Dll"
-}
-Write-Host "Built $Dll ($((Get-Item $Dll).Length) bytes)"
+$os = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
+$arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
 
-$entryPath = "natives/windows-x86_64/wasmtime4j.dll"
-$jars = @()
-foreach ($artifact in @("wasmtime4j-native", "wasmtime4j-jni")) {
-    $found = Get-ChildItem "$env:USERPROFILE\.gradle\caches\modules-2\files-2.1\ai.tegmentum\$artifact" `
-        -Recurse -Filter "$artifact-*-*.jar" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -notmatch "sources|javadoc" } |
-        Sort-Object LastWriteTime -Descending |
-        Select-Object -First 1
-    if ($found) { $jars += $found }
-}
-if ($jars.Count -eq 0) {
-    throw "Maven wasmtime4j-native/jni jars not found; run a Gradle resolve first"
+$platform = $null
+$libName = $null
+$built = $null
+if ($IsWindows -or $env:OS -eq "Windows_NT") {
+    if ($arch -match "X64|Amd64") {
+        $platform = "windows-x86_64"
+        $libName = "wasmtime4j.dll"
+        $built = Join-Path $Deps "target\release\wasmtime4j.dll"
+    }
+} elseif ($IsMacOS) {
+    if ($arch -match "Arm64") {
+        $platform = "darwin-aarch64"
+        $libName = "libwasmtime4j.dylib"
+        $built = Join-Path $Deps "target\release\libwasmtime4j.dylib"
+    }
+} else {
+    # Linux
+    if ($arch -match "Arm64") {
+        $platform = "linux-aarch64"
+        $libName = "libwasmtime4j.so"
+        $built = Join-Path $Deps "target\release\libwasmtime4j.so"
+    } else {
+        $platform = "linux-x86_64"
+        $libName = "libwasmtime4j.so"
+        $built = Join-Path $Deps "target\release\libwasmtime4j.so"
+    }
 }
 
-$jarList = ($jars | ForEach-Object { $_.FullName }) -join "`n"
-python -c @"
-import os, zipfile
-from pathlib import Path
-dll = Path(r'$Dll')
-entry = r'$entryPath'
-jars = [Path(p) for p in r'''$jarList'''.splitlines() if p.strip()]
-for jar in jars:
-    bak = Path(str(jar) + '.orig')
-    if not bak.exists():
-        bak.write_bytes(jar.read_bytes())
-        print('backed up', bak)
-    tmp = jar.with_suffix('.jar.tmp')
-    with zipfile.ZipFile(jar, 'r') as zin, zipfile.ZipFile(tmp, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
-        for item in zin.infolist():
-            if item.filename == entry:
-                continue
-            zout.writestr(item, zin.read(item.filename))
-        zout.write(dll, entry)
-    os.replace(tmp, jar)
-    with zipfile.ZipFile(jar, 'r') as z:
-        print('installed', jar.name, z.getinfo(entry).file_size)
-"@
-if ($LASTEXITCODE -ne 0) { throw "failed to install DLL into jar" }
-Write-Host "Re-run desktop tests (Gradle extracts natives to a fresh temp dir each process)."
+if (-not $platform -or -not $built) {
+    throw "Unsupported host platform (os=$os arch=$arch); add a desktop-natives layout entry"
+}
+if (-not (Test-Path $built)) {
+    throw "Patched native not found at $built"
+}
+
+$destDir = Join-Path $OutRoot $platform
+New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+$dest = Join-Path $destDir $libName
+Copy-Item -Force -Path $built -Destination $dest
+Write-Host "Installed $dest ($((Get-Item $dest).Length) bytes)"
+Write-Host "Gradle will pack this into a patched wasmtime4j-native jar for tests (no Maven cache mutation)."
+Write-Host "Re-run: ./gradlew :runtime-wasmtime:test"

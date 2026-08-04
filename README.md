@@ -33,7 +33,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + 预编译 `.wasm` |
 | Consumer | `android-demo` | Dawn / Guest 仪器测试 / 薄 UI |
 
-**明确不做（本阶段）：** Chicory、上屏 / wasi-gfx、合规 wasi:webgpu 全量 world / 记录类型对齐。
+**明确不做（本阶段）：** Chicory、上屏 / wasi-gfx、合规 wasi:webgpu 全量 world / 记录类型对齐、Maven Central 发布。
 
 ## 仓库布局
 
@@ -45,13 +45,16 @@ wasi-webgpu-jvm-mvp/
   abi-cm/              # experimental CM host → L2
   runtime-wasmtime/    # Wasmtime4j L1（abi-mvp + CM）
     android-natives/   # Android Bionic libwasmtime4j.so（jniLibs）
+    desktop-natives/   # 桌面 CM-patched native（本地重建；默认不入库）
   guest/vector-add/    # abi-mvp Guest 资产
   guest/vector-add-cm/ # CM Guest 资产
   android-demo/        # Dawn + Guest consumer
   docs/mapping/        # WIT ↔ Dawn
   docs/perf/           # P1 边界备注
   docs/android-wasmtime.md
+  patches/             # wasmtime4j 补丁 + UPSTREAM 备忘
   wit/                 # WIT 钉定（含 compute-cm）
+  .github/workflows/   # CI（JVM 测试 + assembleDebug）
 ```
 
 ## 构建与测试
@@ -116,9 +119,10 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 # CM（需 Rust wasm32-unknown-unknown + wasm-tools）
 ./scripts/build-vector-add-cm.ps1
 
-# 桌面 CM resources：git apply 入库补丁并安装 wasmtime4j-native（一次性 / 升级后重跑）
+# 桌面 CM resources：产出到 runtime-wasmtime/desktop-natives/（不改 Gradle cache）
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 # 补丁源：patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch（见 patches/README.md / [EN](patches/README.en.md)）
+# 无 desktop-natives 时 :runtime-wasmtime:test 仍跑 abi-mvp；CM 测试 skip
 ```
 
 ## 包名
@@ -147,11 +151,19 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] WIT resources 替换 flat u32（adapter/device/queue/buffer/…；仍非合规 wasi:webgpu）
 - [x] Android CM 仪器测试（`WasmtimeCmVectorAddInstrumentedTest`；需 CM-patched Bionic `.so`）
 
+### 交付巩固
+
+- [x] 桌面 CM native → `runtime-wasmtime/desktop-natives/`（不改写 Gradle cache）
+- [x] 无 patched natives 时 CM 单测 skip；abi-mvp 始终跑
+- [x] GitHub Actions：`:host-api:test` / `:abi-mvp:test` / `:runtime-wasmtime:test` + `:android-demo:assembleDebug`
+- [x] `CHANGELOG.md` + [`patches/UPSTREAM.md`](patches/UPSTREAM.md)（上游贡献备忘；未强制开 PR）
+
 ## 参考
 
 - [wasi-webgpu](https://github.com/WebAssembly/wasi-webgpu)
 - [androidx.webgpu](https://developer.android.com/jetpack/androidx/releases/webgpu)
 - [wasmtime4j](https://github.com/tegmentum/wasmtime4j)
+- 变更记录：[`CHANGELOG.md`](CHANGELOG.md)
 - 方案摘要：[`docs/scheme/README.md`](docs/scheme/README.md) / [EN](docs/scheme/README.en.md)
 - Android Wasmtime 进度与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md) / [EN](docs/android-wasmtime.en.md)
 
@@ -169,6 +181,9 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 | WIT 钉定 | [wit/README.md](wit/README.md) | [wit/README.en.md](wit/README.en.md) |
 | compute-cm WIT | [wit/compute-cm/README.md](wit/compute-cm/README.md) | [wit/compute-cm/README.en.md](wit/compute-cm/README.en.md) |
 | wasmtime4j 补丁 | [patches/README.md](patches/README.md) | [patches/README.en.md](patches/README.en.md) |
+| 补丁上游备忘 | [patches/UPSTREAM.md](patches/UPSTREAM.md) | [patches/UPSTREAM.en.md](patches/UPSTREAM.en.md) |
 | Android natives | [runtime-wasmtime/android-natives/README.md](runtime-wasmtime/android-natives/README.md)（已为英文） | 同上 |
+| Desktop CM natives | [runtime-wasmtime/desktop-natives/README.md](runtime-wasmtime/desktop-natives/README.md)（已为英文） | 同上 |
 | Guest abi-mvp | [guest/vector-add/README.md](guest/vector-add/README.md) | [guest/vector-add/README.en.md](guest/vector-add/README.en.md) |
 | Guest CM | [guest/vector-add-cm/README.md](guest/vector-add-cm/README.md) | [guest/vector-add-cm/README.en.md](guest/vector-add-cm/README.en.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) | 同上 |

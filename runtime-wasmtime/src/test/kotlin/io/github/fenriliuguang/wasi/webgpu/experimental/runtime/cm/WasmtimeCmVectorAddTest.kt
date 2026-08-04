@@ -3,6 +3,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.runtime.cm
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.CpuWasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VectorAddScenario
 import org.junit.Assert.assertArrayEquals
+import org.junit.Before
 import org.junit.Test
 
 /**
@@ -10,8 +11,15 @@ import org.junit.Test
  *
  * Multiple vector sizes share one CM linker/instance ([WasmtimeCmVectorAdd.runAll]) because
  * wasmtime4j's process-wide host-callback registry can trap on back-to-back linker recreate.
+ *
+ * Skips when CM-patched desktop natives are absent (CI / clean checkout).
  */
 class WasmtimeCmVectorAddTest {
+
+    @Before
+    fun requireCmNatives() {
+        CmNativesGate.assumePatchedNativesPresent()
+    }
 
     @Test
     fun cmGuestViaWasmtimeMatchesCpuHostDirect() {

@@ -15,7 +15,8 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **P0 · Glue** | **Done**: `host-api` / `host-webgpu` + `docs/mapping` + Android instrumented tests |
 | **P1 · Runtime** | **Done**: desktop Wasmtime + Android-embedded Wasmtime → same `abi-mvp` / L2; still experimental / non-CM |
 | **CM slice** | **Done (experimental)**: `experimental:webgpu-cm` WIT resources + Guest + `abi-cm` + desktop ComponentLinker → same L2; Android CM → Dawn instrumented tests; still not compliant wasi:webgpu |
-| **Optional next** | Not started: on-screen / Chicory; next can align more wasi:webgpu records/flags |
+| **Delivery harden** | **Done**: desktop CM → `desktop-natives` (no Gradle cache mutation); CM test gate; GitHub Actions (JVM + assemble); `CHANGELOG` / `patches/UPSTREAM` |
+| **Semantic expansion** | **Not started**: on-screen / Chicory; align more wasi:webgpu records/flags |
 
 ## Hard principles (excerpt)
 
@@ -23,6 +24,6 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 2. Do not reinvent a full Kotlin WebGPU client API.  
 3. Package names / README mark `experimental`; do not claim compliant `wasi:webgpu` before the standard full world is wired.  
 4. P1 uses hand-written abi-mvp (core wasm), **not** the Component Model.  
-5. Android uses Bionic `libwasmtime4j.so` (`runtime-wasmtime/android-natives`; CM path needs both android + cm-resources patches); desktop CM resources need a patched `wasmtime4j-native` (tracked `patches/*.patch` + `scripts/build-wasmtime4j-desktop-cm.ps1`).
+5. Android uses Bionic `libwasmtime4j.so` (`runtime-wasmtime/android-natives`; CM path needs both android + cm-resources patches); desktop CM resources land in `runtime-wasmtime/desktop-natives/` via `scripts/build-wasmtime4j-desktop-cm.ps1` (does not mutate Maven/Gradle cache; see `patches/*.patch`).
 
 Android-embedded Wasmtime progress, patches, and pitfalls: [`docs/android-wasmtime.en.md`](../android-wasmtime.en.md).

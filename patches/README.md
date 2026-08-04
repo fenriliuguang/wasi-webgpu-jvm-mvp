@@ -13,10 +13,12 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 源码检出目录 `.deps/wasmtime4j` **不入库**（见根 `.gitignore`）。  
 补丁本身入库；构建脚本 clone tag 后 `git apply`。
 
+上游贡献备忘（非已提 PR）：[`UPSTREAM.md`](UPSTREAM.md) / [EN](UPSTREAM.en.md)。
+
 ## 应用
 
 ```powershell
-# 桌面 CM（resources + 编组 / 全局 registry 重放）
+# 桌面 CM → runtime-wasmtime/desktop-natives/（不改写 Gradle cache）
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 
 # Android .so（默认：JNI 1_6 + 句柄无符号校验 + CM resources）

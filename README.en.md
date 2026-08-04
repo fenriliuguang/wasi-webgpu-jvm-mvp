@@ -33,7 +33,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + prebuilt `.wasm` |
 | Consumer | `android-demo` | Dawn / Guest instrumented tests / thin UI |
 
-**Explicitly out of scope (this phase):** Chicory, on-screen / wasi-gfx, compliant full wasi:webgpu world / record-type alignment.
+**Explicitly out of scope (this phase):** Chicory, on-screen / wasi-gfx, compliant full wasi:webgpu world / record-type alignment, Maven Central publishing.
 
 ## Repository layout
 
@@ -45,13 +45,16 @@ wasi-webgpu-jvm-mvp/
   abi-cm/              # experimental CM host → L2
   runtime-wasmtime/    # Wasmtime4j L1 (abi-mvp + CM)
     android-natives/   # Android Bionic libwasmtime4j.so (jniLibs)
+    desktop-natives/   # Desktop CM-patched native (local rebuild; not committed by default)
   guest/vector-add/    # abi-mvp Guest assets
   guest/vector-add-cm/ # CM Guest assets
   android-demo/        # Dawn + Guest consumer
   docs/mapping/        # WIT ↔ Dawn
   docs/perf/           # P1 boundary notes
   docs/android-wasmtime.md
+  patches/             # wasmtime4j patches + UPSTREAM notes
   wit/                 # Pinned WIT (incl. compute-cm)
+  .github/workflows/   # CI (JVM tests + assembleDebug)
 ```
 
 ## Build & test
@@ -116,9 +119,10 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 # CM (needs Rust wasm32-unknown-unknown + wasm-tools)
 ./scripts/build-vector-add-cm.ps1
 
-# Desktop CM resources: git apply tracked patches and install wasmtime4j-native (one-shot / re-run after upgrades)
+# Desktop CM resources: install into runtime-wasmtime/desktop-natives/ (no Gradle cache mutation)
 ./scripts/build-wasmtime4j-desktop-cm.ps1
 # Patch source: patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch (see patches/README.en.md)
+# Without desktop-natives, :runtime-wasmtime:test still runs abi-mvp; CM tests skip
 ```
 
 ## Package name
@@ -147,11 +151,19 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] WIT resources replace flat u32 (adapter/device/queue/buffer/…; still not compliant wasi:webgpu)
 - [x] Android CM instrumented tests (`WasmtimeCmVectorAddInstrumentedTest`; needs CM-patched Bionic `.so`)
 
+### Delivery harden
+
+- [x] Desktop CM native → `runtime-wasmtime/desktop-natives/` (no Gradle cache mutation)
+- [x] CM unit tests skip without patched natives; abi-mvp always runs
+- [x] GitHub Actions: `:host-api:test` / `:abi-mvp:test` / `:runtime-wasmtime:test` + `:android-demo:assembleDebug`
+- [x] `CHANGELOG.md` + [`patches/UPSTREAM.en.md`](patches/UPSTREAM.en.md) (upstream brief; no required PR)
+
 ## References
 
 - [wasi-webgpu](https://github.com/WebAssembly/wasi-webgpu)
 - [androidx.webgpu](https://developer.android.com/jetpack/androidx/releases/webgpu)
 - [wasmtime4j](https://github.com/tegmentum/wasmtime4j)
+- Changelog: [`CHANGELOG.md`](CHANGELOG.md)
 - Scheme summary: [`docs/scheme/README.en.md`](docs/scheme/README.en.md)
 - Android Wasmtime progress & pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md)
 
@@ -169,6 +181,9 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 | WIT lock | [wit/README.en.md](wit/README.en.md) |
 | compute-cm WIT | [wit/compute-cm/README.en.md](wit/compute-cm/README.en.md) |
 | wasmtime4j patches | [patches/README.en.md](patches/README.en.md) |
+| Patch upstream notes | [patches/UPSTREAM.en.md](patches/UPSTREAM.en.md) |
 | Android natives | [runtime-wasmtime/android-natives/README.md](runtime-wasmtime/android-natives/README.md) (EN) |
+| Desktop CM natives | [runtime-wasmtime/desktop-natives/README.md](runtime-wasmtime/desktop-natives/README.md) (EN) |
 | Guest abi-mvp | [guest/vector-add/README.en.md](guest/vector-add/README.en.md) |
 | Guest CM | [guest/vector-add-cm/README.en.md](guest/vector-add-cm/README.en.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |

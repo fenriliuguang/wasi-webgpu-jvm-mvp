@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to this experimental MVP are documented here.
+Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full standard world is wired.
+
+## 0.1.0-experimental
+
+### Features (DoD complete)
+
+- **P0:** `WasiWebGpuHost` + Dawn / CPU Host compute subset; Android instrumented vector-add
+- **P1:** `abi-mvp` Guest → Wasmtime → same L2 (desktop + Android Bionic `libwasmtime4j.so`)
+- **CM slice:** `experimental:webgpu-cm` WIT resources + `abi-cm` + desktop/Android CM Guest path
+
+### Delivery harden (this release slice)
+
+- Desktop CM natives install to `runtime-wasmtime/desktop-natives/` (no Gradle cache mutation)
+- CM unit tests skip when patched desktop natives are absent (CI-friendly)
+- GitHub Actions: JVM unit tests + `:android-demo:assembleDebug`
+- Patch upstream notes: `patches/UPSTREAM.md`
+
+### Explicitly out of scope
+
+- Maven Central / GitHub Packages publishing
+- On-screen / wasi-gfx, Chicory, broader WIT records/flags compliance
+- Opening upstream PRs to tegmentum/wasmtime4j (notes only)
