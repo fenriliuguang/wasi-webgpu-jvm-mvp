@@ -1,0 +1,106 @@
+diff --git a/wasmtime4j-native/src/async_runtime.rs b/wasmtime4j-native/src/async_runtime.rs
+index 0ef8772..82603df 100644
+--- a/wasmtime4j-native/src/async_runtime.rs
++++ b/wasmtime4j-native/src/async_runtime.rs
+@@ -165,7 +165,15 @@ pub extern "system" fn JNI_OnLoad(
+ ) -> jni::sys::jint {
+     cache_jvm(Arc::new(vm));
+     debug!("JNI_OnLoad: JavaVM cached for async CompletableFuture bridge");
+-    jni::sys::JNI_VERSION_1_8
++    // Android ART only accepts JNI_VERSION_1_2 / 1_4 / 1_6 (not 1_8 = 65544).
++    #[cfg(target_os = "android")]
++    {
++        jni::sys::JNI_VERSION_1_6
++    }
++    #[cfg(not(target_os = "android"))]
++    {
++        jni::sys::JNI_VERSION_1_8
++    }
+ }
+ 
+ /// Spawn an async task on the Tokio runtime that completes a Java CompletableFuture via JNI.
+diff --git a/wasmtime4j-native/src/jni/memory.rs b/wasmtime4j-native/src/jni/memory.rs
+index 04d1ea7..e692696 100644
+--- a/wasmtime4j-native/src/jni/memory.rs
++++ b/wasmtime4j-native/src/jni/memory.rs
+@@ -96,7 +96,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeGrow(
+             });
+         }
+ 
+-        if memory_ptr < 0x1000 || memory_ptr == -1 {
++        if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Memory.nativeGrow: invalid memory handle 0x{:x}",
+                 memory_ptr
+@@ -211,7 +211,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeReadByte
+             });
+         }
+ 
+-        if memory_ptr < 0x1000 || memory_ptr == -1 {
++        if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Memory.nativeReadByte: invalid memory handle 0x{:x}",
+                 memory_ptr
+@@ -291,7 +291,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeWriteByt
+             });
+         }
+ 
+-        if memory_ptr < 0x1000 || memory_ptr == -1 {
++        if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Memory.nativeWriteByte: invalid memory handle 0x{:x}",
+                 memory_ptr
+@@ -390,7 +390,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeReadByte
+         });
+         return -1;
+     }
+-    if memory_ptr < 0x1000 || memory_ptr == -1 {
++    if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+         log::error!("JNI Memory.nativeReadBytes: invalid memory handle 0x{:x}", memory_ptr);
+         jni_utils::throw_jni_exception(&mut env, &WasmtimeError::InvalidParameter {
+             message: format!("Invalid memory handle (0x{:x}) for bulk read operation. Handle appears corrupted or uninitialized.", memory_ptr),
+@@ -485,7 +485,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeWriteByt
+         });
+         return -1;
+     }
+-    if memory_ptr < 0x1000 || memory_ptr == -1 {
++    if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+         log::error!("JNI Memory.nativeWriteBytes: invalid memory handle 0x{:x}", memory_ptr);
+         jni_utils::throw_jni_exception(&mut env, &WasmtimeError::InvalidParameter {
+             message: format!("Invalid memory handle (0x{:x}) for bulk write operation. Handle appears corrupted or uninitialized.", memory_ptr),
+@@ -589,7 +589,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeGetBuffe
+         });
+     }
+ 
+-    if memory_ptr < 0x1000 || memory_ptr == -1 {
++    if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+         log::error!(
+             "JNI Memory.nativeGetBuffer: invalid memory handle 0x{:x}",
+             memory_ptr
+@@ -756,7 +756,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeGetPageC
+         }
+ 
+         // Check for obviously invalid pointers (basic sanity check)
+-        if memory_ptr < 0x1000 || memory_ptr == -1 {
++        if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Memory.nativeGetPageCount: invalid memory handle 0x{:x}",
+                 memory_ptr
+@@ -890,7 +890,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniMemory_nativeGetMaxSi
+         }
+ 
+         // Check for obviously invalid pointers (basic sanity check)
+-        if memory_ptr < 0x1000 || memory_ptr == -1 {
++        if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Memory.nativeGetMaxSize: invalid memory handle 0x{:x}",
+                 memory_ptr
+@@ -1106,7 +1106,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniTable_nativeGetElemen
+             });
+         }
+ 
+-        if table_ptr < 0x1000 || table_ptr == -1 {
++        if table_ptr == 0 || table_ptr == -1 || (table_ptr as u64) < 0x1000 {
+             log::error!(
+                 "JNI Table.nativeGetElementType: invalid table handle 0x{:x}",
+                 table_ptr

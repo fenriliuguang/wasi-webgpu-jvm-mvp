@@ -1,5 +1,5 @@
-# Build patched wasmtime4j-native for desktop CM resources and install into Maven cache jar.
-# Prerequisites: rustc/cargo (1.97+), cloned .deps/wasmtime4j (see build-wasmtime4j-android.ps1).
+# Apply tracked CM resources patch, build desktop wasmtime4j-native, install into Maven cache jars.
+# Prerequisites: rustc/cargo (1.97+), network for first clone.
 param(
     [string]$Wasmtime4jTag = "v47.0.2-1.5.0"
 )
@@ -7,36 +7,49 @@ param(
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 $Deps = Join-Path $Root ".deps\wasmtime4j"
+$Patch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-cm-resources.patch"
+
+if (-not (Test-Path $Patch)) {
+    throw "Missing tracked patch: $Patch"
+}
 
 if (-not (Test-Path (Join-Path $Deps "wasmtime4j-native\Cargo.toml"))) {
     New-Item -ItemType Directory -Force -Path (Split-Path $Deps) | Out-Null
     git clone --depth 1 --branch $Wasmtime4jTag https://github.com/tegmentum/wasmtime4j.git $Deps
 }
 
-python (Join-Path $Root "scripts\patch-wasmtime4j-cm-resources.py")
-if ($LASTEXITCODE -ne 0) { throw "patch-wasmtime4j-cm-resources.py failed" }
+# Fresh apply from clean tag tree (idempotent rebuilds).
+git -C $Deps checkout -- .
+git -C $Deps apply --check -- "$Patch"
+if ($LASTEXITCODE -ne 0) { throw "git apply --check failed for $Patch" }
+git -C $Deps apply -- "$Patch"
+if ($LASTEXITCODE -ne 0) { throw "git apply failed for $Patch" }
+Write-Host "Applied $Patch"
 
 if (-not $env:RUSTUP_TOOLCHAIN) {
     $env:RUSTUP_TOOLCHAIN = "1.97.1"
 }
 
-$Native = Join-Path $Deps "wasmtime4j-native"
-Push-Location $Native
+Push-Location (Join-Path $Deps "wasmtime4j-native")
 try {
-    cargo build --release --features "jni-bindings,component-model,wasi" 2>&1 | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw "cargo build failed: $LASTEXITCODE" }
+    # cargo writes progress to stderr; do not let PS ErrorActionPreference treat that as failure.
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & cargo build --release --features "jni-bindings,component-model,wasi"
+    $cargoExit = $LASTEXITCODE
+    $ErrorActionPreference = $prevEap
+    if ($cargoExit -ne 0) { throw "cargo build failed: $cargoExit" }
 } finally {
     Pop-Location
 }
 
-# Workspace cargo target lives at .deps/wasmtime4j/target (not wasmtime4j-native/target).
+# Workspace cargo target lives at .deps/wasmtime4j/target.
 $Dll = Join-Path $Deps "target\release\wasmtime4j.dll"
 if (-not (Test-Path $Dll)) {
     throw "Patched DLL not found at $Dll"
 }
 Write-Host "Built $Dll ($((Get-Item $Dll).Length) bytes)"
 
-# Replace natives/windows-x86_64/wasmtime4j.dll inside Maven wasmtime4j-native and wasmtime4j-jni jars.
 $entryPath = "natives/windows-x86_64/wasmtime4j.dll"
 $jars = @()
 foreach ($artifact in @("wasmtime4j-native", "wasmtime4j-jni")) {
@@ -51,12 +64,13 @@ if ($jars.Count -eq 0) {
     throw "Maven wasmtime4j-native/jni jars not found; run a Gradle resolve first"
 }
 
+$jarList = ($jars | ForEach-Object { $_.FullName }) -join "`n"
 python -c @"
 import os, zipfile
 from pathlib import Path
 dll = Path(r'$Dll')
 entry = r'$entryPath'
-jars = [Path(p) for p in r'''$($jars.FullName -join "`n")'''.splitlines() if p.strip()]
+jars = [Path(p) for p in r'''$jarList'''.splitlines() if p.strip()]
 for jar in jars:
     bak = Path(str(jar) + '.orig')
     if not bak.exists():

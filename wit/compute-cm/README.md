@@ -12,7 +12,8 @@ Guest：`guest/vector-add-cm/`
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 
-桌面 CM 需要打补丁的 wasmtime4j native（resource 编组 / 多 resource 注册 / 实例化时重放 resources）：
+桌面 CM 需要打补丁的 wasmtime4j native（resource 编组 / 多 resource 注册 / 实例化时重放 resources）。  
+补丁入库：[`patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch)
 
 ```powershell
 ./scripts/build-wasmtime4j-desktop-cm.ps1

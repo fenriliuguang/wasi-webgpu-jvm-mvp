@@ -1,4 +1,5 @@
 # Cross-compile wasmtime4j-native for Android and install into runtime-wasmtime/android-natives/jniLibs.
+# Applies tracked patches/wasmtime4j-v47.0.2-1.5.0-android.patch (JNI 1_6 + unsigned handle checks).
 param(
     [string]$NdkVersion = "28.2.13676358",
     [string]$Wasmtime4jTag = "v47.0.2-1.5.0",
@@ -14,52 +15,22 @@ if (-not (Test-Path $Ndk)) {
 }
 
 $Deps = Join-Path $Root ".deps\wasmtime4j"
+$Patch = Join-Path $Root "patches\wasmtime4j-v47.0.2-1.5.0-android.patch"
+if (-not (Test-Path $Patch)) {
+    throw "Missing tracked patch: $Patch"
+}
+
 if (-not (Test-Path (Join-Path $Deps "wasmtime4j-native\Cargo.toml"))) {
     New-Item -ItemType Directory -Force -Path (Split-Path $Deps) | Out-Null
     git clone --depth 1 --branch $Wasmtime4jTag https://github.com/tegmentum/wasmtime4j.git $Deps
 }
 
-# Android ART rejects JNI_VERSION_1_8 (65544) from JNI_OnLoad; return 1_6 instead.
-$AsyncRs = Join-Path $Deps "wasmtime4j-native\src\async_runtime.rs"
-$asyncText = Get-Content -LiteralPath $AsyncRs -Raw
-if ($asyncText -notmatch 'cfg\(target_os = "android"\)') {
-    $patched = $asyncText -replace `
-        '(?ms)(cache_jvm\(Arc::new\(vm\)\);\s*debug!\("JNI_OnLoad: JavaVM cached for async CompletableFuture bridge"\);\s*)jni::sys::JNI_VERSION_1_8', `
-        @'
-$1// Android ART only accepts JNI_VERSION_1_2 / 1_4 / 1_6 (not 1_8 = 65544).
-    #[cfg(target_os = "android")]
-    {
-        jni::sys::JNI_VERSION_1_6
-    }
-    #[cfg(not(target_os = "android"))]
-    {
-        jni::sys::JNI_VERSION_1_8
-    }
-'@
-    if ($patched -eq $asyncText) {
-        throw "Failed to patch JNI_OnLoad in $AsyncRs for Android JNI_VERSION_1_6"
-    }
-    Set-Content -LiteralPath $AsyncRs -Value $patched -NoNewline
-    Write-Host "Patched JNI_OnLoad to return JNI_VERSION_1_6 on Android"
-}
-
-# Android MTE/TBI tagged pointers look negative as signed jlong; use unsigned low-page checks.
-$MemoryRs = Join-Path $Deps "wasmtime4j-native\src\jni\memory.rs"
-$memoryText = Get-Content -LiteralPath $MemoryRs -Raw
-if ($memoryText -match 'if memory_ptr < 0x1000 \|\| memory_ptr == -1 \{') {
-    $memoryPatched = $memoryText.Replace(
-        'if memory_ptr < 0x1000 || memory_ptr == -1 {',
-        'if memory_ptr == 0 || memory_ptr == -1 || (memory_ptr as u64) < 0x1000 {'
-    ).Replace(
-        'if table_ptr < 0x1000 || table_ptr == -1 {',
-        'if table_ptr == 0 || table_ptr == -1 || (table_ptr as u64) < 0x1000 {'
-    )
-    if ($memoryPatched -eq $memoryText) {
-        throw "Failed to patch signed jlong handle checks in $MemoryRs"
-    }
-    Set-Content -LiteralPath $MemoryRs -Value $memoryPatched -NoNewline
-    Write-Host "Patched memory.rs handle checks for Android MTE/TBI pointers"
-}
+git -C $Deps checkout -- .
+git -C $Deps apply --check -- "$Patch"
+if ($LASTEXITCODE -ne 0) { throw "git apply --check failed for $Patch" }
+git -C $Deps apply -- "$Patch"
+if ($LASTEXITCODE -ne 0) { throw "git apply failed for $Patch" }
+Write-Host "Applied $Patch"
 
 $Out = Join-Path $Root "runtime-wasmtime\android-natives\jniLibs"
 New-Item -ItemType Directory -Force -Path $Out | Out-Null

@@ -21,6 +21,6 @@
 2. 不重造完整 Kotlin WebGPU 客户端 API。  
 3. 包名 / README 标明 `experimental`；未接标准完整 world 前不得声称合规 `wasi:webgpu`。  
 4. P1 使用手工 abi-mvp（core wasm），**不是** Component Model。  
-5. Android 使用 Bionic `libwasmtime4j.so`（`runtime-wasmtime/android-natives`）；桌面 CM resources 需 patched `wasmtime4j-native`（`scripts/build-wasmtime4j-desktop-cm.ps1`）。
+5. Android 使用 Bionic `libwasmtime4j.so`（`runtime-wasmtime/android-natives`）；桌面 CM resources 需 patched `wasmtime4j-native`（入库补丁 `patches/*.patch` + `scripts/build-wasmtime4j-desktop-cm.ps1`）。
 
 Android 嵌 Wasmtime 的进度、补丁与踩坑见 [`docs/android-wasmtime.md`](../android-wasmtime.md)。

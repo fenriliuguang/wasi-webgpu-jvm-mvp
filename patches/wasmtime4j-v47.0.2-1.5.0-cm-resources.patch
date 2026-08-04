@@ -1,0 +1,498 @@
+diff --git a/wasmtime4j-native/src/component/linker.rs b/wasmtime4j-native/src/component/linker.rs
+index 219fc7d..b628a78 100644
+--- a/wasmtime4j-native/src/component/linker.rs
++++ b/wasmtime4j-native/src/component/linker.rs
+@@ -12,9 +12,9 @@ use std::sync::{Arc, Mutex};
+ use std::time::Instant;
+ use wasmtime::{
+     component::{
+-        Instance as ComponentInstance, InstancePre, Linker, ResourceTable, ResourceType, Val,
++        types::ComponentFunc, Instance as ComponentInstance, InstancePre, Linker, ResourceDynamic, ResourceTable, ResourceType, Type, Val,
+     },
+-    Engine as WasmtimeEngine, Store, StoreContextMut,
++    AsContextMut, Engine as WasmtimeEngine, Store, StoreContextMut,
+ };
+ 
+ /// Component Model value representation for host function communication
+@@ -491,6 +491,34 @@ pub static COMPONENT_HOST_FUNCTION_REGISTRY: std::sync::OnceLock<
+ pub static NEXT_COMPONENT_HOST_FUNCTION_ID: std::sync::atomic::AtomicU64 =
+     std::sync::atomic::AtomicU64::new(1);
+ 
++
++/// Process-global host resource definitions (mirrors host-function registry).
++/// Used when instantiation rebuilds a fresh linker and cannot see caller-local
++/// ComponentLinker::interface_resource_entries.
++type HostResourceRegistry = HashMap<
++    String,
++    Vec<(String, u32, Arc<dyn ResourceDestructorCallback>)>,
++>;
++
++fn get_component_host_resource_registry() -> &'static Mutex<HostResourceRegistry> {
++    static REGISTRY: std::sync::OnceLock<Mutex<HostResourceRegistry>> = std::sync::OnceLock::new();
++    REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
++}
++
++fn register_host_resource_globally(
++    interface_path: &str,
++    resource_name: &str,
++    resource_id: u32,
++    destructor: Arc<dyn ResourceDestructorCallback>,
++) {
++    if let Ok(mut registry) = get_component_host_resource_registry().lock() {
++        let entry = registry.entry(interface_path.to_string()).or_default();
++        // Upsert by name so repeated linker builds in one process do not duplicate.
++        entry.retain(|(n, _, _)| n != resource_name);
++        entry.push((resource_name.to_string(), resource_id, destructor));
++    }
++}
++
+ pub fn get_component_host_function_registry(
+ ) -> &'static Mutex<HashMap<u64, Arc<ComponentHostFunctionEntry>>> {
+     COMPONENT_HOST_FUNCTION_REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
+@@ -525,6 +553,17 @@ pub fn add_registered_host_functions_to_linker(
+                 .push(entry.clone());
+         }
+     }
++    // Merge process-global host resources (may be resource-only interfaces).
++    let mut resource_ifaces: HashMap<
++        String,
++        Vec<(String, u32, Arc<dyn ResourceDestructorCallback>)>,
++    > = HashMap::new();
++    if let Ok(registry) = get_component_host_resource_registry().lock() {
++        for (iface, resources) in registry.iter() {
++            resource_ifaces.insert(iface.clone(), resources.clone());
++            by_iface.entry(iface.clone()).or_default();
++        }
++    }
+     if by_iface.is_empty() {
+         return Ok(());
+     }
+@@ -534,30 +573,38 @@ pub fn add_registered_host_functions_to_linker(
+         let mut inst = root.instance(&iface).map_err(|e| WasmtimeError::Linker {
+             message: format!("Failed to get linker instance for '{}': {}", iface, e),
+         })?;
++        // WASI_WEBGPU_CM: attach global host resources
++        if let Some(resources) = resource_ifaces.get(&iface) {
++            for (res_name, res_id, dtor) in resources {
++                let resource_type = ResourceType::host_dynamic(*res_id);
++                let dtor = dtor.clone();
++                inst.resource(res_name, resource_type, move |_store_ctx, rep| {
++                    dtor.destroy(rep).map_err(|e| {
++                        wasmtime::Error::msg(format!("Resource destructor failed: {}", e))
++                    })
++                })
++                .map_err(|e| WasmtimeError::Linker {
++                    message: format!(
++                        "Failed to define resource '{}' on '{}': {}",
++                        res_name, iface, e
++                    ),
++                })?;
++            }
++        }
+         for entry in entries {
+             let fn_name = entry.function_name.clone();
+             let fn_entry = entry.clone();
+             inst.func_new(
+                 &fn_name,
+-                move |_store_ctx: StoreContextMut<'_, ComponentStoreData>,
+-                      _func_type,
++                move |mut store_ctx: StoreContextMut<'_, ComponentStoreData>,
++                      func_type: ComponentFunc,
+                       params: &[Val],
+                       results: &mut [Val]| {
+-                    let cv_params: Vec<ComponentValue> =
+-                        params.iter().map(val_to_component_value).collect();
++                    let cv_params = vals_to_host_params(store_ctx.as_context_mut(), params)?;
+                     let cv_results = fn_entry.callback.execute(&cv_params).map_err(|e| {
+                         wasmtime::Error::msg(format!("Host function callback failed: {}", e))
+                     })?;
+-                    for (i, cv) in cv_results.iter().enumerate() {
+-                        if i < results.len() {
+-                            results[i] = component_value_to_val(cv).map_err(|e| {
+-                                wasmtime::Error::msg(format!(
+-                                    "Failed to convert result value: {}",
+-                                    e
+-                                ))
+-                            })?;
+-                        }
+-                    }
++                    host_results_to_vals(store_ctx, func_type, &cv_results, results)?;
+                     Ok(())
+                 },
+             )
+@@ -914,6 +961,112 @@ impl WasiP2Config {
+     }
+ }
+ 
++
++/// Resolve host_dynamic payload id for a ResourceType by probing known small ids.
++fn host_dynamic_payload(rt: ResourceType) -> Option<u32> {
++    for id in 1..512u32 {
++        if ResourceType::host_dynamic(id) == rt {
++            return Some(id);
++        }
++    }
++    None
++}
++
++fn component_value_as_u32(cv: &ComponentValue) -> Result<u32, wasmtime::Error> {
++    match cv {
++        ComponentValue::U32(v) => Ok(*v),
++        ComponentValue::S32(v) => Ok(*v as u32),
++        ComponentValue::U64(v) => Ok(*v as u32),
++        ComponentValue::S64(v) => Ok(*v as u32),
++        ComponentValue::Own(v) | ComponentValue::Borrow(v) => Ok(*v as u32),
++        other => Err(wasmtime::Error::msg(format!(
++            "Expected integer resource rep, got {:?}",
++            other
++        ))),
++    }
++}
++
++/// Convert host-callback params, mapping Resource handles to U32(rep) for Java.
++fn vals_to_host_params(
++    mut store: StoreContextMut<'_, ComponentStoreData>,
++    params: &[Val],
++) -> Result<Vec<ComponentValue>, wasmtime::Error> {
++    let mut out = Vec::with_capacity(params.len());
++    for param in params {
++        match param {
++            Val::Resource(resource) => {
++                let dyn_res = ResourceDynamic::try_from_resource_any(*resource, &mut store)
++                    .map_err(|e| {
++                        wasmtime::Error::msg(format!(
++                            "Failed to extract host resource rep from param: {}",
++                            e
++                        ))
++                    })?;
++                out.push(ComponentValue::U32(dyn_res.rep()));
++            }
++            other => out.push(val_to_component_value(other)),
++        }
++    }
++    Ok(out)
++}
++
++/// Convert host-callback results, creating ResourceAny when the result type is own/borrow.
++fn host_results_to_vals(
++    mut store: StoreContextMut<'_, ComponentStoreData>,
++    func_type: ComponentFunc,
++    cv_results: &[ComponentValue],
++    results: &mut [Val],
++) -> Result<(), wasmtime::Error> {
++    let result_types: Vec<Type> = func_type.results().collect();
++    for (i, cv) in cv_results.iter().enumerate() {
++        if i >= results.len() {
++            break;
++        }
++        match result_types.get(i) {
++            Some(Type::Own(rt)) => {
++                let rep = component_value_as_u32(cv)?;
++                let payload = host_dynamic_payload(*rt).ok_or_else(|| {
++                    wasmtime::Error::msg(format!(
++                        "Unknown host_dynamic resource type for own result[{i}]"
++                    ))
++                })?;
++                let dyn_res = ResourceDynamic::new_own(rep, payload);
++                results[i] = Val::Resource(dyn_res.try_into_resource_any(&mut store).map_err(
++                    |e| {
++                        wasmtime::Error::msg(format!(
++                            "Failed to create owned resource result: {}",
++                            e
++                        ))
++                    },
++                )?);
++            }
++            Some(Type::Borrow(rt)) => {
++                let rep = component_value_as_u32(cv)?;
++                let payload = host_dynamic_payload(*rt).ok_or_else(|| {
++                    wasmtime::Error::msg(format!(
++                        "Unknown host_dynamic resource type for borrow result[{i}]"
++                    ))
++                })?;
++                let dyn_res = ResourceDynamic::new_borrow(rep, payload);
++                results[i] = Val::Resource(dyn_res.try_into_resource_any(&mut store).map_err(
++                    |e| {
++                        wasmtime::Error::msg(format!(
++                            "Failed to create borrowed resource result: {}",
++                            e
++                        ))
++                    },
++                )?);
++            }
++            _ => {
++                results[i] = component_value_to_val(cv).map_err(|e| {
++                    wasmtime::Error::msg(format!("Failed to convert result value: {}", e))
++                })?;
++            }
++        }
++    }
++    Ok(())
++}
++
+ /// Component Model linker for defining host functions and instantiating components
+ pub struct ComponentLinker {
+     /// Wasmtime engine for component compilation
+@@ -926,6 +1079,8 @@ pub struct ComponentLinker {
+     pub(crate) defined_interfaces: HashMap<String, Vec<String>>,
+     /// Entries per interface for re-registration when adding multiple functions
+     interface_function_entries: HashMap<String, Vec<(String, Arc<ComponentHostFunctionEntry>, bool)>>,
++    /// Resource types per interface (re-registered with functions under allow_shadowing)
++    interface_resource_entries: HashMap<String, Vec<(String, u32, Arc<dyn ResourceDestructorCallback>)>>,
+     /// Whether WASI Preview 2 is enabled
+     wasi_p2_enabled: bool,
+     /// Whether WASI HTTP is enabled
+@@ -985,6 +1140,7 @@ impl ComponentLinker {
+             host_functions: HashMap::new(),
+             defined_interfaces: HashMap::new(),
+             interface_function_entries: HashMap::new(),
++            interface_resource_entries: HashMap::new(),
+             wasi_p2_enabled: false,
+             wasi_http_enabled: false,
+             #[cfg(feature = "wasi-http")]
+@@ -1024,6 +1180,7 @@ impl ComponentLinker {
+             host_functions: HashMap::new(),
+             defined_interfaces: HashMap::new(),
+             interface_function_entries: HashMap::new(),
++            interface_resource_entries: HashMap::new(),
+             wasi_p2_enabled: false,
+             wasi_http_enabled: false,
+             #[cfg(feature = "wasi-http")]
+@@ -1359,6 +1516,27 @@ impl ComponentLinker {
+             ),
+         })?;
+ 
++        // WASI_WEBGPU_CM: re-register resources before functions
++        let resources: Vec<(String, u32, Arc<dyn ResourceDestructorCallback>)> = self
++            .interface_resource_entries
++            .get(interface_path)
++            .cloned()
++            .unwrap_or_default();
++        for (res_name, res_id, dtor) in resources {
++            let resource_type = ResourceType::host_dynamic(res_id);
++            inst.resource(&res_name, resource_type, move |_store_ctx, rep| {
++                dtor.destroy(rep).map_err(|e| {
++                    wasmtime::Error::msg(format!("Resource destructor failed: {}", e))
++                })
++            })
++            .map_err(|e| WasmtimeError::Linker {
++                message: format!(
++                    "Failed to define resource '{}' on '{}': {}",
++                    res_name, interface_path, e
++                ),
++            })?;
++        }
++
+         // Register ALL functions for this interface (re-registers existing + new)
+         for (fn_name, fn_entry, fn_is_async) in entries {
+             if fn_is_async {
+@@ -1404,12 +1582,11 @@ impl ComponentLinker {
+                 let fn_entry_clone = fn_entry.clone();
+                 inst.func_new(
+                     &fn_name,
+-                    move |_store_ctx: StoreContextMut<'_, ComponentStoreData>,
+-                          _func_type,
++                    move |mut store_ctx: StoreContextMut<'_, ComponentStoreData>,
++                          func_type: ComponentFunc,
+                           params: &[Val],
+                           results: &mut [Val]| {
+-                        let cv_params: Vec<ComponentValue> =
+-                            params.iter().map(val_to_component_value).collect();
++                        let cv_params = vals_to_host_params(store_ctx.as_context_mut(), params)?;
+                         let cv_results =
+                             fn_entry_clone.callback.execute(&cv_params).map_err(|e| {
+                                 wasmtime::Error::msg(format!(
+@@ -1417,16 +1594,7 @@ impl ComponentLinker {
+                                     e
+                                 ))
+                             })?;
+-                        for (i, cv) in cv_results.iter().enumerate() {
+-                            if i < results.len() {
+-                                results[i] = component_value_to_val(cv).map_err(|e| {
+-                                    wasmtime::Error::msg(format!(
+-                                        "Failed to convert result value: {}",
+-                                        e
+-                                    ))
+-                                })?;
+-                            }
+-                        }
++                        host_results_to_vals(store_ctx, func_type, &cv_results, results)?;
+                         Ok(())
+                     },
+                 )
+@@ -1610,30 +1778,123 @@ impl ComponentLinker {
+         resource_id: u32,
+         destructor: Arc<dyn ResourceDestructorCallback>,
+     ) -> WasmtimeResult<()> {
+-        let resource_type = ResourceType::host_dynamic(resource_id);
++        // Track then re-register: LinkerInstance::instance() inserts once per name.
++        register_host_resource_globally(
++            interface_path,
++            resource_name,
++            resource_id,
++            destructor.clone(),
++        );
++        self.interface_resource_entries
++            .entry(interface_path.to_string())
++            .or_default()
++            .push((resource_name.to_string(), resource_id, destructor));
+ 
+-        self.linker
+-            .root()
+-            .instance(interface_path)
+-            .map_err(|e| WasmtimeError::Linker {
+-                message: format!(
+-                    "Failed to get linker instance for '{}': {}",
+-                    interface_path, e
+-                ),
+-            })?
+-            .resource(resource_name, resource_type, move |_store_ctx, rep| {
+-                destructor
+-                    .destroy(rep)
++        let resources: Vec<(String, u32, Arc<dyn ResourceDestructorCallback>)> = self
++            .interface_resource_entries
++            .get(interface_path)
++            .cloned()
++            .unwrap_or_default();
++        let functions: Vec<(String, Arc<ComponentHostFunctionEntry>, bool)> = self
++            .interface_function_entries
++            .get(interface_path)
++            .cloned()
++            .unwrap_or_default();
++
++        self.linker.allow_shadowing(true);
++        let mut root = self.linker.root();
++        let mut inst = root.instance(interface_path).map_err(|e| WasmtimeError::Linker {
++            message: format!(
++                "Failed to get linker instance for '{}': {}",
++                interface_path, e
++            ),
++        })?;
++
++        for (res_name, res_id, dtor) in resources {
++            let resource_type = ResourceType::host_dynamic(res_id);
++            inst.resource(&res_name, resource_type, move |_store_ctx, rep| {
++                dtor.destroy(rep)
+                     .map_err(|e| wasmtime::Error::msg(format!("Resource destructor failed: {}", e)))
+             })
+             .map_err(|e| WasmtimeError::Linker {
+                 message: format!(
+                     "Failed to define resource '{}' on '{}': {}",
+-                    resource_name, interface_path, e
++                    res_name, interface_path, e
+                 ),
+             })?;
++        }
++
++        for (fn_name, fn_entry, fn_is_async) in functions {
++            if fn_is_async {
++                let fn_entry_clone = fn_entry.clone();
++                inst.func_new_async(
++                    &fn_name,
++                    move |_store_ctx: StoreContextMut<'_, ComponentStoreData>,
++                          _func_type,
++                          params: &[Val],
++                          results: &mut [Val]| {
++                        let entry = fn_entry_clone.clone();
++                        Box::new(async move {
++                            let cv_params: Vec<ComponentValue> =
++                                params.iter().map(val_to_component_value).collect();
++                            let cv_results =
++                                entry.callback.execute(&cv_params).map_err(|e| {
++                                    wasmtime::Error::msg(format!(
++                                        "Host function callback failed: {}",
++                                        e
++                                    ))
++                                })?;
++                            for (i, cv) in cv_results.iter().enumerate() {
++                                if i < results.len() {
++                                    results[i] = component_value_to_val(cv).map_err(|e| {
++                                        wasmtime::Error::msg(format!(
++                                            "Failed to convert result value: {}",
++                                            e
++                                        ))
++                                    })?;
++                                }
++                            }
++                            Ok(())
++                        })
++                    },
++                )
++                .map_err(|e| WasmtimeError::Linker {
++                    message: format!(
++                        "Failed to register async function '{}' on '{}': {}",
++                        fn_name, interface_path, e
++                    ),
++                })?;
++            } else {
++                let fn_entry_clone = fn_entry.clone();
++                inst.func_new(
++                    &fn_name,
++                    move |mut store_ctx: StoreContextMut<'_, ComponentStoreData>,
++                          func_type: ComponentFunc,
++                          params: &[Val],
++                          results: &mut [Val]| {
++                        let cv_params = vals_to_host_params(store_ctx.as_context_mut(), params)?;
++                        let cv_results =
++                            fn_entry_clone.callback.execute(&cv_params).map_err(|e| {
++                                wasmtime::Error::msg(format!(
++                                    "Host function callback failed: {}",
++                                    e
++                                ))
++                            })?;
++                        host_results_to_vals(store_ctx, func_type, &cv_results, results)?;
++                        Ok(())
++                    },
++                )
++                .map_err(|e| WasmtimeError::Linker {
++                    message: format!(
++                        "Failed to register function '{}' on '{}': {}",
++                        fn_name, interface_path, e
++                    ),
++                })?;
++            }
++        }
++
++        self.linker.allow_shadowing(false);
+ 
+-        // Track the resource in the defined interfaces
+         let interface_key = interface_path.to_string();
+         let resource_entry = format!("[resource]{}", resource_name);
+         self.defined_interfaces
+@@ -3038,6 +3299,7 @@ pub unsafe extern "C" fn wasmtime4j_component_linker_new_with_engine(
+             host_functions: HashMap::new(),
+             defined_interfaces: HashMap::new(),
+             interface_function_entries: HashMap::new(),
++            interface_resource_entries: HashMap::new(),
+             wasi_p2_enabled: false,
+             wasi_http_enabled: false,
+             #[cfg(feature = "wasi-http")]
+diff --git a/wasmtime4j-native/src/jni/component_linker.rs b/wasmtime4j-native/src/jni/component_linker.rs
+index 6363e37..6fbe1c2 100644
+--- a/wasmtime4j-native/src/jni/component_linker.rs
++++ b/wasmtime4j-native/src/jni/component_linker.rs
+@@ -1738,7 +1738,7 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniComponentLinker_nativ
+     let resource_type_id = RESOURCE_ID_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+ 
+     // Build the interface path (e.g., "ns:pkg/iface")
+-    let interface_path = format!("{}:{}", namespace_str, interface_str);
++    let interface_path = format!("{}/{}", namespace_str, interface_str);
+ 
+     // Get JVM reference for destructor callback
+     let jvm = env.get_java_vm().map_err(|e| {
+@@ -1916,12 +1916,9 @@ pub extern "system" fn Java_ai_tegmentum_wasmtime4j_jni_JniComponentLinker_nativ
+     // without registering anything with the component engine, so subsequent invokes
+     // failed with "Instance ID N not found in engine".
+     //
+-    // The caller-supplied linker/store handles are intentionally not used here: this
+-    // path routes to `EnhancedComponentEngine::instantiate_component`, which
+-    // constructs its own Store on the component's engine (with defaults) and
+-    // registers the instance in that engine's HashMap so it is reachable by
+-    // subsequent `nativeComponentInvokeFunction` calls. Callers who need explicit
+-    // WASI capabilities or a custom store should use
++    // Builds a fresh linker and replays process-global host functions AND host
++    // resources (see add_registered_host_functions_to_linker). Callers who need
++    // explicit WASI capabilities or a custom store should use
+     // `nativeInstantiateComponentWithWasi`.
+     jni_utils::jni_try_with_default(&mut env, 0, || {
+         let engine = unsafe {

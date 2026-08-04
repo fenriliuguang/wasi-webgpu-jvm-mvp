@@ -24,7 +24,7 @@ Requires: Rust **≥ 1.94** (1.97+ recommended), `cargo-ndk`, Android NDK, targe
 
 Version pin matches `gradle/libs.versions.toml` (`wasmtime4j`). Source checkout lives under `.deps/wasmtime4j` (gitignored).
 
-The build script applies Android-specific patches under `.deps/wasmtime4j` before compile:
+The build script `git apply`s tracked [`patches/wasmtime4j-v47.0.2-1.5.0-android.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-android.patch):
 
 1. `JNI_OnLoad` → `JNI_VERSION_1_6` (ART rejects `1_8` / `65544`)
 2. `memory.rs` handle checks use unsigned compare (MTE/TBI tagged pointers)

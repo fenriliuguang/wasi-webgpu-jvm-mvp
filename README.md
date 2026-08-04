@@ -99,8 +99,9 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 # CM（需 Rust wasm32-unknown-unknown + wasm-tools）
 ./scripts/build-vector-add-cm.ps1
 
-# 桌面 CM resources：打补丁并安装 wasmtime4j-native（一次性 / 升级后重跑）
+# 桌面 CM resources：git apply 入库补丁并安装 wasmtime4j-native（一次性 / 升级后重跑）
 ./scripts/build-wasmtime4j-desktop-cm.ps1
+# 补丁源：patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch（见 patches/README.md）
 ```
 
 ## 包名

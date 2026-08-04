@@ -51,7 +51,7 @@ Android 必须自建 `aarch64-linux-android` / `x86_64-linux-android`，经 `jni
 现象：`Bad JNI version returned from JNI_OnLoad ...: 65544`（即 `0x10008` = 1_8）。  
 ART 只接受 `JNI_VERSION_1_2` / `1_4` / `1_6`。
 
-处理：构建脚本在 `.deps/wasmtime4j` 中把 Android 路径改为返回 `JNI_VERSION_1_6`（见 `async_runtime.rs`）。
+处理：入库补丁 [`patches/wasmtime4j-v47.0.2-1.5.0-android.patch`](../patches/wasmtime4j-v47.0.2-1.5.0-android.patch)（`async_runtime.rs` 返回 `JNI_VERSION_1_6`）；由 `scripts/build-wasmtime4j-android.ps1` `git apply`。
 
 ### 4. Java `Validation.requireValidHandle` 拒绝「负」句柄
 
@@ -71,7 +71,7 @@ ARM64 堆指针 / TBI / PAC 高位 bit-cast 成 signed `long` 可为负；句柄
 
 | 补丁 | 位置 |
 |------|------|
-| JNI 1_6 / memory 无符号校验 | `scripts/build-wasmtime4j-android.ps1` → 打进 `.deps/wasmtime4j`（gitignore）后编 `.so` |
+| JNI 1_6 / memory 无符号校验 | `patches/wasmtime4j-v47.0.2-1.5.0-android.patch` → `build-wasmtime4j-android.ps1` `git apply` 后编 `.so` |
 | 预编译 `.so` + pthread stub | `runtime-wasmtime/android-natives/` |
 | Validation 放宽 | `android-demo/src/main/java/ai/tegmentum/wasmtime4j/util/Validation.java` + `filterWasmtime4jJar` |
 | 排除桌面 native jar | `android-demo/build.gradle.kts` `configurations.exclude(wasmtime4j-native)` |
