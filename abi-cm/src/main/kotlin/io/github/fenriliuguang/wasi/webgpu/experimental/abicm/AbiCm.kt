@@ -9,7 +9,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 object AbiCm {
     const val PACKAGE: String = "experimental:webgpu-cm"
     const val INTERFACE: String = "host"
-    const val VERSION: String = "0.1.0"
+    const val VERSION: String = "0.2.0"
 
     /** Full import interface id as emitted by wit-bindgen / wasm-tools. */
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
@@ -67,7 +67,7 @@ object AbiCm {
             "[method]command-encoder.copy-buffer-to-buffer"
         const val COMMAND_ENCODER_FINISH = "[method]command-encoder.finish"
         const val QUEUE_SUBMIT1 = "[method]queue.submit1"
-        const val BUFFER_MAP_READ = "[method]buffer.map-read"
+        const val BUFFER_MAP_ASYNC = "[method]buffer.map-async"
         const val BUFFER_GET_MAPPED_RANGE = "[method]buffer.get-mapped-range"
         const val BUFFER_UNMAP = "[method]buffer.unmap"
     }

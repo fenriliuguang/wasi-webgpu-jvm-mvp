@@ -16,7 +16,7 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **P1 · Runtime** | **Done**: desktop Wasmtime + Android-embedded Wasmtime → same `abi-mvp` / L2; still experimental / non-CM |
 | **CM slice** | **Done (experimental)**: `experimental:webgpu-cm` WIT resources + Guest + `abi-cm` + desktop ComponentLinker → same L2; Android CM → Dawn instrumented tests; still not compliant wasi:webgpu |
 | **Delivery harden** | **Done**: desktop CM → `desktop-natives` (no Gradle cache mutation); CM test gate; GitHub Actions (JVM + assemble); `CHANGELOG` / `patches/UPSTREAM` |
-| **Semantic expansion** | **Not started**: on-screen / Chicory; align more wasi:webgpu records/flags |
+| **Semantic expansion** | **Done (first slice)**: CM `buffer-descriptor` + usage/map flags (`experimental:webgpu-cm@0.2.0`); later optional: on-screen / more records (bind-group, etc.) |
 
 ## Hard principles (excerpt)
 

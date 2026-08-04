@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.1.0
+# experimental:webgpu-cm@0.2.0
 
 **中文** | [English](README.en.md)
 
@@ -9,6 +9,7 @@ Component Model compute 切片（vector-add）。
 - 句柄为 WIT `resource` + method（内部仍映射到 L2 `GpuHandle`）
 - async WIT → 同步（与 L2 一致）
 - bind-group helpers 仍是 vector-add 特化
+- **0.2.0：** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags`（u32 别名）；`create-buffer(descriptor)`；`map-async(mode, …)` 取代 `map-read`
 
 Guest：`guest/vector-add-cm/`  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  

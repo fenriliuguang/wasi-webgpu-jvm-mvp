@@ -1,16 +1,26 @@
 /// Copied pin of ../../wit/compute-cm/world.wit for cargo/wit-bindgen path locality.
 /// Keep in sync when updating the compute-cm WIT.
 
-package experimental:webgpu-cm@0.1.0;
+package experimental:webgpu-cm@0.2.0;
 
 interface host {
+  type buffer-usage-flags = u32;
+  type map-mode-flags = u32;
+
+  record buffer-descriptor {
+    size: u64,
+    usage: buffer-usage-flags,
+    mapped-at-creation: bool,
+    label: option<string>,
+  }
+
   resource adapter {
     request-device: func() -> device;
   }
 
   resource device {
     get-queue: func() -> queue;
-    create-buffer: func(size: u64, usage: u32) -> buffer;
+    create-buffer: func(descriptor: buffer-descriptor) -> buffer;
     create-shader-module: func(code: string) -> shader-module;
     create-bind-group-layout-storage3: func() -> bind-group-layout;
     create-bind-group3: func(
@@ -33,7 +43,7 @@ interface host {
   }
 
   resource buffer {
-    map-read: func(offset: u64, size: u64);
+    map-async: func(mode: map-mode-flags, offset: u64, size: u64);
     get-mapped-range: func(offset: u64, size: u64) -> list<u8>;
     unmap: func();
   }

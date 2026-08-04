@@ -10,7 +10,6 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuMapMode
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
@@ -33,10 +32,21 @@ class AbiCmHostBindings(
 
     fun deviceGetQueue(device: Int): Int = host.deviceGetQueue(GpuHandle(device)).raw
 
-    fun deviceCreateBuffer(device: Int, size: Long, usage: Int): Int =
+    fun deviceCreateBuffer(
+        device: Int,
+        size: Long,
+        usage: Int,
+        mappedAtCreation: Boolean = false,
+        label: String? = null,
+    ): Int =
         host.deviceCreateBuffer(
             GpuHandle(device),
-            BufferDescriptor(size = size, usage = usage),
+            BufferDescriptor(
+                size = size,
+                usage = usage,
+                mappedAtCreation = mappedAtCreation,
+                label = label,
+            ),
         ).raw
 
     fun queueWriteBuffer(queue: Int, buffer: Int, offset: Long, data: ByteArray) {
@@ -134,8 +144,8 @@ class AbiCmHostBindings(
         host.queueSubmit(GpuHandle(queue), listOf(GpuHandle(commandBuffer)))
     }
 
-    fun bufferMapRead(buffer: Int, offset: Long, size: Long) {
-        host.bufferMapAsync(GpuHandle(buffer), GpuMapMode.READ, offset, size)
+    fun bufferMapAsync(buffer: Int, mode: Int, offset: Long, size: Long) {
+        host.bufferMapAsync(GpuHandle(buffer), mode, offset, size)
     }
 
     fun bufferGetMappedRange(buffer: Int, offset: Long, size: Long): ByteArray =

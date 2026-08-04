@@ -59,8 +59,8 @@ class WasmtimeCmLinker(
 
     private fun registerResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.1.0" that yields
-        // "experimental:webgpu-cm/host@0.1.0" — matching defineFunction / guest import.
+        // With PACKAGE "experimental:webgpu-cm" + "host@0.2.0" that yields
+        // "experimental:webgpu-cm/host@0.2.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
@@ -85,6 +85,23 @@ class WasmtimeCmLinker(
 
         fun paramU64(params: List<ComponentVal>, i: Int): Long = params[i].asU64()
 
+        fun parseBufferDescriptor(val_: ComponentVal): BufferDescriptorFields {
+            require(val_.isRecord) { "expected buffer-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val size = fields.getValue("size").asU64()
+            val usage = fields.getValue("usage").asU32().toInt()
+            val mapped = fields.getValue("mapped-at-creation").asBool()
+            val labelVal = fields.getValue("label")
+            val label = if (labelVal.isOption) {
+                labelVal.asSome().map { it.asString() }.orElse(null)
+            } else if (labelVal.isString) {
+                labelVal.asString()
+            } else {
+                null
+            }
+            return BufferDescriptorFields(size, usage, mapped, label)
+        }
+
         // Patched wasmtime4j maps own/borrow results <-> U32(rep=L2 handle).
         define(AbiCm.Func.REQUEST_ADAPTER, ComponentHostFunction.singleValue {
             u32(bindings.requestAdapter())
@@ -96,11 +113,14 @@ class WasmtimeCmLinker(
             u32(bindings.deviceGetQueue(paramU32(params, 0)))
         })
         define(AbiCm.Func.DEVICE_CREATE_BUFFER, ComponentHostFunction.singleValue { params ->
+            val desc = parseBufferDescriptor(params[1])
             u32(
                 bindings.deviceCreateBuffer(
                     paramU32(params, 0),
-                    paramU64(params, 1),
-                    paramU32(params, 2),
+                    desc.size,
+                    desc.usage,
+                    desc.mappedAtCreation,
+                    desc.label,
                 ),
             )
         })
@@ -216,9 +236,14 @@ class WasmtimeCmLinker(
             },
         )
         define(
-            AbiCm.Func.BUFFER_MAP_READ,
+            AbiCm.Func.BUFFER_MAP_ASYNC,
             ComponentHostFunction.voidFunctionWithParams { params ->
-                bindings.bufferMapRead(paramU32(params, 0), paramU64(params, 1), paramU64(params, 2))
+                bindings.bufferMapAsync(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    paramU64(params, 2),
+                    paramU64(params, 3),
+                )
             },
         )
         define(AbiCm.Func.BUFFER_GET_MAPPED_RANGE, ComponentHostFunction.singleValue { params ->
@@ -236,4 +261,11 @@ class WasmtimeCmLinker(
             },
         )
     }
+
+    private data class BufferDescriptorFields(
+        val size: Long,
+        val usage: Int,
+        val mappedAtCreation: Boolean,
+        val label: String?,
+    )
 }

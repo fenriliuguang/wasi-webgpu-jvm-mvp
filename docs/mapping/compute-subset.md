@@ -28,7 +28,7 @@
 
 | WIT | L2 | Dawn | 备注 |
 |-----|----|------|------|
-| `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags 对齐 WebGPU |
+| `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags 对齐 WebGPU；CM `0.2.0` 传 `buffer-descriptor`（含 mapped/label） |
 | `gpu-device.create-shader-module` | `deviceCreateShaderModule` | `GPUDevice.createShaderModule` + WGSL | ✅ 仅 WGSL |
 | `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ buffer binding only |
 | `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ buffer resources only |
@@ -48,7 +48,7 @@
 | `gpu-command-encoder.finish` | `commandEncoderFinish` | `finish` | ✅ encoder handle drop |
 | `gpu-queue.write-buffer-with-copy` | `queueWriteBuffer` | `GPUQueue.writeBuffer` | ⚠️ 始终走 host 拷贝 |
 | `gpu-queue.submit` | `queueSubmit` | `submit` | ✅ |
-| `gpu-buffer.map-async` | `bufferMapAsync` | `mapAsync` | ⚠️ 异步→同步等待 |
+| `gpu-buffer.map-async` | `bufferMapAsync` | `mapAsync` | ⚠️ 异步→同步等待；CM `0.2.0` 传 `map-mode-flags` |
 | `gpu-buffer.get-mapped-range-get-with-copy` | `bufferGetMappedRange` | `getConstMappedRange` + copy | ⚠️ 返回 `ByteArray` 拷贝 |
 | `gpu-buffer.unmap` | `bufferUnmap` | `unmap` | ✅ |
 | resource `drop` | `drop` | `close` / 句柄表移除 | ✅ |
@@ -61,7 +61,7 @@
 | Texture / sampler / query set | ❌ |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌（显式 layout） |
-| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm`（非合规 wasi:webgpu） |
+| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.2.0`（buffer-descriptor；仍非合规 wasi:webgpu） |
 | 完整错误 `result` 抬升 | ⚠️ 现为 Kotlin 异常；见 [errors-async.md](errors-async.md) / [EN](errors-async.en.md) |
 
 ## 偏差列表（摘要）

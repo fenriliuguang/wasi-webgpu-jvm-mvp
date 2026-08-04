@@ -33,7 +33,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + 预编译 `.wasm` |
 | Consumer | `android-demo` | Dawn / Guest 仪器测试 / 薄 UI |
 
-**明确不做（本阶段）：** Chicory、上屏 / wasi-gfx、合规 wasi:webgpu 全量 world / 记录类型对齐、Maven Central 发布。
+**明确不做（本阶段）：** 上屏 / wasi-gfx、合规 wasi:webgpu 全量 world、Maven Central 发布。
 
 ## 仓库布局
 
@@ -136,7 +136,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] compute 子集映射表与偏差列表（`docs/mapping`）
 - [x] `WasiWebGpuHost` + Dawn 适配 + 句柄 drop 单测
 - [x] 回读结果与 CPU 期望一致（仪器测试绿灯）
-- [x] 无 Runtime / Chicory / CM 依赖即可合并（P0 切片）
+- [x] 无 Runtime / CM 依赖即可合并（P0 切片）
 
 ### P1
 
@@ -157,6 +157,11 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] 无 patched natives 时 CM 单测 skip；abi-mvp 始终跑
 - [x] GitHub Actions：`:host-api:test` / `:abi-mvp:test` / `:runtime-wasmtime:test` + `:android-demo:assembleDebug`
 - [x] `CHANGELOG.md` + [`patches/UPSTREAM.md`](patches/UPSTREAM.md)（上游贡献备忘；未强制开 PR）
+
+### 语义扩展（buffer records/flags）
+
+- [x] `experimental:webgpu-cm@0.2.0`：`buffer-descriptor` + usage/map flags；`create-buffer` / `map-async`
+- [x] 文档与方案中移除备用 Runtime 路线表述
 
 ## 参考
 

@@ -26,16 +26,18 @@ const SHADER: &str = concat!(
     "}",
 );
 
-/// STORAGE | COPY_DST | COPY_SRC
+/// STORAGE | COPY_DST | COPY_SRC (GpuBufferUsage)
 const USAGE_STORAGE: u32 = 0x8c;
 /// MAP_READ | COPY_DST
 const USAGE_MAP_READ: u32 = 0x09;
+/// GpuMapMode::READ
+const MAP_MODE_READ: u32 = 0x01;
 
 struct Component;
 
 impl Guest for Component {
     fn run_vector_add(a: Vec<f32>, b: Vec<f32>) -> Result<Vec<f32>, String> {
-        use experimental::webgpu_cm::host;
+        use experimental::webgpu_cm::host::{self, BufferDescriptor};
 
         if a.is_empty() || a.len() != b.len() {
             return Err("a/b length mismatch or empty".into());
@@ -47,10 +49,23 @@ impl Guest for Component {
         let device = adapter.request_device();
         let queue = device.get_queue();
 
-        let buf_a = device.create_buffer(bytes, USAGE_STORAGE);
-        let buf_b = device.create_buffer(bytes, USAGE_STORAGE);
-        let buf_out = device.create_buffer(bytes, USAGE_STORAGE);
-        let buf_read = device.create_buffer(bytes, USAGE_MAP_READ);
+        let storage = BufferDescriptor {
+            size: bytes,
+            usage: USAGE_STORAGE,
+            mapped_at_creation: false,
+            label: None,
+        };
+        let map_read = BufferDescriptor {
+            size: bytes,
+            usage: USAGE_MAP_READ,
+            mapped_at_creation: false,
+            label: None,
+        };
+
+        let buf_a = device.create_buffer(&storage);
+        let buf_b = device.create_buffer(&storage);
+        let buf_out = device.create_buffer(&storage);
+        let buf_read = device.create_buffer(&map_read);
 
         queue.write_buffer(&buf_a, 0, &floats_to_bytes(&a));
         queue.write_buffer(&buf_b, 0, &floats_to_bytes(&b));
@@ -72,7 +87,7 @@ impl Guest for Component {
         let cmd = encoder.finish();
         queue.submit1(cmd);
 
-        buf_read.map_read(0, bytes);
+        buf_read.map_async(MAP_MODE_READ, 0, bytes);
         let mapped = buf_read.get_mapped_range(0, bytes);
         buf_read.unmap();
 

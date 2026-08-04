@@ -33,7 +33,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
 | Guest CM | `guest/vector-add-cm` | wit-bindgen component + prebuilt `.wasm` |
 | Consumer | `android-demo` | Dawn / Guest instrumented tests / thin UI |
 
-**Explicitly out of scope (this phase):** Chicory, on-screen / wasi-gfx, compliant full wasi:webgpu world / record-type alignment, Maven Central publishing.
+**Explicitly out of scope (this phase):** on-screen / wasi-gfx, compliant full wasi:webgpu world, Maven Central publishing.
 
 ## Repository layout
 
@@ -136,7 +136,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] Compute-subset mapping table and deviation list (`docs/mapping`)
 - [x] `WasiWebGpuHost` + Dawn adapter + handle-drop unit tests
 - [x] Readback matches CPU expectation (instrumented tests green)
-- [x] Mergeable without Runtime / Chicory / CM dependencies (P0 slice)
+- [x] Mergeable without Runtime / CM dependencies (P0 slice)
 
 ### P1
 
@@ -157,6 +157,11 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [x] CM unit tests skip without patched natives; abi-mvp always runs
 - [x] GitHub Actions: `:host-api:test` / `:abi-mvp:test` / `:runtime-wasmtime:test` + `:android-demo:assembleDebug`
 - [x] `CHANGELOG.md` + [`patches/UPSTREAM.en.md`](patches/UPSTREAM.en.md) (upstream brief; no required PR)
+
+### Semantic expansion (buffer records/flags)
+
+- [x] `experimental:webgpu-cm@0.2.0`: `buffer-descriptor` + usage/map flags; `create-buffer` / `map-async`
+- [x] Dropped alternate-runtime mentions from docs / scheme
 
 ## References
 

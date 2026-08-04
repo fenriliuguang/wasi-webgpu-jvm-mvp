@@ -12,7 +12,7 @@ Pin the upstream subset so the Host does not drift with WIT tip.
 | Imports summary | https://github.com/WebAssembly/wasi-webgpu/blob/main/imports.md |
 | L2 scope in this repo | **compute subset** (see [`docs/mapping/compute-subset.en.md`](../docs/mapping/compute-subset.en.md)) |
 | P1 Guest ABI | **abi-mvp** (`wasi-webgpu-mvp` core imports, **not** CM / not compliant) |
-| CM slice | [`compute-cm/`](compute-cm/) — `experimental:webgpu-cm@0.1.0` (typed lists/strings + WIT resources; **still not** compliant wasi:webgpu) |
+| CM slice | [`compute-cm/`](compute-cm/) — `experimental:webgpu-cm@0.2.0` (typed lists/strings + WIT resources + buffer-descriptor; **still not** compliant wasi:webgpu) |
 
 P0/P1 do **not** vendor the full upstream WIT, and do not generate a full wit-bindgen host.  
 The CM slice pins this repo’s `wit/compute-cm/world.wit` (method names lean toward wasi:webgpu compute).  

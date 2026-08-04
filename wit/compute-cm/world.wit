@@ -7,19 +7,31 @@
 /// - async WIT methods are sync (matching L2)
 /// - bind-group helpers are vector-add shaped
 ///
-/// Next steps toward compliance: align records/flags with the pinned
-/// wasi:webgpu WIT and broaden beyond the vector-add compute slice.
+/// 0.2.0: buffer-descriptor + buffer-usage/map-mode flag aliases (u32),
+/// aligned with pinned wasi:webgpu record/flag shape for create-buffer / map-async.
 
-package experimental:webgpu-cm@0.1.0;
+package experimental:webgpu-cm@0.2.0;
 
 interface host {
+  /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
+  type buffer-usage-flags = u32;
+  /// WebGPU GPUMapMode bitfield (same bit values as L2 GpuMapMode).
+  type map-mode-flags = u32;
+
+  record buffer-descriptor {
+    size: u64,
+    usage: buffer-usage-flags,
+    mapped-at-creation: bool,
+    label: option<string>,
+  }
+
   resource adapter {
     request-device: func() -> device;
   }
 
   resource device {
     get-queue: func() -> queue;
-    create-buffer: func(size: u64, usage: u32) -> buffer;
+    create-buffer: func(descriptor: buffer-descriptor) -> buffer;
     create-shader-module: func(code: string) -> shader-module;
     /// Fixed 3× storage layout: binding0/1 read-only-storage, binding2 storage.
     create-bind-group-layout-storage3: func() -> bind-group-layout;
@@ -43,7 +55,8 @@ interface host {
   }
 
   resource buffer {
-    map-read: func(offset: u64, size: u64);
+    /// Sync host wait (L2); mode is map-mode-flags (READ / WRITE bits).
+    map-async: func(mode: map-mode-flags, offset: u64, size: u64);
     get-mapped-range: func(offset: u64, size: u64) -> list<u8>;
     unmap: func();
   }

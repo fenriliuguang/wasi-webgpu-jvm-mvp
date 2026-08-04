@@ -50,4 +50,4 @@ python ./scripts/export-wasmtime4j-patches.py
 1. Host callback：`Resource` ↔ `U32(rep)` 编组（`vals_to_host_params` / `host_results_to_vals`）
 2. 同一 interface 多 `resource` 注册（`allow_shadowing` + 批量重挂）
 3. 进程级 resource registry，供 `add_registered_host_functions_to_linker` 在 fresh linker 上重放（上游 `nativeInstantiateWithLinker` 不用 caller linker）
-4. JNI `defineResource` 的 interface path 使用 `"{ns}/{iface}"`（与 guest import `experimental:webgpu-cm/host@0.1.0` 一致）
+4. JNI `defineResource` 的 interface path 使用 `"{ns}/{iface}"`（与 guest import `experimental:webgpu-cm/host@0.2.0` 一致）

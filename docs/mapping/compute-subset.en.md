@@ -28,7 +28,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 
 | WIT | L2 | Dawn | Notes |
 |-----|----|------|-------|
-| `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags align with WebGPU |
+| `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags align with WebGPU; CM `0.2.0` passes `buffer-descriptor` (mapped/label) |
 | `gpu-device.create-shader-module` | `deviceCreateShaderModule` | `GPUDevice.createShaderModule` + WGSL | ✅ WGSL only |
 | `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ buffer binding only |
 | `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ buffer resources only |
@@ -48,7 +48,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 | `gpu-command-encoder.finish` | `commandEncoderFinish` | `finish` | ✅ encoder handle drop |
 | `gpu-queue.write-buffer-with-copy` | `queueWriteBuffer` | `GPUQueue.writeBuffer` | ⚠️ always host copy |
 | `gpu-queue.submit` | `queueSubmit` | `submit` | ✅ |
-| `gpu-buffer.map-async` | `bufferMapAsync` | `mapAsync` | ⚠️ async → sync wait |
+| `gpu-buffer.map-async` | `bufferMapAsync` | `mapAsync` | ⚠️ async → sync wait; CM `0.2.0` passes `map-mode-flags` |
 | `gpu-buffer.get-mapped-range-get-with-copy` | `bufferGetMappedRange` | `getConstMappedRange` + copy | ⚠️ returns `ByteArray` copy |
 | `gpu-buffer.unmap` | `bufferUnmap` | `unmap` | ✅ |
 | resource `drop` | `drop` | `close` / remove from handle table | ✅ |
@@ -61,7 +61,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 | Texture / sampler / query set | ❌ |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌ (explicit layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm` (not compliant wasi:webgpu) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.2.0` (buffer-descriptor; still not compliant wasi:webgpu) |
 | Full `result` error lifting | ⚠️ currently Kotlin exceptions; see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)

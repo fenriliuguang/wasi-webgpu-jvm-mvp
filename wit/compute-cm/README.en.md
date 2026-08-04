@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.1.0
+# experimental:webgpu-cm@0.2.0
 
 [中文](README.md) | **English**
 
@@ -9,6 +9,7 @@ Component Model compute slice (vector-add).
 - Handles are WIT `resource` + methods (still map internally to L2 `GpuHandle`)
 - async WIT → sync (same as L2)
 - bind-group helpers remain vector-add specialized
+- **0.2.0:** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags` (u32 aliases); `create-buffer(descriptor)`; `map-async(mode, …)` replaces `map-read`
 
 Guest: `guest/vector-add-cm/`  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  

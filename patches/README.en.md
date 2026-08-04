@@ -50,4 +50,4 @@ Then review with `git diff patches/` and commit.
 1. Host callback: `Resource` ↔ `U32(rep)` marshalling (`vals_to_host_params` / `host_results_to_vals`)
 2. Multiple `resource` registrations on the same interface (`allow_shadowing` + batch re-hang)
 3. Process-wide resource registry so `add_registered_host_functions_to_linker` can replay onto a fresh linker (upstream `nativeInstantiateWithLinker` does not use the caller linker)
-4. JNI `defineResource` interface path uses `"{ns}/{iface}"` (matches guest import `experimental:webgpu-cm/host@0.1.0`)
+4. JNI `defineResource` interface path uses `"{ns}/{iface}"` (matches guest import `experimental:webgpu-cm/host@0.2.0`)
