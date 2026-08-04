@@ -2,6 +2,8 @@
 
 **experimental Dawn / CPU host mapping for wasi:webgpu**
 
+**中文** | [English](README.en.md)
+
 > 未接标准 `wasi:webgpu` 完整 world / 全量资源面之前，**不得**宣传为已合规实现。  
 > P1：**abi-mvp**（core wasm imports）。  
 > CM 切片：**experimental:webgpu-cm**（Component Model + typed lists/strings + WIT resources；仍为 experimental）。  
@@ -84,7 +86,7 @@ wasi-webgpu-jvm-mvp/
 
 详见 [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md)。
 
-Android 额外补丁（摘要；细节与踩坑见 [`docs/android-wasmtime.md`](docs/android-wasmtime.md)）：
+Android 额外补丁（摘要；细节与踩坑见 [`docs/android-wasmtime.md`](docs/android-wasmtime.md) / [EN](docs/android-wasmtime.en.md)）：
 
 - `JNI_OnLoad` 返回 `JNI_VERSION_1_6`（ART 不接受 1_8）
 - 本地 `Validation.requireValidHandle` 允许高位置位的句柄（ARM64 TBI/PAC 指针 bit-cast 成 signed `long` 可能为负）
@@ -101,7 +103,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 # 桌面 CM resources：git apply 入库补丁并安装 wasmtime4j-native（一次性 / 升级后重跑）
 ./scripts/build-wasmtime4j-desktop-cm.ps1
-# 补丁源：patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch（见 patches/README.md）
+# 补丁源：patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch（见 patches/README.md / [EN](patches/README.en.md)）
 ```
 
 ## 包名
@@ -135,5 +137,23 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 - [wasi-webgpu](https://github.com/WebAssembly/wasi-webgpu)
 - [androidx.webgpu](https://developer.android.com/jetpack/androidx/releases/webgpu)
 - [wasmtime4j](https://github.com/tegmentum/wasmtime4j)
-- 方案摘要：[`docs/scheme/README.md`](docs/scheme/README.md)
-- Android Wasmtime 进度与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md)
+- 方案摘要：[`docs/scheme/README.md`](docs/scheme/README.md) / [EN](docs/scheme/README.en.md)
+- Android Wasmtime 进度与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md) / [EN](docs/android-wasmtime.en.md)
+
+## 文档索引
+
+| 文档 | 中文 | English |
+|------|------|---------|
+| 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
+| 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
+| Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
+| WIT ↔ Dawn 映射 | [docs/mapping/compute-subset.md](docs/mapping/compute-subset.md) | [docs/mapping/compute-subset.en.md](docs/mapping/compute-subset.en.md) |
+| 线程模型 | [docs/mapping/threading.md](docs/mapping/threading.md) | [docs/mapping/threading.en.md](docs/mapping/threading.en.md) |
+| 错误与 Async | [docs/mapping/errors-async.md](docs/mapping/errors-async.md) | [docs/mapping/errors-async.en.md](docs/mapping/errors-async.en.md) |
+| P1 边界开销 | [docs/perf/p1-boundary.md](docs/perf/p1-boundary.md) | [docs/perf/p1-boundary.en.md](docs/perf/p1-boundary.en.md) |
+| WIT 钉定 | [wit/README.md](wit/README.md) | [wit/README.en.md](wit/README.en.md) |
+| compute-cm WIT | [wit/compute-cm/README.md](wit/compute-cm/README.md) | [wit/compute-cm/README.en.md](wit/compute-cm/README.en.md) |
+| wasmtime4j 补丁 | [patches/README.md](patches/README.md) | [patches/README.en.md](patches/README.en.md) |
+| Android natives | [runtime-wasmtime/android-natives/README.md](runtime-wasmtime/android-natives/README.md)（已为英文） | 同上 |
+| Guest abi-mvp | [guest/vector-add/README.md](guest/vector-add/README.md) | [guest/vector-add/README.en.md](guest/vector-add/README.en.md) |
+| Guest CM | [guest/vector-add-cm/README.md](guest/vector-add-cm/README.md) | [guest/vector-add-cm/README.en.md](guest/vector-add-cm/README.en.md) |

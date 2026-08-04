@@ -1,5 +1,7 @@
 # 线程模型（P0 备忘）
 
+**中文** | [English](threading.en.md)
+
 ## 结论（P0）
 
 - Host 调用约定为 **单线程**：同一 `WasiWebGpuHost` 实例不要并发调用。  

@@ -1,5 +1,7 @@
 # experimental:webgpu-cm@0.1.0
 
+**中文** | [English](README.en.md)
+
 Component Model compute 切片（vector-add）。
 
 - 包名 **experimental** — **不得**称为合规 `wasi:webgpu`

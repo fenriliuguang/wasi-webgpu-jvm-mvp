@@ -1,5 +1,7 @@
 # P1 边界开销备注（初稿）
 
+**中文** | [English](p1-boundary.en.md)
+
 > experimental · Guest → Wasmtime (L1) → abi-mvp → `WasiWebGpuHost` (L2) → `CpuWasiWebGpuHost`  
 > 对照：纯 Kotlin 直接调 L2（同一 CPU Host）  
 > Android：同一 Guest / abi-mvp 路径 → `DawnWasiWebGpuHost`（见 `WasmtimeVectorAddInstrumentedTest`）

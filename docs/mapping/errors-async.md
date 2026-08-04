@@ -1,5 +1,7 @@
 # 错误与 Async 备忘（P0）
 
+**中文** | [English](errors-async.en.md)
+
 ## 错误策略
 
 | 层 | P0 行为 |

@@ -1,5 +1,7 @@
 # Android 嵌 Wasmtime：进度与踩坑
 
+**中文** | [English](android-wasmtime.en.md)
+
 > experimental · Guest → Wasmtime (L1) + abi-mvp → `WasiWebGpuHost` (L2) → `DawnWasiWebGpuHost`  
 > 验收：`WasmtimeVectorAddInstrumentedTest`（仪器测试绿灯）
 

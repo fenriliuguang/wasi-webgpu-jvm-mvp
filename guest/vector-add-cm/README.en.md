@@ -1,10 +1,10 @@
 # guest/vector-add-cm
 
-**English** | [README.en.md](README.en.md) (same content, language-switcher pair)
+[中文](README.md) | **English**
 
 Experimental **Component Model** Guest for vector-add.
 
-- Imports `experimental:webgpu-cm/host@0.1.0`（WIT resources + methods；pinned in `wit/`）
+- Imports `experimental:webgpu-cm/host@0.1.0` (WIT resources + methods; pinned in `wit/`)
 - **Not** compliant `wasi:webgpu`
 - Export: `run-vector-add(a, b) -> result<list<f32>, string>`
 

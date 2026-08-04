@@ -1,5 +1,7 @@
 # 方案说明（迁入）
 
+**中文** | [English](README.en.md)
+
 本文件是从讨论稿迁入本仓的方案摘要。完整论述见仓库根 [`README.md`](../../README.md)。
 
 ## 一句话
@@ -23,4 +25,4 @@
 4. P1 使用手工 abi-mvp（core wasm），**不是** Component Model。  
 5. Android 使用 Bionic `libwasmtime4j.so`（`runtime-wasmtime/android-natives`）；桌面 CM resources 需 patched `wasmtime4j-native`（入库补丁 `patches/*.patch` + `scripts/build-wasmtime4j-desktop-cm.ps1`）。
 
-Android 嵌 Wasmtime 的进度、补丁与踩坑见 [`docs/android-wasmtime.md`](../android-wasmtime.md)。
+Android 嵌 Wasmtime 的进度、补丁与踩坑见 [`docs/android-wasmtime.md`](../android-wasmtime.md) / [EN](../android-wasmtime.en.md)。

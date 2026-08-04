@@ -1,5 +1,7 @@
 # guest/vector-add
 
+**中文** | [English](README.en.md)
+
 Experimental **abi-mvp** Guest（core wasm imports），**不是**标准 Component Model / 合规 `wasi:webgpu`。
 
 ## 重建

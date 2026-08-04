@@ -1,5 +1,7 @@
 # Android natives for wasmtime4j
 
+**English** (this file is English-first; Chinese context lives in [`docs/android-wasmtime.md`](../../docs/android-wasmtime.md))
+
 Prebuilt `libwasmtime4j.so` for Android (Bionic), used via `jniLibs` + `System.loadLibrary("wasmtime4j")`.
 
 Desktop JVM continues to use Maven `wasmtime4j-native` (glibc / Darwin / Windows). **Do not** ship those desktop binaries as Android `jniLibs`.
