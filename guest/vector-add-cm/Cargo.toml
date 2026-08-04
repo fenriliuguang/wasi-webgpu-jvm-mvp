@@ -1,0 +1,20 @@
+﻿[package]
+name = "vector-add-cm"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Experimental CM guest for vector-add (NOT compliant wasi:webgpu)"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# 0.55 is the newest crate that publishes matching wit-bindgen-rust-macro on crates.io here.
+wit-bindgen = "0.55.0"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"

@@ -1,0 +1,278 @@
+package io.github.fenriliuguang.wasi.webgpu.experimental.host
+
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+/**
+ * In-memory L3 double for desktop/CI. Not a general WGSL runtime.
+ *
+ * Vector-add dispatch is recognized only when the shader text equals [VectorAddScenario.SHADER].
+ */
+class CpuWasiWebGpuHost : WasiWebGpuHost {
+
+    private val handles = HandleTable()
+
+    private class Adapter
+    private class Device
+    private class Queue
+    private class ShaderModule(val code: String)
+    private class BindGroupLayout
+    private class BindGroup(val buffers: List<GpuHandle>)
+    private class ComputePipeline(val shader: ShaderModule)
+
+    private class CommandEncoder {
+        val copies = ArrayList<CopyOp>()
+        var dispatch: DispatchOp? = null
+        var finished = false
+    }
+
+    private class ComputePass(
+        val encoder: CommandEncoder,
+        var pipeline: GpuHandle? = null,
+        var bindGroup: GpuHandle? = null,
+    )
+
+    private class CommandBuffer(
+        val copies: List<CopyOp>,
+        val dispatch: DispatchOp?,
+    )
+
+    private data class CopyOp(
+        val source: GpuHandle,
+        val sourceOffset: Long,
+        val destination: GpuHandle,
+        val destinationOffset: Long,
+        val size: Long,
+    )
+
+    private data class DispatchOp(
+        val pipeline: GpuHandle,
+        val bindGroup: GpuHandle,
+    )
+
+    private class BufferResource(
+        val size: Long,
+        val usage: Int,
+        val data: ByteArray,
+        var mapped: Boolean = false,
+    )
+
+    override fun requestAdapter(options: RequestAdapterOptions): GpuHandle =
+        handles.insert(ResourceKind.Adapter, Adapter())
+
+    override fun adapterRequestDevice(adapter: GpuHandle): GpuHandle {
+        handles.get<Adapter>(adapter, ResourceKind.Adapter)
+        return handles.insert(ResourceKind.Device, Device())
+    }
+
+    override fun deviceGetQueue(device: GpuHandle): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        return handles.insert(ResourceKind.Queue, Queue())
+    }
+
+    override fun deviceCreateBuffer(device: GpuHandle, descriptor: BufferDescriptor): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        require(descriptor.size >= 0 && descriptor.size <= Int.MAX_VALUE)
+        val buffer = BufferResource(
+            size = descriptor.size,
+            usage = descriptor.usage,
+            data = ByteArray(descriptor.size.toInt()),
+            mapped = descriptor.mappedAtCreation,
+        )
+        return handles.insert(ResourceKind.Buffer, buffer)
+    }
+
+    override fun deviceCreateShaderModule(
+        device: GpuHandle,
+        descriptor: ShaderModuleDescriptor,
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        return handles.insert(ResourceKind.ShaderModule, ShaderModule(descriptor.code))
+    }
+
+    override fun deviceCreateBindGroupLayout(
+        device: GpuHandle,
+        descriptor: BindGroupLayoutDescriptor,
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        return handles.insert(ResourceKind.BindGroupLayout, BindGroupLayout())
+    }
+
+    override fun deviceCreateBindGroup(device: GpuHandle, descriptor: BindGroupDescriptor): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        handles.get<BindGroupLayout>(descriptor.layout, ResourceKind.BindGroupLayout)
+        val buffers = descriptor.entries
+            .sortedBy { it.binding }
+            .map { entry ->
+                handles.get<BufferResource>(entry.resource.buffer, ResourceKind.Buffer)
+                entry.resource.buffer
+            }
+        return handles.insert(ResourceKind.BindGroup, BindGroup(buffers))
+    }
+
+    override fun deviceCreateComputePipeline(
+        device: GpuHandle,
+        descriptor: ComputePipelineDescriptor,
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        val layout = descriptor.layout
+            ?: throw HostException.Unsupported("auto pipeline layout; pass an explicit bind-group layout handle")
+        handles.get<BindGroupLayout>(layout, ResourceKind.BindGroupLayout)
+        val shader = handles.get<ShaderModule>(descriptor.compute.module, ResourceKind.ShaderModule)
+        return handles.insert(ResourceKind.ComputePipeline, ComputePipeline(shader))
+    }
+
+    override fun deviceCreateCommandEncoder(
+        device: GpuHandle,
+        descriptor: CommandEncoderDescriptor,
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        return handles.insert(ResourceKind.CommandEncoder, CommandEncoder())
+    }
+
+    override fun commandEncoderBeginComputePass(
+        encoder: GpuHandle,
+        descriptor: ComputePassDescriptor,
+    ): GpuHandle {
+        val commandEncoder = handles.get<CommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        if (commandEncoder.finished) {
+            throw HostException.Validation("encoder already finished")
+        }
+        return handles.insert(ResourceKind.ComputePassEncoder, ComputePass(commandEncoder))
+    }
+
+    override fun computePassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) {
+        val computePass = handles.get<ComputePass>(pass, ResourceKind.ComputePassEncoder)
+        handles.get<ComputePipeline>(pipeline, ResourceKind.ComputePipeline)
+        computePass.pipeline = pipeline
+    }
+
+    override fun computePassSetBindGroup(
+        pass: GpuHandle,
+        index: Int,
+        bindGroup: GpuHandle,
+        dynamicOffsets: IntArray,
+    ) {
+        require(index == 0) { "Cpu host only supports bind group index 0" }
+        val computePass = handles.get<ComputePass>(pass, ResourceKind.ComputePassEncoder)
+        handles.get<BindGroup>(bindGroup, ResourceKind.BindGroup)
+        computePass.bindGroup = bindGroup
+    }
+
+    override fun computePassDispatchWorkgroups(
+        pass: GpuHandle,
+        workgroupCountX: Int,
+        workgroupCountY: Int,
+        workgroupCountZ: Int,
+    ) {
+        val computePass = handles.get<ComputePass>(pass, ResourceKind.ComputePassEncoder)
+        val pipelineHandle = computePass.pipeline
+            ?: throw HostException.Validation("pipeline not set")
+        val bindGroupHandle = computePass.bindGroup
+            ?: throw HostException.Validation("bind group not set")
+        computePass.encoder.dispatch = DispatchOp(pipelineHandle, bindGroupHandle)
+    }
+
+    override fun computePassEnd(pass: GpuHandle) {
+        handles.get<ComputePass>(pass, ResourceKind.ComputePassEncoder)
+        handles.drop(pass)
+    }
+
+    override fun commandEncoderCopyBufferToBuffer(
+        encoder: GpuHandle,
+        source: GpuHandle,
+        sourceOffset: Long,
+        destination: GpuHandle,
+        destinationOffset: Long,
+        size: Long,
+    ) {
+        val commandEncoder = handles.get<CommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        handles.get<BufferResource>(source, ResourceKind.Buffer)
+        handles.get<BufferResource>(destination, ResourceKind.Buffer)
+        commandEncoder.copies += CopyOp(source, sourceOffset, destination, destinationOffset, size)
+    }
+
+    override fun commandEncoderFinish(encoder: GpuHandle): GpuHandle {
+        val commandEncoder = handles.get<CommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        commandEncoder.finished = true
+        val commandBuffer = CommandBuffer(commandEncoder.copies.toList(), commandEncoder.dispatch)
+        handles.drop(encoder)
+        return handles.insert(ResourceKind.CommandBuffer, commandBuffer)
+    }
+
+    override fun queueWriteBuffer(
+        queue: GpuHandle,
+        buffer: GpuHandle,
+        bufferOffset: Long,
+        data: ByteArray,
+    ) {
+        handles.get<Queue>(queue, ResourceKind.Queue)
+        val buf = handles.get<BufferResource>(buffer, ResourceKind.Buffer)
+        val offset = bufferOffset.toInt()
+        require(offset >= 0 && offset + data.size <= buf.data.size)
+        System.arraycopy(data, 0, buf.data, offset, data.size)
+    }
+
+    override fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>) {
+        handles.get<Queue>(queue, ResourceKind.Queue)
+        for (cmdHandle in commandBuffers) {
+            val cmd = handles.get<CommandBuffer>(cmdHandle, ResourceKind.CommandBuffer)
+            cmd.dispatch?.let { runVectorAddDispatch(it) }
+            for (copy in cmd.copies) {
+                val src = handles.get<BufferResource>(copy.source, ResourceKind.Buffer)
+                val dst = handles.get<BufferResource>(copy.destination, ResourceKind.Buffer)
+                System.arraycopy(
+                    src.data,
+                    copy.sourceOffset.toInt(),
+                    dst.data,
+                    copy.destinationOffset.toInt(),
+                    copy.size.toInt(),
+                )
+            }
+        }
+    }
+
+    override fun bufferMapAsync(buffer: GpuHandle, mode: Int, offset: Long, size: Long) {
+        val buf = handles.get<BufferResource>(buffer, ResourceKind.Buffer)
+        require(offset >= 0 && offset + size <= buf.size)
+        buf.mapped = true
+    }
+
+    override fun bufferGetMappedRange(buffer: GpuHandle, offset: Long, size: Long): ByteArray {
+        val buf = handles.get<BufferResource>(buffer, ResourceKind.Buffer)
+        if (!buf.mapped) throw HostException.Validation("buffer not mapped")
+        return buf.data.copyOfRange(offset.toInt(), (offset + size).toInt())
+    }
+
+    override fun bufferUnmap(buffer: GpuHandle) {
+        val buf = handles.get<BufferResource>(buffer, ResourceKind.Buffer)
+        buf.mapped = false
+    }
+
+    override fun drop(handle: GpuHandle) {
+        handles.drop(handle)
+    }
+
+    override fun close() {
+        handles.clear()
+    }
+
+    private fun runVectorAddDispatch(dispatch: DispatchOp) {
+        val pipeline = handles.get<ComputePipeline>(dispatch.pipeline, ResourceKind.ComputePipeline)
+        if (pipeline.shader.code != VectorAddScenario.SHADER) {
+            throw HostException.Unsupported("Cpu host only executes VectorAddScenario.SHADER")
+        }
+        val group = handles.get<BindGroup>(dispatch.bindGroup, ResourceKind.BindGroup)
+        require(group.buffers.size >= 3) { "vector-add bind group needs 3 buffers" }
+        val a = handles.get<BufferResource>(group.buffers[0], ResourceKind.Buffer)
+        val b = handles.get<BufferResource>(group.buffers[1], ResourceKind.Buffer)
+        val out = handles.get<BufferResource>(group.buffers[2], ResourceKind.Buffer)
+        val n = minOf(a.data.size, b.data.size, out.data.size) / 4
+        val ab = ByteBuffer.wrap(a.data).order(ByteOrder.LITTLE_ENDIAN)
+        val bb = ByteBuffer.wrap(b.data).order(ByteOrder.LITTLE_ENDIAN)
+        val ob = ByteBuffer.wrap(out.data).order(ByteOrder.LITTLE_ENDIAN)
+        for (i in 0 until n) {
+            ob.putFloat(i * 4, ab.getFloat(i * 4) + bb.getFloat(i * 4))
+        }
+    }
+}

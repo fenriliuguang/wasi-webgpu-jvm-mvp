@@ -1,0 +1,83 @@
+/// Experimental Component Model compute subset for vector-add.
+///
+/// Method names lean toward wasi:webgpu@0.3.0-rc.2 compute paths, but this is
+/// NOT a compliant wasi:webgpu world:
+/// - package remains experimental
+/// - handles are WIT resources (not the full wasi:webgpu resource surface)
+/// - async WIT methods are sync (matching L2)
+/// - bind-group helpers are vector-add shaped
+///
+/// Next steps toward compliance: align records/flags with the pinned
+/// wasi:webgpu WIT and broaden beyond the vector-add compute slice.
+
+package experimental:webgpu-cm@0.1.0;
+
+interface host {
+  resource adapter {
+    request-device: func() -> device;
+  }
+
+  resource device {
+    get-queue: func() -> queue;
+    create-buffer: func(size: u64, usage: u32) -> buffer;
+    create-shader-module: func(code: string) -> shader-module;
+    /// Fixed 3× storage layout: binding0/1 read-only-storage, binding2 storage.
+    create-bind-group-layout-storage3: func() -> bind-group-layout;
+    create-bind-group3: func(
+      layout: borrow<bind-group-layout>,
+      b0: borrow<buffer>,
+      b1: borrow<buffer>,
+      b2: borrow<buffer>,
+    ) -> bind-group;
+    create-compute-pipeline: func(
+      layout: borrow<bind-group-layout>,
+      shader: borrow<shader-module>,
+      entry-point: string,
+    ) -> compute-pipeline;
+    create-command-encoder: func() -> command-encoder;
+  }
+
+  resource queue {
+    write-buffer: func(buffer: borrow<buffer>, offset: u64, data: list<u8>);
+    submit1: func(command-buffer: command-buffer);
+  }
+
+  resource buffer {
+    map-read: func(offset: u64, size: u64);
+    get-mapped-range: func(offset: u64, size: u64) -> list<u8>;
+    unmap: func();
+  }
+
+  resource shader-module {}
+  resource bind-group-layout {}
+  resource bind-group {}
+  resource compute-pipeline {}
+
+  resource command-encoder {
+    begin-compute-pass: func() -> compute-pass-encoder;
+    copy-buffer-to-buffer: func(
+      source: borrow<buffer>,
+      source-offset: u64,
+      destination: borrow<buffer>,
+      destination-offset: u64,
+      size: u64,
+    );
+    finish: func() -> command-buffer;
+  }
+
+  resource compute-pass-encoder {
+    set-pipeline: func(pipeline: borrow<compute-pipeline>);
+    set-bind-group: func(index: u32, bind-group: borrow<bind-group>);
+    dispatch-workgroups: func(x: u32, y: u32, z: u32);
+    end: func();
+  }
+
+  resource command-buffer {}
+
+  request-adapter: func() -> adapter;
+}
+
+world vector-add {
+  import host;
+  export run-vector-add: func(a: list<f32>, b: list<f32>) -> result<list<f32>, string>;
+}
