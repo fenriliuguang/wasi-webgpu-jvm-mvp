@@ -249,6 +249,58 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         buf.mapped = false
     }
 
+    override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle =
+        throw HostException.Unsupported("Android surface (Cpu host)")
+
+    override fun surfaceConfigure(
+        surface: GpuHandle,
+        device: GpuHandle,
+        adapter: GpuHandle,
+        width: Int,
+        height: Int,
+    ): Int = throw HostException.Unsupported("Android surface (Cpu host)")
+
+    override fun surfaceUnconfigure(surface: GpuHandle) =
+        throw HostException.Unsupported("Android surface (Cpu host)")
+
+    override fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult =
+        throw HostException.Unsupported("Android surface (Cpu host)")
+
+    override fun surfacePresent(surface: GpuHandle) =
+        throw HostException.Unsupported("Android surface (Cpu host)")
+
+    override fun deviceCreateRenderPipelineTriangle(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+    ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
+
+    override fun textureCreateView(texture: GpuHandle): GpuHandle =
+        throw HostException.Unsupported("texture view (Cpu host)")
+
+    override fun commandEncoderBeginRenderPassClear(
+        encoder: GpuHandle,
+        view: GpuHandle,
+        clearR: Float,
+        clearG: Float,
+        clearB: Float,
+        clearA: Float,
+    ): GpuHandle = throw HostException.Unsupported("render pass (Cpu host)")
+
+    override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) =
+        throw HostException.Unsupported("render pass (Cpu host)")
+
+    override fun renderPassDraw(
+        pass: GpuHandle,
+        vertexCount: Int,
+        instanceCount: Int,
+        firstVertex: Int,
+        firstInstance: Int,
+    ) = throw HostException.Unsupported("render pass (Cpu host)")
+
+    override fun renderPassEnd(pass: GpuHandle) =
+        throw HostException.Unsupported("render pass (Cpu host)")
+
     override fun drop(handle: GpuHandle) {
         handles.drop(handle)
     }

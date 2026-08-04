@@ -5,9 +5,16 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Surface/render lift (L2 + WIT)
+
+- L2: `WasiWebGpuHost` surface/render minimal API; `DawnWasiWebGpuHost` implements; `CpuWasiWebGpuHost` → Unsupported
+- `experimental:webgpu-cm` **0.2.0 → 0.3.0**: surface + render-pipeline / render-pass helpers (Android native window)
+- `TriangleRenderer` draws via L2 Host (not direct androidx.webgpu); still no Guest/wasi-gfx on-screen
+- Docs: `docs/mapping/render-subset.md`; threading contract for surface/submit
+
 ### On-screen demo (Kotlin)
 
-- `android-demo`: `SurfaceView` + `TriangleRenderer` red triangle via androidx.webgpu (not L2/Guest/wasi-gfx)
+- `android-demo`: `SurfaceView` + `TriangleRenderer` red triangle (now L2 Host→Dawn)
 
 ### Semantic expansion (CM buffer records/flags)
 

@@ -1,17 +1,18 @@
-# experimental:webgpu-cm@0.2.0
+# experimental:webgpu-cm@0.3.0
 
 [中文](README.md) | **English**
 
-Component Model compute slice (vector-add).
+Component Model compute + minimal surface/render slice.
 
 - Package name is **experimental** — **must not** be called compliant `wasi:webgpu`
-- Method names lean toward the `wasi:webgpu@0.3.0-rc.2` compute subset
+- Method names lean toward `wasi:webgpu@0.3.0-rc.2` paths
 - Handles are WIT `resource` + methods (still map internally to L2 `GpuHandle`)
 - async WIT → sync (same as L2)
 - bind-group helpers remain vector-add specialized
 - **0.2.0:** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags` (u32 aliases); `create-buffer(descriptor)`; `map-async(mode, …)` replaces `map-read`
+- **0.3.0:** Android native-window `surface` + triangle-shaped `render-pipeline` / `render-pass` (no Guest on-screen export)
 
-Guest: `guest/vector-add-cm/`  
+Guest: `guest/vector-add-cm/` (still exports only `run-vector-add`)  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  
 Wiring: `runtime-wasmtime` `runtime.cm` (`ComponentLinker` + `defineResource`)
 

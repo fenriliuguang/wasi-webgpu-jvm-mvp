@@ -1,11 +1,26 @@
-/// Copied pin of ../../wit/compute-cm/world.wit for cargo/wit-bindgen path locality.
-/// Keep in sync when updating the compute-cm WIT.
+/// Experimental Component Model compute + minimal surface/render subset.
+///
+/// Method names lean toward wasi:webgpu@0.3.0-rc.2 paths, but this is
+/// NOT a compliant wasi:webgpu world:
+/// - package remains experimental
+/// - handles are WIT resources (not the full wasi:webgpu resource surface)
+/// - async WIT methods are sync (matching L2)
+/// - bind-group helpers are vector-add shaped
+/// - surface/render helpers are triangle-demo shaped (Android native window)
+///
+/// 0.2.0: buffer-descriptor + buffer-usage/map-mode flag aliases (u32),
+/// aligned with pinned wasi:webgpu record/flag shape for create-buffer / map-async.
+/// 0.3.0: surface + render-pipeline / render-pass (Android native window; no Guest canvas).
 
-package experimental:webgpu-cm@0.2.0;
+package experimental:webgpu-cm@0.3.0;
 
 interface host {
+  /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
   type buffer-usage-flags = u32;
+  /// WebGPU GPUMapMode bitfield (same bit values as L2 GpuMapMode).
   type map-mode-flags = u32;
+  /// Dawn / WebGPU texture format enum value (u32).
+  type texture-format = u32;
 
   record buffer-descriptor {
     size: u64,
@@ -22,6 +37,7 @@ interface host {
     get-queue: func() -> queue;
     create-buffer: func(descriptor: buffer-descriptor) -> buffer;
     create-shader-module: func(code: string) -> shader-module;
+    /// Fixed 3× storage layout: binding0/1 read-only-storage, binding2 storage.
     create-bind-group-layout-storage3: func() -> bind-group-layout;
     create-bind-group3: func(
       layout: borrow<bind-group-layout>,
@@ -34,6 +50,11 @@ interface host {
       shader: borrow<shader-module>,
       entry-point: string,
     ) -> compute-pipeline;
+    /// Empty-layout TriangleList; shader must export vs_main / fs_main.
+    create-render-pipeline-triangle: func(
+      shader: borrow<shader-module>,
+      format: texture-format,
+    ) -> render-pipeline;
     create-command-encoder: func() -> command-encoder;
   }
 
@@ -43,6 +64,7 @@ interface host {
   }
 
   resource buffer {
+    /// Sync host wait (L2); mode is map-mode-flags (READ / WRITE bits).
     map-async: func(mode: map-mode-flags, offset: u64, size: u64);
     get-mapped-range: func(offset: u64, size: u64) -> list<u8>;
     unmap: func();
@@ -52,9 +74,33 @@ interface host {
   resource bind-group-layout {}
   resource bind-group {}
   resource compute-pipeline {}
+  resource render-pipeline {}
+  resource texture-view {}
+
+  /// Android native-window surface (Host injects window handle; Guest does not create windows).
+  resource surface {
+    /// Picks preferred format from capabilities; returns format used.
+    configure: func(
+      device: borrow<device>,
+      adapter: borrow<adapter>,
+      width: u32,
+      height: u32,
+    ) -> texture-format;
+    /// Encapsulates getCurrentTexture + createView; fails if acquire is not success.
+    get-current-texture-view: func() -> texture-view;
+    present: func();
+    unconfigure: func();
+  }
 
   resource command-encoder {
     begin-compute-pass: func() -> compute-pass-encoder;
+    begin-render-pass-clear: func(
+      view: borrow<texture-view>,
+      r: f32,
+      g: f32,
+      b: f32,
+      a: f32,
+    ) -> render-pass-encoder;
     copy-buffer-to-buffer: func(
       source: borrow<buffer>,
       source-offset: u64,
@@ -72,9 +118,17 @@ interface host {
     end: func();
   }
 
+  resource render-pass-encoder {
+    set-pipeline: func(pipeline: borrow<render-pipeline>);
+    draw: func(vertex-count: u32);
+    end: func();
+  }
+
   resource command-buffer {}
 
   request-adapter: func() -> adapter;
+  /// Android: native window from Util.windowFromSurface (u64 bit pattern).
+  create-surface-from-native-window: func(window-handle: u64) -> surface;
 }
 
 world vector-add {

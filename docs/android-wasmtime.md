@@ -16,7 +16,7 @@
 | Android：guest wasm 进 assets，仪器测试向量加（abi-mvp） | 完成（绿灯） |
 | Android CM：CM-patched `.so` + `vector_add_cm.wasm` 仪器测试 | 完成（绿灯） |
 | 桌面 CM：`desktop-natives/`（不改 Gradle cache）+ CM 测试门控 | 完成 |
-| 上屏 | demo：Kotlin→Dawn `SurfaceView` 红三角（不经 L2）；Guest/wasi-gfx 未做 |
+| 上屏 | demo：`TriangleRenderer` → L2 Host → Dawn（无 Guest/wasi-gfx） |
 
 路径（abi-mvp）：
 

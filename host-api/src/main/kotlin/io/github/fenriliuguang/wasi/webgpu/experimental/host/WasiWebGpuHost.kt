@@ -3,10 +3,15 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.host
 /**
  * L2 Host API — experimental Dawn host mapping for wasi:webgpu.
  *
- * Scope (P0): compute subset only. No Wasm runtime / ABI / Component Model dependency.
+ * Scope: compute subset + minimal Android surface/render (triangle demo).
+ * No Wasm runtime / ABI / Component Model dependency on this interface.
  * Callers may be Kotlin unit tests or a thin Android demo.
  *
  * Handles are opaque u32-style ids managed by the host implementation.
+ *
+ * Threading (surface/render): for one host instance, surface configure /
+ * getCurrentTexture / present and device submit must run on the same thread
+ * (see docs/mapping/threading.md).
  */
 interface WasiWebGpuHost : AutoCloseable {
 
@@ -40,6 +45,63 @@ interface WasiWebGpuHost : AutoCloseable {
         device: GpuHandle,
         descriptor: CommandEncoderDescriptor = CommandEncoderDescriptor(),
     ): GpuHandle
+
+    // --- Surface / render (Android; Cpu host throws Unsupported) ---
+
+    /**
+     * Create a GPU surface from an Android native window handle
+     * (`Util.windowFromSurface`). Desktop / Cpu host: Unsupported.
+     */
+    fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle
+
+    /**
+     * Configure swapchain from surface capabilities; returns the chosen texture format.
+     */
+    fun surfaceConfigure(
+        surface: GpuHandle,
+        device: GpuHandle,
+        adapter: GpuHandle,
+        width: Int,
+        height: Int,
+    ): Int
+
+    fun surfaceUnconfigure(surface: GpuHandle)
+
+    fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult
+
+    fun surfacePresent(surface: GpuHandle)
+
+    /**
+     * Empty-layout TriangleList render pipeline; shader must export `vs_main` / `fs_main`.
+     */
+    fun deviceCreateRenderPipelineTriangle(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+    ): GpuHandle
+
+    fun textureCreateView(texture: GpuHandle): GpuHandle
+
+    fun commandEncoderBeginRenderPassClear(
+        encoder: GpuHandle,
+        view: GpuHandle,
+        clearR: Float,
+        clearG: Float,
+        clearB: Float,
+        clearA: Float,
+    ): GpuHandle
+
+    fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle)
+
+    fun renderPassDraw(
+        pass: GpuHandle,
+        vertexCount: Int,
+        instanceCount: Int = 1,
+        firstVertex: Int = 0,
+        firstInstance: Int = 0,
+    )
+
+    fun renderPassEnd(pass: GpuHandle)
 
     // --- Command encoding (compute) ---
 

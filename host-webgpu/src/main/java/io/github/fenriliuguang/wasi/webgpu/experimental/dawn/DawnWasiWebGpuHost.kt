@@ -2,6 +2,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.dawn
 
 import androidx.webgpu.BackendType
 import androidx.webgpu.BufferBindingType as DawnBufferBindingType
+import androidx.webgpu.CompositeAlphaMode
 import androidx.webgpu.DeviceLostCallback
 import androidx.webgpu.GPU
 import androidx.webgpu.GPUAdapter
@@ -14,6 +15,8 @@ import androidx.webgpu.GPUBindGroupLayoutEntry
 import androidx.webgpu.GPUBuffer
 import androidx.webgpu.GPUBufferBindingLayout
 import androidx.webgpu.GPUBufferDescriptor
+import androidx.webgpu.GPUColor
+import androidx.webgpu.GPUColorTargetState
 import androidx.webgpu.GPUCommandBuffer
 import androidx.webgpu.GPUCommandEncoder
 import androidx.webgpu.GPUCommandEncoderDescriptor
@@ -24,16 +27,36 @@ import androidx.webgpu.GPUComputePipelineDescriptor
 import androidx.webgpu.GPUComputeState
 import androidx.webgpu.GPUDevice
 import androidx.webgpu.GPUDeviceDescriptor
+import androidx.webgpu.GPUFragmentState
 import androidx.webgpu.GPUInstance
 import androidx.webgpu.GPUPipelineLayout
 import androidx.webgpu.GPUPipelineLayoutDescriptor
+import androidx.webgpu.GPUPrimitiveState
 import androidx.webgpu.GPUQueue
+import androidx.webgpu.GPURenderPassColorAttachment
+import androidx.webgpu.GPURenderPassDescriptor
+import androidx.webgpu.GPURenderPassEncoder
+import androidx.webgpu.GPURenderPipeline
+import androidx.webgpu.GPURenderPipelineDescriptor
 import androidx.webgpu.GPURequestAdapterOptions
 import androidx.webgpu.GPURequestCallback
 import androidx.webgpu.GPUShaderModule
 import androidx.webgpu.GPUShaderModuleDescriptor
 import androidx.webgpu.GPUShaderSourceWGSL
+import androidx.webgpu.GPUSurface
+import androidx.webgpu.GPUSurfaceConfiguration
+import androidx.webgpu.GPUSurfaceDescriptor
+import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
+import androidx.webgpu.GPUTexture
+import androidx.webgpu.GPUTextureView
+import androidx.webgpu.GPUVertexState
+import androidx.webgpu.LoadOp
 import androidx.webgpu.PowerPreference as DawnPowerPreference
+import androidx.webgpu.PresentMode
+import androidx.webgpu.PrimitiveTopology
+import androidx.webgpu.StoreOp
+import androidx.webgpu.SurfaceGetCurrentTextureStatus
+import androidx.webgpu.TextureUsage
 import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.helper.initLibrary
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
@@ -50,6 +73,8 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.PowerPreference
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RequestAdapterOptions
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureResult
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -63,8 +88,11 @@ import java.util.concurrent.atomic.AtomicReference
  * L3 Dawn backend for [WasiWebGpuHost].
  *
  * Depends on `androidx.webgpu`. Must not be referenced by L1 runtime adapters.
- * P0 methods are synchronous wrappers around Dawn async entry points and poll
+ * Methods are synchronous wrappers around Dawn async entry points and poll
  * [GPUInstance.processEvents] until callbacks fire.
+ *
+ * Surface/render: caller must invoke configure / getCurrentTexture / present /
+ * submit on the same thread for a given host instance (see docs/mapping/threading.md).
  */
 class DawnWasiWebGpuHost private constructor(
     private val instance: GPUInstance,
@@ -112,7 +140,6 @@ class DawnWasiWebGpuHost private constructor(
             deviceLostCallbackExecutor = callbackExecutor,
             uncapturedErrorCallbackExecutor = callbackExecutor,
             deviceLostCallback = DeviceLostCallback { _, reason, message ->
-                // P0: surface via Backend on next API call if needed; log-style throw avoided on callback thread.
                 throw HostException.Backend("device lost reason=$reason: $message")
             },
             uncapturedErrorCallback = UncapturedErrorCallback { _, type, message ->
@@ -248,6 +275,165 @@ class DawnWasiWebGpuHost private constructor(
         return handles.insert(ResourceKind.CommandEncoder, encoder)
     }
 
+    override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle {
+        val surface = instance.createSurface(
+            GPUSurfaceDescriptor(
+                surfaceSourceAndroidNativeWindow =
+                    GPUSurfaceSourceAndroidNativeWindow(nativeWindowHandle),
+            ),
+        )
+        return handles.insert(ResourceKind.Surface, surface)
+    }
+
+    override fun surfaceConfigure(
+        surface: GpuHandle,
+        device: GpuHandle,
+        adapter: GpuHandle,
+        width: Int,
+        height: Int,
+    ): Int {
+        require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
+        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+        val gpuAdapter = handles.get<GPUAdapter>(adapter, ResourceKind.Adapter)
+        val caps = gpuSurface.getCapabilities(gpuAdapter)
+        val format = caps.formats.firstOrNull()
+            ?: throw HostException.Backend("surface has no texture formats")
+        val presentMode = caps.presentModes.firstOrNull() ?: PresentMode.Fifo
+        val alphaMode = caps.alphaModes.firstOrNull() ?: CompositeAlphaMode.Opaque
+        gpuSurface.configure(
+            GPUSurfaceConfiguration(
+                device = gpuDevice,
+                width = width,
+                height = height,
+                format = format,
+                usage = TextureUsage.RenderAttachment,
+                viewFormats = intArrayOf(),
+                alphaMode = alphaMode,
+                presentMode = presentMode,
+            ),
+        )
+        return format
+    }
+
+    override fun surfaceUnconfigure(surface: GpuHandle) {
+        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+        gpuSurface.unconfigure()
+    }
+
+    override fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult {
+        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+        val surfaceTexture = gpuSurface.getCurrentTexture()
+        val status = when (surfaceTexture.status) {
+            SurfaceGetCurrentTextureStatus.SuccessOptimal -> SurfaceTextureStatus.SuccessOptimal
+            SurfaceGetCurrentTextureStatus.SuccessSuboptimal -> SurfaceTextureStatus.SuccessSuboptimal
+            SurfaceGetCurrentTextureStatus.Timeout -> SurfaceTextureStatus.Timeout
+            SurfaceGetCurrentTextureStatus.Outdated -> SurfaceTextureStatus.Outdated
+            SurfaceGetCurrentTextureStatus.Lost -> SurfaceTextureStatus.Lost
+            else -> SurfaceTextureStatus.Error
+        }
+        val texture = surfaceTexture.texture
+        return if (
+            texture != null &&
+            (status == SurfaceTextureStatus.SuccessOptimal ||
+                status == SurfaceTextureStatus.SuccessSuboptimal)
+        ) {
+            SurfaceTextureResult(status, handles.insert(ResourceKind.Texture, texture))
+        } else {
+            SurfaceTextureResult(status, null)
+        }
+    }
+
+    override fun surfacePresent(surface: GpuHandle) {
+        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+        gpuSurface.present()
+    }
+
+    override fun deviceCreateRenderPipelineTriangle(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+    ): GpuHandle {
+        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+        val module = handles.get<GPUShaderModule>(shader, ResourceKind.ShaderModule)
+        val pipelineLayout = gpuDevice.createPipelineLayout(
+            GPUPipelineLayoutDescriptor(bindGroupLayouts = emptyArray()),
+        )
+        val pipeline = gpuDevice.createRenderPipeline(
+            GPURenderPipelineDescriptor(
+                vertex = GPUVertexState(module = module, entryPoint = "vs_main"),
+                layout = pipelineLayout,
+                primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList),
+                fragment = GPUFragmentState(
+                    module = module,
+                    entryPoint = "fs_main",
+                    targets = arrayOf(GPUColorTargetState(format = format)),
+                ),
+            ),
+        )
+        val handle = handles.insert(ResourceKind.RenderPipeline, pipeline)
+        pipelineLayouts[handle.raw] = pipelineLayout
+        return handle
+    }
+
+    override fun textureCreateView(texture: GpuHandle): GpuHandle {
+        val gpuTexture = handles.get<GPUTexture>(texture, ResourceKind.Texture)
+        return handles.insert(ResourceKind.TextureView, gpuTexture.createView())
+    }
+
+    override fun commandEncoderBeginRenderPassClear(
+        encoder: GpuHandle,
+        view: GpuHandle,
+        clearR: Float,
+        clearG: Float,
+        clearB: Float,
+        clearA: Float,
+    ): GpuHandle {
+        val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        val textureView = handles.get<GPUTextureView>(view, ResourceKind.TextureView)
+        val pass = commandEncoder.beginRenderPass(
+            GPURenderPassDescriptor(
+                colorAttachments = arrayOf(
+                    GPURenderPassColorAttachment(
+                        clearValue = GPUColor(
+                            clearR.toDouble(),
+                            clearG.toDouble(),
+                            clearB.toDouble(),
+                            clearA.toDouble(),
+                        ),
+                        view = textureView,
+                        loadOp = LoadOp.Clear,
+                        storeOp = StoreOp.Store,
+                    ),
+                ),
+            ),
+        )
+        return handles.insert(ResourceKind.RenderPassEncoder, pass)
+    }
+
+    override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) {
+        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        val renderPipeline = handles.get<GPURenderPipeline>(pipeline, ResourceKind.RenderPipeline)
+        renderPass.setPipeline(renderPipeline)
+    }
+
+    override fun renderPassDraw(
+        pass: GpuHandle,
+        vertexCount: Int,
+        instanceCount: Int,
+        firstVertex: Int,
+        firstInstance: Int,
+    ) {
+        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        renderPass.draw(vertexCount, instanceCount, firstVertex, firstInstance)
+    }
+
+    override fun renderPassEnd(pass: GpuHandle) {
+        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        renderPass.end()
+        handles.drop(pass)
+    }
+
     override fun commandEncoderBeginComputePass(
         encoder: GpuHandle,
         descriptor: ComputePassDescriptor,
@@ -358,7 +544,9 @@ class DawnWasiWebGpuHost private constructor(
 
     override fun drop(handle: GpuHandle) {
         val entry = handles.drop(handle)
-        pipelineLayouts.remove(handle.raw)
+        pipelineLayouts.remove(handle.raw)?.let { layout ->
+            runCatching { layout.close() }
+        }
         val resource = entry.resource
         if (resource is AutoCloseable) {
             runCatching { resource.close() }
@@ -369,6 +557,7 @@ class DawnWasiWebGpuHost private constructor(
         closed = true
         eventPoller.shutdownNow()
         handles.clear()
+        pipelineLayouts.values.forEach { runCatching { it.close() } }
         pipelineLayouts.clear()
         runCatching { instance.close() }
     }
@@ -402,7 +591,7 @@ class DawnWasiWebGpuHost private constructor(
         private const val POLL_MS = 5L
         private const val TIMEOUT_SEC = 30L
 
-        /** Create a host bound to a fresh Dawn [GPUInstance] (no Surface). */
+        /** Create a host bound to a fresh Dawn [GPUInstance]. */
         fun create(): DawnWasiWebGpuHost {
             initLibrary()
             val instance = GPU.createInstance()

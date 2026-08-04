@@ -28,6 +28,11 @@ enum class ResourceKind {
     ComputePassEncoder,
     CommandBuffer,
     Queue,
+    Surface,
+    Texture,
+    TextureView,
+    RenderPipeline,
+    RenderPassEncoder,
 }
 
 /**

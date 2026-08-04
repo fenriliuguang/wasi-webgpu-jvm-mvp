@@ -1,7 +1,7 @@
 package io.github.fenriliuguang.wasi.webgpu.experimental.host
 
 /**
- * L2 descriptor / flag types for the P0 compute subset.
+ * L2 descriptor / flag types for the compute + minimal surface/render subset.
  *
  * Names follow wasi:webgpu WIT; values are chosen for Kotlin ergonomics.
  * This is NOT a full kotlin-webgpu client shim.
@@ -111,4 +111,19 @@ data class CommandEncoderDescriptor(
 
 data class ComputePassDescriptor(
     val label: String? = null,
+)
+
+/** Status from [WasiWebGpuHost.surfaceGetCurrentTexture] (Dawn surface acquire). */
+enum class SurfaceTextureStatus {
+    SuccessOptimal,
+    SuccessSuboptimal,
+    Timeout,
+    Outdated,
+    Lost,
+    Error,
+}
+
+data class SurfaceTextureResult(
+    val status: SurfaceTextureStatus,
+    val texture: GpuHandle?,
 )

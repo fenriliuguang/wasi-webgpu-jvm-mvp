@@ -34,7 +34,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
 | Consumer | `android-demo` | Dawn compute / Guest instrumented tests / SurfaceView triangle demo |
 
 **Explicitly out of scope (this phase):** Guest / wasi-gfx on-screen, compliant full wasi:webgpu world, Maven Central publishing.  
-(Demo has a Kotlin→Dawn `SurfaceView` red triangle; **not** wired into L2 Host / WIT.)
+(Demo red triangle goes through L2 Host → Dawn; **not** Guest / wasi-gfx.)
 
 ## Repository layout
 
@@ -163,11 +163,12 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `experimental:webgpu-cm@0.2.0`: `buffer-descriptor` + usage/map flags; `create-buffer` / `map-async`
 - [x] Dropped alternate-runtime mentions from docs / scheme
+- [x] `experimental:webgpu-cm@0.3.0`: surface + render minimal surface (see on-screen DoD)
 
 ### On-screen demo (Kotlin)
 
-- [x] `android-demo`: `SurfaceView` + `TriangleRenderer` (Kotlin→androidx.webgpu; not via L2/Guest)
-- [ ] Lift surface/render into `WasiWebGpuHost` / WIT (not done)
+- [x] `android-demo`: `SurfaceView` + `TriangleRenderer` (via L2 Host→Dawn; not Guest/wasi-gfx)
+- [x] Lift surface/render into `WasiWebGpuHost` / WIT (`experimental:webgpu-cm@0.3.0`; still no Guest/wasi-gfx on-screen)
 
 ## References
 
@@ -186,6 +187,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | WIT ↔ Dawn mapping | [docs/mapping/compute-subset.en.md](docs/mapping/compute-subset.en.md) |
+| Render / Surface mapping | [docs/mapping/render-subset.en.md](docs/mapping/render-subset.en.md) |
 | Threading | [docs/mapping/threading.en.md](docs/mapping/threading.en.md) |
 | Errors & async | [docs/mapping/errors-async.en.md](docs/mapping/errors-async.en.md) |
 | P1 boundary notes | [docs/perf/p1-boundary.en.md](docs/perf/p1-boundary.en.md) |

@@ -59,8 +59,8 @@ class WasmtimeCmLinker(
 
     private fun registerResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.2.0" that yields
-        // "experimental:webgpu-cm/host@0.2.0" — matching defineFunction / guest import.
+        // With PACKAGE "experimental:webgpu-cm" + "host@0.3.0" that yields
+        // "experimental:webgpu-cm/host@0.3.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
@@ -102,10 +102,15 @@ class WasmtimeCmLinker(
             return BufferDescriptorFields(size, usage, mapped, label)
         }
 
-        // Patched wasmtime4j maps own/borrow results <-> U32(rep=L2 handle).
         define(AbiCm.Func.REQUEST_ADAPTER, ComponentHostFunction.singleValue {
             u32(bindings.requestAdapter())
         })
+        define(
+            AbiCm.Func.CREATE_SURFACE_FROM_NATIVE_WINDOW,
+            ComponentHostFunction.singleValue { params ->
+                u32(bindings.createSurfaceFromNativeWindow(paramU64(params, 0)))
+            },
+        )
         define(AbiCm.Func.ADAPTER_REQUEST_DEVICE, ComponentHostFunction.singleValue { params ->
             u32(bindings.adapterRequestDevice(paramU32(params, 0)))
         })
@@ -169,15 +174,71 @@ class WasmtimeCmLinker(
             },
         )
         define(
+            AbiCm.Func.DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateRenderPipelineTriangle(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        paramU32(params, 2),
+                    ),
+                )
+            },
+        )
+        define(
             AbiCm.Func.DEVICE_CREATE_COMMAND_ENCODER,
             ComponentHostFunction.singleValue { params ->
                 u32(bindings.deviceCreateCommandEncoder(paramU32(params, 0)))
+            },
+        )
+        define(AbiCm.Func.SURFACE_CONFIGURE, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.surfaceConfigure(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    paramU32(params, 2),
+                    paramU32(params, 3),
+                    paramU32(params, 4),
+                ),
+            )
+        })
+        define(
+            AbiCm.Func.SURFACE_GET_CURRENT_TEXTURE_VIEW,
+            ComponentHostFunction.singleValue { params ->
+                u32(bindings.surfaceGetCurrentTextureView(paramU32(params, 0)))
+            },
+        )
+        define(
+            AbiCm.Func.SURFACE_PRESENT,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.surfacePresent(paramU32(params, 0))
+            },
+        )
+        define(
+            AbiCm.Func.SURFACE_UNCONFIGURE,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.surfaceUnconfigure(paramU32(params, 0))
             },
         )
         define(
             AbiCm.Func.COMMAND_ENCODER_BEGIN_COMPUTE_PASS,
             ComponentHostFunction.singleValue { params ->
                 u32(bindings.commandEncoderBeginComputePass(paramU32(params, 0)))
+            },
+        )
+        define(
+            AbiCm.Func.COMMAND_ENCODER_BEGIN_RENDER_PASS_CLEAR,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.commandEncoderBeginRenderPassClear(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        params[2].asF32(),
+                        params[3].asF32(),
+                        params[4].asF32(),
+                        params[5].asF32(),
+                    ),
+                )
             },
         )
         define(
@@ -211,6 +272,24 @@ class WasmtimeCmLinker(
             AbiCm.Func.COMPUTE_PASS_END,
             ComponentHostFunction.voidFunctionWithParams { params ->
                 bindings.computePassEnd(paramU32(params, 0))
+            },
+        )
+        define(
+            AbiCm.Func.RENDER_PASS_SET_PIPELINE,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassSetPipeline(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiCm.Func.RENDER_PASS_DRAW,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassDraw(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiCm.Func.RENDER_PASS_END,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassEnd(paramU32(params, 0))
             },
         )
         define(

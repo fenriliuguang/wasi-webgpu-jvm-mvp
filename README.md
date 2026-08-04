@@ -34,7 +34,7 @@ CM: Guest.component → Wasmtime ComponentLinker + abi-cm → 同一 L2
 | Consumer | `android-demo` | Dawn compute / Guest 仪器测试 / SurfaceView 红三角 demo |
 
 **明确不做（本阶段）：** Guest / wasi-gfx 上屏、合规 wasi:webgpu 全量 world、Maven Central 发布。  
-（demo 已有 Kotlin→Dawn `SurfaceView` 红三角，**未**进 L2 Host / WIT。）
+（demo 红三角经 L2 Host → Dawn；**未**进 Guest / wasi-gfx。）
 
 ## 仓库布局
 
@@ -163,11 +163,12 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 
 - [x] `experimental:webgpu-cm@0.2.0`：`buffer-descriptor` + usage/map flags；`create-buffer` / `map-async`
 - [x] 文档与方案中移除备用 Runtime 路线表述
+- [x] `experimental:webgpu-cm@0.3.0`：surface + render 最小面（见上屏 DoD）
 
 ### 上屏 demo（Kotlin）
 
-- [x] `android-demo`：`SurfaceView` + `TriangleRenderer`（Kotlin→androidx.webgpu，不经 L2/Guest）
-- [ ] Surface/render 抬升进 `WasiWebGpuHost` / WIT（未做）
+- [x] `android-demo`：`SurfaceView` + `TriangleRenderer`（经 L2 Host→Dawn；不经 Guest/wasi-gfx）
+- [x] Surface/render 抬升进 `WasiWebGpuHost` / WIT（`experimental:webgpu-cm@0.3.0`；仍无 Guest/wasi-gfx 上屏）
 
 ## 参考
 
@@ -186,6 +187,7 @@ wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | WIT ↔ Dawn 映射 | [docs/mapping/compute-subset.md](docs/mapping/compute-subset.md) | [docs/mapping/compute-subset.en.md](docs/mapping/compute-subset.en.md) |
+| Render / Surface 映射 | [docs/mapping/render-subset.md](docs/mapping/render-subset.md) | [docs/mapping/render-subset.en.md](docs/mapping/render-subset.en.md) |
 | 线程模型 | [docs/mapping/threading.md](docs/mapping/threading.md) | [docs/mapping/threading.en.md](docs/mapping/threading.en.md) |
 | 错误与 Async | [docs/mapping/errors-async.md](docs/mapping/errors-async.md) | [docs/mapping/errors-async.en.md](docs/mapping/errors-async.en.md) |
 | P1 边界开销 | [docs/perf/p1-boundary.md](docs/perf/p1-boundary.md) | [docs/perf/p1-boundary.en.md](docs/perf/p1-boundary.en.md) |

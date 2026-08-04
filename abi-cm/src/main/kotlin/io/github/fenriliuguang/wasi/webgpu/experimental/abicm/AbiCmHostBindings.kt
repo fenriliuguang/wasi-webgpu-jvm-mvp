@@ -11,8 +11,10 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
@@ -26,6 +28,9 @@ class AbiCmHostBindings(
 ) {
 
     fun requestAdapter(): Int = host.requestAdapter().raw
+
+    fun createSurfaceFromNativeWindow(windowHandle: Long): Int =
+        host.instanceCreateSurfaceFromAndroidNativeWindow(windowHandle).raw
 
     fun adapterRequestDevice(adapter: Int): Int =
         host.adapterRequestDevice(GpuHandle(adapter)).raw
@@ -97,11 +102,65 @@ class AbiCmHostBindings(
             ),
         ).raw
 
+    fun deviceCreateRenderPipelineTriangle(device: Int, shader: Int, format: Int): Int =
+        host.deviceCreateRenderPipelineTriangle(
+            GpuHandle(device),
+            GpuHandle(shader),
+            format,
+        ).raw
+
     fun deviceCreateCommandEncoder(device: Int): Int =
         host.deviceCreateCommandEncoder(GpuHandle(device)).raw
 
+    fun surfaceConfigure(surface: Int, device: Int, adapter: Int, width: Int, height: Int): Int =
+        host.surfaceConfigure(
+            GpuHandle(surface),
+            GpuHandle(device),
+            GpuHandle(adapter),
+            width,
+            height,
+        )
+
+    fun surfaceGetCurrentTextureView(surface: Int): Int {
+        val result = host.surfaceGetCurrentTexture(GpuHandle(surface))
+        if (
+            result.status != SurfaceTextureStatus.SuccessOptimal &&
+            result.status != SurfaceTextureStatus.SuccessSuboptimal
+        ) {
+            throw HostException.Validation("surface get-current-texture status=${result.status}")
+        }
+        val texture = result.texture
+            ?: throw HostException.Validation("surface get-current-texture returned null texture")
+        return host.textureCreateView(texture).raw
+    }
+
+    fun surfacePresent(surface: Int) {
+        host.surfacePresent(GpuHandle(surface))
+    }
+
+    fun surfaceUnconfigure(surface: Int) {
+        host.surfaceUnconfigure(GpuHandle(surface))
+    }
+
     fun commandEncoderBeginComputePass(encoder: Int): Int =
         host.commandEncoderBeginComputePass(GpuHandle(encoder)).raw
+
+    fun commandEncoderBeginRenderPassClear(
+        encoder: Int,
+        view: Int,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float,
+    ): Int =
+        host.commandEncoderBeginRenderPassClear(
+            GpuHandle(encoder),
+            GpuHandle(view),
+            r,
+            g,
+            b,
+            a,
+        ).raw
 
     fun computePassSetPipeline(pass: Int, pipeline: Int) {
         host.computePassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))
@@ -117,6 +176,18 @@ class AbiCmHostBindings(
 
     fun computePassEnd(pass: Int) {
         host.computePassEnd(GpuHandle(pass))
+    }
+
+    fun renderPassSetPipeline(pass: Int, pipeline: Int) {
+        host.renderPassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))
+    }
+
+    fun renderPassDraw(pass: Int, vertexCount: Int) {
+        host.renderPassDraw(GpuHandle(pass), vertexCount)
+    }
+
+    fun renderPassEnd(pass: Int) {
+        host.renderPassEnd(GpuHandle(pass))
     }
 
     fun commandEncoderCopyBufferToBuffer(
