@@ -5,198 +5,89 @@
 [中文](README.md) | **English**
 
 > Until a standard full `wasi:webgpu` world / full resource surface is wired, **do not** advertise this as a compliant implementation.  
-> P1: **abi-mvp** (core wasm imports).  
-> CM slice: **experimental:webgpu-cm** (Component Model + typed lists/strings + WIT resources; still experimental).  
-> Reference implementation: [`wasi-webgpu-wasmtime`](https://crates.io/crates/wasi-webgpu-wasmtime).
+> Reference: [`wasi-webgpu-wasmtime`](https://crates.io/crates/wasi-webgpu-wasmtime).
 
-## Goals
+## Features
+
+- **L2 Host**: `WasiWebGpuHost` (compute + minimal Android surface/render) + desktop `CpuWasiWebGpuHost`
+- **L3 Dawn**: `DawnWasiWebGpuHost` (Android / androidx.webgpu)
+- **Runtime**: Wasmtime4j — **abi-mvp** (core wasm) and **abi-cm** (Component Model / `experimental:webgpu-cm@0.3.0`)
+- **Guest**: vector-add (abi-mvp + CM); Kotlin `SurfaceView` red triangle via L2 Host→Dawn
+- **Engineering**: multi-module Gradle, CI (JVM tests + `assembleDebug`), Bionic / desktop CM-patched native scripts
+
+Package: `io.github.fenriliuguang.wasi.webgpu.experimental.*`
+
+## Architecture
 
 Build the **lamp wiring (Host glue)** first, then plug in the **socket (Wasmtime)**.
 
 ```text
-P0: Kotlin / Demo → WasiWebGpuHost (L2) → Dawn (Android) or CpuHost (desktop)
-P1: Guest.wasm → Wasmtime (L1) + abi-mvp → same L2
-    Desktop: CpuWasiWebGpuHost
-    Android: DawnWasiWebGpuHost + Bionic libwasmtime4j.so
-CM: Guest.component → Wasmtime ComponentLinker + abi-cm → same L2
-    Desktop: CpuWasiWebGpuHost
-    Android: DawnWasiWebGpuHost + CM-patched Bionic libwasmtime4j.so
+Kotlin / Demo ──► WasiWebGpuHost (L2) ──► Dawn (Android) or CpuHost (desktop)
+Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► same L2
 ```
 
-| Layer | Module | Notes |
-|-------|--------|-------|
-| L2 Host API | `host-api` | Pure JVM: `WasiWebGpuHost`, handles, `CpuWasiWebGpuHost`, `VectorAddScenario` |
-| L3 Dawn | `host-webgpu` | Android: `DawnWasiWebGpuHost` |
-| L1 + ABI | `runtime-wasmtime` + `abi-mvp` | Wasmtime ↔ flat imports (desktop + Android) |
-| L1 + CM | `runtime-wasmtime` (`runtime.cm`) + `abi-cm` | ComponentLinker ↔ typed WIT imports |
-| Guest | `guest/vector-add` | abi-mvp `.wat` + prebuilt `.wasm` |
-| Guest CM | `guest/vector-add-cm` | wit-bindgen component + prebuilt `.wasm` |
-| Consumer | `android-demo` | Dawn compute / Guest instrumented tests / SurfaceView triangle demo |
-
-**Explicitly out of scope (this phase):** Guest / wasi-gfx on-screen, compliant full wasi:webgpu world, Maven Central publishing.  
-(Demo red triangle goes through L2 Host → Dawn; **not** Guest / wasi-gfx.)
+| Layer | Module |
+|-------|--------|
+| L2 | `host-api` |
+| L3 | `host-webgpu` |
+| L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
+| Guest | `guest/vector-add`, `guest/vector-add-cm` (in progress: `triangle-cm`) |
+| Demo | `android-demo` |
 
 ## Repository layout
 
 ```text
 wasi-webgpu-jvm-mvp/
-  host-api/            # L2 + CPU Host
-  host-webgpu/         # Dawn L3 (Android library)
-  abi-mvp/             # Flat import bindings
-  abi-cm/              # experimental CM host → L2
-  runtime-wasmtime/    # Wasmtime4j L1 (abi-mvp + CM)
-    android-natives/   # Android Bionic libwasmtime4j.so (jniLibs)
-    desktop-natives/   # Desktop CM-patched native (local rebuild; not committed by default)
-  guest/vector-add/    # abi-mvp Guest assets
-  guest/vector-add-cm/ # CM Guest assets
-  android-demo/        # Dawn + Guest consumer
-  docs/mapping/        # WIT ↔ Dawn
-  docs/perf/           # P1 boundary notes
-  docs/android-wasmtime.md
-  patches/             # wasmtime4j patches + UPSTREAM notes
-  wit/                 # Pinned WIT (incl. compute-cm)
-  .github/workflows/   # CI (JVM tests + assembleDebug)
+  host-api/  host-webgpu/  abi-mvp/  abi-cm/  runtime-wasmtime/
+  guest/  android-demo/  wit/  patches/  docs/  scripts/  .github/workflows/
 ```
 
 ## Build & test
 
-Requires: full **JDK** (not JRE), Android SDK (for Dawn paths).  
-If Gradle picks a JRE by mistake, set `org.gradle.java.home=...` in `local.properties`.
+Requires full **JDK** (not JRE) and Android SDK. If Gradle picks a JRE, set `org.gradle.java.home=...` in `local.properties`.
 
 ```bash
-# L2 / CPU Host / abi-mvp
 ./gradlew :host-api:test :abi-mvp:test
-
-# P1 + CM: Guest → Wasmtime → L2 (desktop CpuHost; abi-mvp and CM tests)
-./gradlew :runtime-wasmtime:test
-
-# Android assemble (includes jniLibs + guest assets)
+./gradlew :runtime-wasmtime:test          # CM tests skip without desktop-natives
 ./gradlew :android-demo:assembleDebug
 ```
 
-Instrumented tests (device/emulator + WebGPU/Vulkan): in Android Studio, right-click
-
-- P0 Kotlin→Dawn: `VectorAddInstrumentedTest.kt` → **Run**  
-- Guest→Wasmtime→Dawn: `WasmtimeVectorAddInstrumentedTest.kt` → **Run**  
-- CM Guest→Wasmtime CM→Dawn: `WasmtimeCmVectorAddInstrumentedTest.kt` → **Run**  
-
-(Gradle panels may not list verification tasks; that is default IDE behavior.)
-
-If Studio / `:connectedDebugAndroidTest` reports `Process crashed` or `No UID for androidx.test.services`, see [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md) §7; reliable bypass:
+Instrumented tests (device + WebGPU/Vulkan): run `*InstrumentedTest.kt` in Studio, or:
 
 ```powershell
 ./scripts/run-android-instrumented.ps1
 ```
 
-Instrumented test checklist:
+Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md), [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md), `scripts/build-*.ps1`.
 
-- P0 Kotlin→Dawn: `VectorAddInstrumentedTest.kt`
-- P1 Guest→Wasmtime→Dawn: `WasmtimeVectorAddInstrumentedTest.kt`
-- CM Guest→Wasmtime CM→Dawn: `WasmtimeCmVectorAddInstrumentedTest.kt` (needs CM-resources-patched Bionic `.so`)
+## Current DoD — Guest CM on-screen
 
-### Android Wasmtime `.so`
+Full plan: [`docs/scheme/guest-onscreen-cm.en.md`](docs/scheme/guest-onscreen-cm.en.md)
 
-`android-demo` packages Bionic `libwasmtime4j.so` from `runtime-wasmtime/android-natives/jniLibs` and **excludes** Maven desktop `wasmtime4j-native`.  
-Rebuild (needs NDK + Rust + `cargo-ndk`):
+- [ ] `guest/triangle-cm` (or equivalent) + prebuilt `.wasm`; via abi-cm → same L2 → Dawn red triangle
+- [ ] Host injects native window; Guest only holds `surface`
+- [ ] Android instrumented test green (needs CM-patched Bionic `.so`)
+- [ ] Docs cover Guest on-screen path
 
-```powershell
-./scripts/build-wasmtime4j-android.ps1
-```
+**Out of scope this phase:** wasi-gfx, full compliant `wasi:webgpu`, Maven Central, `abi-mvp` flat render imports.
 
-See [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md).
-
-Android-specific patches (summary; details and pitfalls in [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md)):
-
-- `JNI_OnLoad` returns `JNI_VERSION_1_6` (ART rejects 1_8)
-- Local `Validation.requireValidHandle` allows high-bit-set handles (ARM64 TBI/PAC pointers bit-cast to signed `long` can be negative)
-- Native `memory.rs` handle checks use unsigned compare (avoid misclassifying MTE-tagged pointers as corrupted)
-
-Guest rebuild:
-
-```bash
-# abi-mvp
-wasm-tools parse guest/vector-add/vector_add.wat -o guest/vector-add/vector_add.wasm
-
-# CM (needs Rust wasm32-unknown-unknown + wasm-tools)
-./scripts/build-vector-add-cm.ps1
-
-# Desktop CM resources: install into runtime-wasmtime/desktop-natives/ (no Gradle cache mutation)
-./scripts/build-wasmtime4j-desktop-cm.ps1
-# Patch source: patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch (see patches/README.en.md)
-# Without desktop-natives, :runtime-wasmtime:test still runs abi-mvp; CM tests skip
-```
-
-## Package name
-
-`io.github.fenriliuguang.wasi.webgpu.experimental.*`
-
-## Definition of Done
-
-### P0
-
-- [x] Compute-subset mapping table and deviation list (`docs/mapping`)
-- [x] `WasiWebGpuHost` + Dawn adapter + handle-drop unit tests
-- [x] Readback matches CPU expectation (instrumented tests green)
-- [x] Mergeable without Runtime / CM dependencies (P0 slice)
-
-### P1
-
-- [x] `abi-mvp` + desktop Wasmtime → same L2
-- [x] Guest vector-add matches pure Kotlin→L2 (`:runtime-wasmtime:test`)
-- [x] Boundary cost notes (`docs/perf/p1-boundary.md`)
-- [x] Android-embedded Wasmtime → same L2 → Dawn (`WasmtimeVectorAddInstrumentedTest`)
-
-### CM (experimental slice)
-
-- [x] `wit/compute-cm` + `abi-cm` + CM Guest → same L2 (desktop `:runtime-wasmtime:test`)
-- [x] WIT resources replace flat u32 (adapter/device/queue/buffer/…; still not compliant wasi:webgpu)
-- [x] Android CM instrumented tests (`WasmtimeCmVectorAddInstrumentedTest`; needs CM-patched Bionic `.so`)
-
-### Delivery harden
-
-- [x] Desktop CM native → `runtime-wasmtime/desktop-natives/` (no Gradle cache mutation)
-- [x] CM unit tests skip without patched natives; abi-mvp always runs
-- [x] GitHub Actions: `:host-api:test` / `:abi-mvp:test` / `:runtime-wasmtime:test` + `:android-demo:assembleDebug`
-- [x] `CHANGELOG.md` + [`patches/UPSTREAM.en.md`](patches/UPSTREAM.en.md) (upstream brief; no required PR)
-
-### Semantic expansion (buffer records/flags)
-
-- [x] `experimental:webgpu-cm@0.2.0`: `buffer-descriptor` + usage/map flags; `create-buffer` / `map-async`
-- [x] Dropped alternate-runtime mentions from docs / scheme
-- [x] `experimental:webgpu-cm@0.3.0`: surface + render minimal surface (see on-screen DoD)
-
-### On-screen demo (Kotlin)
-
-- [x] `android-demo`: `SurfaceView` + `TriangleRenderer` (via L2 Host→Dawn; not Guest/wasi-gfx)
-- [x] Lift surface/render into `WasiWebGpuHost` / WIT (`experimental:webgpu-cm@0.3.0`; still no Guest/wasi-gfx on-screen)
+Completed baseline (P0–P1, CM compute, L2 surface, Kotlin triangle): [`docs/scheme/archive-baseline-dod.en.md`](docs/scheme/archive-baseline-dod.en.md).
 
 ## References
 
-- [wasi-webgpu](https://github.com/WebAssembly/wasi-webgpu)
-- [androidx.webgpu](https://developer.android.com/jetpack/androidx/releases/webgpu)
-- [wasmtime4j](https://github.com/tegmentum/wasmtime4j)
-- Changelog: [`CHANGELOG.md`](CHANGELOG.md)
-- Scheme summary: [`docs/scheme/README.en.md`](docs/scheme/README.en.md)
-- Android Wasmtime progress & pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md)
+- [wasi-webgpu](https://github.com/WebAssembly/wasi-webgpu) · [androidx.webgpu](https://developer.android.com/jetpack/androidx/releases/webgpu) · [wasmtime4j](https://github.com/tegmentum/wasmtime4j)
+- Changelog: [`CHANGELOG.md`](CHANGELOG.md) · Scheme: [`docs/scheme/README.en.md`](docs/scheme/README.en.md)
 
-## Documentation index (English)
+## Documentation index
 
 | Document | Link |
 |----------|------|
 | Root README | [README.en.md](README.en.md) |
+| Current plan (Guest CM on-screen) | [docs/scheme/guest-onscreen-cm.en.md](docs/scheme/guest-onscreen-cm.en.md) |
+| Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
-| WIT ↔ Dawn mapping | [docs/mapping/compute-subset.en.md](docs/mapping/compute-subset.en.md) |
-| Render / Surface mapping | [docs/mapping/render-subset.en.md](docs/mapping/render-subset.en.md) |
-| Threading | [docs/mapping/threading.en.md](docs/mapping/threading.en.md) |
-| Errors & async | [docs/mapping/errors-async.en.md](docs/mapping/errors-async.en.md) |
-| P1 boundary notes | [docs/perf/p1-boundary.en.md](docs/perf/p1-boundary.en.md) |
-| WIT lock | [wit/README.en.md](wit/README.en.md) |
-| compute-cm WIT | [wit/compute-cm/README.en.md](wit/compute-cm/README.en.md) |
-| wasmtime4j patches | [patches/README.en.md](patches/README.en.md) |
-| Patch upstream notes | [patches/UPSTREAM.en.md](patches/UPSTREAM.en.md) |
-| Android natives | [runtime-wasmtime/android-natives/README.md](runtime-wasmtime/android-natives/README.md) (EN) |
-| Desktop CM natives | [runtime-wasmtime/desktop-natives/README.md](runtime-wasmtime/desktop-natives/README.md) (EN) |
-| Guest abi-mvp | [guest/vector-add/README.en.md](guest/vector-add/README.en.md) |
-| Guest CM | [guest/vector-add-cm/README.en.md](guest/vector-add-cm/README.en.md) |
+| Compute / Render mapping | [compute](docs/mapping/compute-subset.en.md) · [render](docs/mapping/render-subset.en.md) |
+| Threading / errors | [threading](docs/mapping/threading.en.md) · [errors-async](docs/mapping/errors-async.en.md) |
+| WIT / patches / natives / Guest | [wit/](wit/README.en.md) · [patches/](patches/README.en.md) · [natives](runtime-wasmtime/android-natives/README.md) · [guest](guest/vector-add/README.en.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
