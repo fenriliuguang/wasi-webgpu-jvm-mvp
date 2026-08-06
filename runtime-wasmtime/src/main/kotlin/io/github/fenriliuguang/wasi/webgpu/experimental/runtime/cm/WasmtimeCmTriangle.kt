@@ -34,6 +34,10 @@ object WasmtimeCmTriangle {
                 val instance = linker.instantiate(componentBytes)
                 invokeRun(instance, windowHandle, width, height)
             }
+            // Let Dawn finish present / GPU work before tearing down the Host.
+            if (ownedHost) {
+                Thread.sleep(100)
+            }
         } finally {
             if (ownedHost) {
                 h.close()

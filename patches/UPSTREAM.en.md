@@ -37,6 +37,11 @@ python ./scripts/export-wasmtime4j-patches.py
 
 ## Related Java-side Android shim (not a Rust patch)
 
-`android-demo` ships a relaxed `ai.tegmentum.wasmtime4j.util.Validation` that allows high-bit-set
-handles (ARM64 TBI/PAC signed `long`). Prefer documenting or fixing upstream validation if
-native pointers are intentionally bit-cast to `jlong`.
+`android-demo` ships relaxed copies (upstream classes stripped from a filtered jar):
+
+| Local class | Problem | Suggested upstream change |
+|-------------|---------|---------------------------|
+| `ai.tegmentum.wasmtime4j.util.Validation` | ARM64 TBI/PAC pointers look “negative” as signed `long` | Allow non-zero opaque handles (or document bit-cast) |
+| `ai.tegmentum.wasmtime4j.component.ConcurrentCallCodec` | Host-callback JSON: Rust `serde_json` emits unsigned u64; `Long.parseLong` throws `NumberFormatException` for values `> Long.MAX_VALUE` (e.g. ANativeWindow*) | Mirror `ComponentTypeCodec.parseNumber`: fall back to `Long.parseUnsignedLong`; serialize U64 with `Long.toUnsignedString` |
+
+Symptom of the codec bug: `JniComponentLinker: Host function callback failed … For input string: "<u64 decimal>"`.

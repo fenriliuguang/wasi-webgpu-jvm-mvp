@@ -12,6 +12,8 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.RequestAdapterOptio
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 /**
  * On-screen red triangle via [WasiWebGpuHost] → Dawn (L2).
@@ -91,6 +93,24 @@ class TriangleRenderer(
             releaseSurface()
             postStatus("Surface destroyed")
         }
+    }
+
+    /**
+     * Stop the L2 frame loop and release the Surface on the render thread, waiting until done.
+     * Call from a non-render caller (test thread / bg thread) before CM Guest owns the Surface.
+     */
+    fun pauseSurfaceAndAwait(timeoutMs: Long = 5_000L): Boolean {
+        val latch = CountDownLatch(1)
+        handler.post {
+            try {
+                stopLoop()
+                releaseSurface()
+                postStatus("Surface destroyed")
+            } finally {
+                latch.countDown()
+            }
+        }
+        return latch.await(timeoutMs, TimeUnit.MILLISECONDS)
     }
 
     fun release() {

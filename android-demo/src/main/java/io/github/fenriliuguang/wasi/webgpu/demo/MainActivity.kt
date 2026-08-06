@@ -27,17 +27,34 @@ class MainActivity : AppCompatActivity() {
         val cmTriangleButton = findViewById<Button>(R.id.cmTriangleButton)
         val surfaceView = findViewById<SurfaceView>(R.id.triangleSurface)
 
-        val renderer = TriangleRenderer { message ->
-            runOnUiThread { status.text = message }
-        }
-        triangleRenderer = renderer
-        renderer.start()
+        // Skip L2 when asked via Intent, or whenever androidx.test Instrumentation is attached
+        // (vivo may ignore our launch Intent and resume launcher MainActivity during tests).
+        val skipL2 = intent.getBooleanExtra(EXTRA_SKIP_L2_TRIANGLE, false) ||
+            isUnderAndroidXTestInstrumentation()
 
-        triangleCmOneShot = TriangleCmOneShot(applicationContext) { message ->
-            runOnUiThread {
-                status.text = message
-                cmTriangleButton.isEnabled = true
+        val renderer = if (skipL2) {
+            null
+        } else {
+            TriangleRenderer { message ->
+                runOnUiThread { status.text = message }
+            }.also {
+                triangleRenderer = it
+                it.start()
             }
+        }
+
+        // Under instrumentation, skip Demo CM button wiring — instrumented tests call
+        // WasmtimeCmTriangleAndroid.runOnce directly (avoids double-present / WINDOW_IN_USE).
+        if (!skipL2) {
+            triangleCmOneShot = TriangleCmOneShot(applicationContext) { message ->
+                runOnUiThread {
+                    status.text = message
+                    cmTriangleButton.isEnabled = true
+                }
+            }
+        } else {
+            cmTriangleButton.isEnabled = false
+            status.text = "CM-only Surface ready (L2 triangle skipped)"
         }
 
         surfaceView.holder.addCallback(
@@ -48,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                     surfaceWidth = frame.width()
                     surfaceHeight = frame.height()
                     if (surfaceWidth > 0 && surfaceHeight > 0) {
-                        renderer.onSurfaceAvailable(holder.surface, surfaceWidth, surfaceHeight)
+                        renderer?.onSurfaceAvailable(holder.surface, surfaceWidth, surfaceHeight)
                     }
                 }
 
@@ -62,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                     surfaceWidth = width
                     surfaceHeight = height
                     if (width > 0 && height > 0) {
-                        renderer.onSurfaceResized(holder.surface, width, height)
+                        renderer?.onSurfaceResized(holder.surface, width, height)
                     }
                 }
 
@@ -70,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                     latestSurface = null
                     surfaceWidth = 0
                     surfaceHeight = 0
-                    renderer.onSurfaceDestroyed()
+                    renderer?.onSurfaceDestroyed()
                 }
             },
         )
@@ -103,17 +120,28 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             cmTriangleButton.isEnabled = false
-            // Pause L2 loop so CM Guest can own the Surface for one shot.
-            renderer.onSurfaceDestroyed()
             status.text = "Running CM Guest triangle (one-shot)…"
-            triangleCmOneShot?.drawOnce(surface, w, h)
+            // Pause L2 on a bg thread (await render-thread release), then CM one-shot.
+            thread {
+                val l2 = triangleRenderer
+                if (l2 != null && !l2.pauseSurfaceAndAwait()) {
+                    runOnUiThread {
+                        status.text = "CM triangle FAILED: L2 pause timeout"
+                        cmTriangleButton.isEnabled = true
+                    }
+                    return@thread
+                }
+                triangleCmOneShot?.drawOnce(surface, w, h)
+            }
         }
     }
 
-    /** Pause L2 [TriangleRenderer] so CM Guest can own the Surface (demo / instrumented). */
-    fun pauseL2TriangleForCm() {
-        triangleRenderer?.onSurfaceDestroyed()
-    }
+    /**
+     * Pause L2 [TriangleRenderer] so CM Guest can own the Surface.
+     * Safe to call from the instrumented-test thread (awaits render-thread release).
+     */
+    fun pauseL2TriangleForCm(): Boolean =
+        triangleRenderer?.pauseSurfaceAndAwait() ?: true
 
     override fun onDestroy() {
         triangleCmOneShot?.release()
@@ -121,5 +149,22 @@ class MainActivity : AppCompatActivity() {
         triangleRenderer?.release()
         triangleRenderer = null
         super.onDestroy()
+    }
+
+    companion object {
+        /** When true, do not start L2 [TriangleRenderer] (CM instrumented tests). */
+        const val EXTRA_SKIP_L2_TRIANGLE: String = "skip_l2_triangle"
+
+        /** True when this process is running under androidx.test Instrumentation. */
+        fun isUnderAndroidXTestInstrumentation(): Boolean {
+            return try {
+                val atClass = Class.forName("android.app.ActivityThread")
+                val thread = atClass.getMethod("currentActivityThread").invoke(null) ?: return false
+                val instr = atClass.getMethod("getInstrumentation").invoke(thread) ?: return false
+                instr.javaClass.name.startsWith("androidx.test")
+            } catch (_: Throwable) {
+                false
+            }
+        }
     }
 }

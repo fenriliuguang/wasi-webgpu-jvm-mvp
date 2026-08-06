@@ -51,6 +51,8 @@ Guest triangle-cm.wasm
 
 帧循环与 CM 调用线程亲和；Surface 生命周期与 Guest 资源 drop；仪器测试稳定性。
 
+踩坑与仪器阻塞记录：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)（含 P6：手动 Demo CM 按钮不稳 — **非本切片 DoD**）。
+
 ## 链接
 
 - 根 README：[`README.md`](../../README.md)  

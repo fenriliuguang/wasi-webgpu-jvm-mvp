@@ -21,7 +21,7 @@ val syncGuestAssets by tasks.registering(Copy::class) {
     into(generatedAssetsDir.resolve("guest"))
 }
 
-// Strip upstream Validation.class so our Android-tolerant copy wins (ARM64 jlong handles).
+// Strip upstream classes so our Android-tolerant copies win (ARM64 jlong / u64 handles).
 val filteredWasmtime4jDir = layout.buildDirectory.dir("filtered-deps")
 val filteredWasmtime4jJar = filteredWasmtime4jDir.map { it.file("wasmtime4j-no-validation.jar") }
 val wasmtime4jForFilter = configurations.detachedConfiguration(
@@ -34,6 +34,9 @@ val filterWasmtime4jJar by tasks.registering(Jar::class) {
     from({
         zipTree(wasmtime4jForFilter.singleFile).matching {
             exclude("ai/tegmentum/wasmtime4j/util/Validation.class")
+            // Host-callback JSON: unsigned u64 > Long.MAX_VALUE (native-window handles).
+            // Exclude outer + nested ($JsonParser, $1, …) so the local Java copy wins.
+            exclude("ai/tegmentum/wasmtime4j/component/ConcurrentCallCodec*.class")
         }
     })
     archiveFileName.set("wasmtime4j-no-validation.jar")
@@ -101,7 +104,7 @@ android {
 configurations.configureEach {
     // Desktop glibc/darwin/windows natives must not be used on Android (Bionic).
     exclude(group = "ai.tegmentum", module = "wasmtime4j-native")
-    // Replace with filtered jar + local Validation (ARM64 opaque handles).
+    // Replace with filtered jar + local Validation / ConcurrentCallCodec (ARM64 opaque handles).
     exclude(group = "ai.tegmentum", module = "wasmtime4j")
 }
 

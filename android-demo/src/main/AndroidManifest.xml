@@ -14,5 +14,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- Surface-only host for CM Guest instrumented tests (no L2 TriangleRenderer).
+             Separate taskAffinity avoids vivo redirecting launches to the launcher MainActivity. -->
+        <activity
+            android:name=".CmSurfaceTestActivity"
+            android:exported="true"
+            android:taskAffinity="io.github.fenriliuguang.wasi.webgpu.demo.cm_surface"
+            android:launchMode="singleInstance" />
     </application>
 </manifest>

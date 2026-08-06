@@ -554,8 +554,20 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     override fun close() {
+        if (closed) return
         closed = true
-        eventPoller.shutdownNow()
+        // Stop the processEvents pump before tearing down the instance — shutdownNow()
+        // during an in-flight processEvents races Mali/Dawn and can SIGABRT (Scudo).
+        eventPoller.shutdown()
+        try {
+            if (!eventPoller.awaitTermination(2, TimeUnit.SECONDS)) {
+                eventPoller.shutdownNow()
+                eventPoller.awaitTermination(1, TimeUnit.SECONDS)
+            }
+        } catch (_: InterruptedException) {
+            eventPoller.shutdownNow()
+            Thread.currentThread().interrupt()
+        }
         handles.clear()
         pipelineLayouts.values.forEach { runCatching { it.close() } }
         pipelineLayouts.clear()

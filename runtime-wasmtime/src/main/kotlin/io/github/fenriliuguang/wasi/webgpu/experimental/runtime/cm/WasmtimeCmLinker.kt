@@ -108,7 +108,16 @@ class WasmtimeCmLinker(
         define(
             AbiCm.Func.CREATE_SURFACE_FROM_NATIVE_WINDOW,
             ComponentHostFunction.singleValue { params ->
-                u32(bindings.createSurfaceFromNativeWindow(paramU64(params, 0)))
+                require(params.isNotEmpty()) { "create-surface-from-native-window: missing window-handle" }
+                val handleVal = params[0]
+                val windowHandle = paramU64(params, 0)
+                // Diagnose u64 marshalling (Android TBI/PAC pointers often set the high bit).
+                System.err.println(
+                    "CREATE_SURFACE_FROM_NATIVE_WINDOW params=${params.size} " +
+                        "type=${handleVal.type} handle=0x${java.lang.Long.toUnsignedString(windowHandle, 16)} " +
+                        "unsignedDec=${java.lang.Long.toUnsignedString(windowHandle)}",
+                )
+                u32(bindings.createSurfaceFromNativeWindow(windowHandle))
             },
         )
         define(AbiCm.Func.ADAPTER_REQUEST_DEVICE, ComponentHostFunction.singleValue { params ->
