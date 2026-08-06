@@ -10,9 +10,10 @@ Component Model compute + minimal surface/render slice.
 - async WIT → sync (same as L2)
 - bind-group helpers remain vector-add specialized
 - **0.2.0:** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags` (u32 aliases); `create-buffer(descriptor)`; `map-async(mode, …)` replaces `map-read`
-- **0.3.0:** Android native-window `surface` + triangle-shaped `render-pipeline` / `render-pass` (no Guest on-screen export)
+- **0.3.0:** Android native-window `surface` + triangle-shaped `render-pipeline` / `render-pass`
+- World exports: `vector-add` → `run-vector-add`; `triangle` → `run-triangle` (Host injects native window)
 
-Guest: `guest/vector-add-cm/` (still exports only `run-vector-add`)  
+Guest: `guest/vector-add-cm/`, `guest/triangle-cm/`  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  
 Wiring: `runtime-wasmtime` `runtime.cm` (`ComponentLinker` + `defineResource`)
 

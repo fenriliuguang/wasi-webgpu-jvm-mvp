@@ -135,3 +135,14 @@ world vector-add {
   import host;
   export run-vector-add: func(a: list<f32>, b: list<f32>) -> result<list<f32>, string>;
 }
+
+/// Single-shot on-screen red triangle (Host injects Android native window).
+/// Guest only holds `surface`; does not create windows / wasi-gfx canvas.
+world triangle {
+  import host;
+  export run-triangle: func(
+    window-handle: u64,
+    width: u32,
+    height: u32,
+  ) -> result<_, string>;
+}

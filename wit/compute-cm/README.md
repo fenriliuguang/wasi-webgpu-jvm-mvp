@@ -10,9 +10,10 @@ Component Model compute + 最小 surface/render 切片。
 - async WIT → 同步（与 L2 一致）
 - bind-group helpers 仍是 vector-add 特化
 - **0.2.0：** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags`（u32 别名）；`create-buffer(descriptor)`；`map-async(mode, …)` 取代 `map-read`
-- **0.3.0：** Android native-window `surface` + triangle 形 `render-pipeline` / `render-pass`（无 Guest 上屏 export）
+- **0.3.0：** Android native-window `surface` + triangle 形 `render-pipeline` / `render-pass`
+- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle`（Host 注入 native window）
 
-Guest：`guest/vector-add-cm/`（仍只导出 `run-vector-add`）  
+Guest：`guest/vector-add-cm/`、`guest/triangle-cm/`  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 

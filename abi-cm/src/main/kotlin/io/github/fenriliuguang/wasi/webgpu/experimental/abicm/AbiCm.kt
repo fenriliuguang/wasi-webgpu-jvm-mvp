@@ -16,6 +16,7 @@ object AbiCm {
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
 
     const val EXPORT_RUN_VECTOR_ADD: String = "run-vector-add"
+    const val EXPORT_RUN_TRIANGLE: String = "run-triangle"
 
     object Resource {
         const val ADAPTER = "adapter"

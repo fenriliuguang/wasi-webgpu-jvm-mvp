@@ -42,7 +42,7 @@ Guest triangle-cm.wasm
 
 ## Sequence
 
-1. Guest WIT world export (e.g. `run-triangle` / `draw-triangle-frame`) + rebuild  
+1. ~~Guest WIT world export (`run-triangle`) + rebuild~~ — done: `guest/triangle-cm` + `triangle_cm.wasm`
 2. Demo / tests: CM instantiate → one-shot draw (frame loop optional later)  
 3. Instrumented green + bilingual docs index  
 4. CHANGELOG
