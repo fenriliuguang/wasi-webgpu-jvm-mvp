@@ -1,7 +1,8 @@
 # Guest CM 上屏 — 仪器测试阻塞 / 踩坑记录
 
 **中文** | 状态：**切片完成**（2026-08-06 仪器绿灯；文档 / CHANGELOG 已补，DoD 全勾选）  
-计划：[`guest-onscreen-cm.md`](guest-onscreen-cm.md)
+计划：[`guest-onscreen-cm.md`](guest-onscreen-cm.md)  
+P6（手动 Demo 稳性）已由新切片承接：[`demo-cm-stability.md`](demo-cm-stability.md)
 
 ## 进度快照
 

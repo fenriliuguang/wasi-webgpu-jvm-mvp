@@ -60,18 +60,10 @@ wasi-webgpu-jvm-mvp/
 
 Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md)、[`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md)、`scripts/build-*.ps1`。
 
-## 当前阶段 DoD — Guest CM 上屏（已达成，2026-08-06）
+## 状态
 
-计划全文：[`docs/scheme/guest-onscreen-cm.md`](docs/scheme/guest-onscreen-cm.md)
-
-- [x] `guest/triangle-cm`（或等价）+ 预编译 `.wasm`；经 abi-cm → 同一 L2 → Dawn 画红三角
-- [x] Host 注入 native window；Guest 只持 `surface`
-- [x] Android 仪器测试绿灯（需 CM-patched Bionic `.so`）
-- [x] 文档补 Guest 上屏路径
-
-**本阶段不做：** wasi-gfx、合规全量 `wasi:webgpu`、Maven Central、`abi-mvp` render 扁平 import。
-
-已完成基线（P0–P1、CM compute、L2 surface、Kotlin 红三角）见归档：[`docs/scheme/archive-baseline-dod.md`](docs/scheme/archive-baseline-dod.md)。
+- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)
+- **进行中**：Demo CM 稳性 + 帧循环 → [计划](docs/scheme/demo-cm-stability.md)
 
 ## 参考
 
@@ -83,8 +75,9 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 文档 | 中文 | English |
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
-| 现行计划（Guest CM 上屏） | [docs/scheme/guest-onscreen-cm.md](docs/scheme/guest-onscreen-cm.md) | [docs/scheme/guest-onscreen-cm.en.md](docs/scheme/guest-onscreen-cm.en.md) |
+| 现行计划（Demo CM 稳性 + 帧循环） | [docs/scheme/demo-cm-stability.md](docs/scheme/demo-cm-stability.md) | [docs/scheme/demo-cm-stability.en.md](docs/scheme/demo-cm-stability.en.md) |
 | 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
+| Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | Compute / Render 映射 | [compute-subset](docs/mapping/compute-subset.md) · [render-subset](docs/mapping/render-subset.md) | [EN](docs/mapping/compute-subset.en.md) · [EN](docs/mapping/render-subset.en.md) |

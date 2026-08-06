@@ -7,6 +7,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
+- Locked next slice: Demo CM stability + frame loop (`docs/scheme/demo-cm-stability.md`); Guest CM on-screen DoD archived to `docs/scheme/archive-guest-onscreen-cm-dod.md`; root README slimmed to basic info + status
 - Locked next slice: Guest CM on-screen (`docs/scheme/guest-onscreen-cm.md`); baseline DoD archived from root README
 
 ### Guest CM on-screen (triangle-cm) — DoD complete 2026-08-06

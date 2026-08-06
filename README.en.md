@@ -60,18 +60,10 @@ Instrumented tests (device + WebGPU/Vulkan): run `*InstrumentedTest.kt` in Studi
 
 Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md), [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md), `scripts/build-*.ps1`.
 
-## Current DoD — Guest CM on-screen (achieved 2026-08-06)
+## Status
 
-Full plan: [`docs/scheme/guest-onscreen-cm.en.md`](docs/scheme/guest-onscreen-cm.en.md)
-
-- [x] `guest/triangle-cm` (or equivalent) + prebuilt `.wasm`; via abi-cm → same L2 → Dawn red triangle
-- [x] Host injects native window; Guest only holds `surface`
-- [x] Android instrumented test green (needs CM-patched Bionic `.so`)
-- [x] Docs cover Guest on-screen path
-
-**Out of scope this phase:** wasi-gfx, full compliant `wasi:webgpu`, Maven Central, `abi-mvp` flat render imports.
-
-Completed baseline (P0–P1, CM compute, L2 surface, Kotlin triangle): [`docs/scheme/archive-baseline-dod.en.md`](docs/scheme/archive-baseline-dod.en.md).
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md)
+- **In progress**: Demo CM stability + frame loop → [plan](docs/scheme/demo-cm-stability.en.md)
 
 ## References
 
@@ -83,8 +75,9 @@ Completed baseline (P0–P1, CM compute, L2 surface, Kotlin triangle): [`docs/sc
 | Document | Link |
 |----------|------|
 | Root README | [README.en.md](README.en.md) |
-| Current plan (Guest CM on-screen) | [docs/scheme/guest-onscreen-cm.en.md](docs/scheme/guest-onscreen-cm.en.md) |
+| Current plan (Demo CM stability + frame loop) | [docs/scheme/demo-cm-stability.en.md](docs/scheme/demo-cm-stability.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
+| Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | Compute / Render mapping | [compute](docs/mapping/compute-subset.en.md) · [render](docs/mapping/render-subset.en.md) |

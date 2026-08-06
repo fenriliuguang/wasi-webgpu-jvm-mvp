@@ -2,7 +2,7 @@
 
 **中文** | [English](guest-onscreen-cm.en.md)
 
-> **状态：已完成（2026-08-06 仪器绿灯，DoD 全勾选）。** 根 README DoD 与此对齐；遗留项见 blockers P6（非本切片）。
+> **状态：已完成（2026-08-06 仪器绿灯，DoD 全勾选）。** DoD 已迁至 [`archive-guest-onscreen-cm-dod.md`](archive-guest-onscreen-cm-dod.md)；遗留 P6 由 [`demo-cm-stability.md`](demo-cm-stability.md) 承接。
 
 ## 一句话
 

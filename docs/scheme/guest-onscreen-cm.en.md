@@ -2,7 +2,7 @@
 
 [中文](guest-onscreen-cm.md) | **English**
 
-> **Status: complete (instrumented green 2026-08-06, all DoD checked).** Root README DoD matches this page; leftovers in blockers P6 (out of slice).
+> **Status: complete (instrumented green 2026-08-06, all DoD checked).** DoD moved to [`archive-guest-onscreen-cm-dod.en.md`](archive-guest-onscreen-cm-dod.en.md); leftover P6 owned by [`demo-cm-stability.en.md`](demo-cm-stability.en.md).
 
 ## One-liner
 

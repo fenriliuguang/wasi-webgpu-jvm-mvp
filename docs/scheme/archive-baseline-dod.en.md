@@ -3,7 +3,7 @@
 [中文](archive-baseline-dod.md) | **English**
 
 > Completed acceptance checklist moved out of the root README.  
-> Current phase: root [`README.en.md`](../../README.en.md) and [`guest-onscreen-cm.en.md`](guest-onscreen-cm.en.md).
+> Current phase: root [`README.en.md`](../../README.en.md) and [`demo-cm-stability.en.md`](demo-cm-stability.en.md).
 
 Archive covers work through: surface/render lifted into L2 + `experimental:webgpu-cm@0.3.0` (Kotlin demo via Host).
 

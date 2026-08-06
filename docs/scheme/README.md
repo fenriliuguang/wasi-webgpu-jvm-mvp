@@ -2,7 +2,7 @@
 
 **中文** | [English](README.en.md)
 
-本文件是从讨论稿迁入本仓的方案摘要。根 README 侧重**特性与现行阶段**；已完成基线 DoD 见归档。
+本文件是从讨论稿迁入本仓的方案摘要。根 README 侧重**特性与现行状态**；已完成 DoD 见各归档页。
 
 ## 一句话
 
@@ -13,7 +13,8 @@
 | 阶段 | 本仓状态 |
 |------|----------|
 | **基线（P0–语义扩展 / L2 上屏）** | **完成** — 详见 [`archive-baseline-dod.md`](archive-baseline-dod.md) |
-| **Guest CM 上屏（triangle-cm）** | **进行中** — 已定计划 [`guest-onscreen-cm.md`](guest-onscreen-cm.md) |
+| **Guest CM 上屏（triangle-cm）** | **完成**（2026-08-06）— 详见 [`archive-guest-onscreen-cm-dod.md`](archive-guest-onscreen-cm-dod.md) |
+| **Demo CM 稳性 + 帧循环** | **进行中** — 已定计划 [`demo-cm-stability.md`](demo-cm-stability.md) |
 | **更远** | 更多 WIT records；wasi-gfx / 合规全量 world；Maven Central（均非本切片） |
 
 ## 硬原则（摘录）
