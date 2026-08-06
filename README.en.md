@@ -31,7 +31,7 @@ Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► same L2
 | L2 | `host-api` |
 | L3 | `host-webgpu` |
 | L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
-| Guest | `guest/vector-add`, `guest/vector-add-cm` (in progress: `triangle-cm`) |
+| Guest | `guest/vector-add`, `guest/vector-add-cm`, `guest/triangle-cm` (CM on-screen wiring) |
 | Demo | `android-demo` |
 
 ## Repository layout

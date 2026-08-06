@@ -31,7 +31,7 @@ Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► 同一 L2
 | L2 | `host-api` |
 | L3 | `host-webgpu` |
 | L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
-| Guest | `guest/vector-add`、`guest/vector-add-cm`（进行中：`triangle-cm`） |
+| Guest | `guest/vector-add`、`guest/vector-add-cm`、`guest/triangle-cm`（CM 上屏接线中） |
 | Demo | `android-demo` |
 
 ## 仓库布局

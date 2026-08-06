@@ -43,7 +43,7 @@ Guest triangle-cm.wasm
 ## 落地顺序
 
 1. ~~Guest WIT world export（`run-triangle`）+ wit-bindgen 重建~~ — 已完成：`guest/triangle-cm` + `triangle_cm.wasm`
-2. Demo / 测试：CM instantiate → 单次 draw（再视需要接帧循环）  
+2. ~~Demo / 测试：CM instantiate → 单次 draw~~ — 已接线：`WasmtimeCmTriangle` + Demo 按钮 + 仪器测试骨架（桌面无 Surface 时 skip / CpuHost Unsupported）
 3. 仪器测试绿灯 + 双语文档索引  
 4. CHANGELOG
 

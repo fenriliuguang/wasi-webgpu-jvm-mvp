@@ -26,4 +26,5 @@ wasm-tools component new target/wasm32-unknown-unknown/release/triangle_cm.wasm 
   -o triangle_cm.wasm
 ```
 
-Committed `triangle_cm.wasm` is for upcoming Demo / instrumented tests (wiring: `docs/scheme/guest-onscreen-cm.md`).
+Committed `triangle_cm.wasm` is synced by `android-demo` to `assets/guest/triangle_cm.wasm`;
+runtime entry: `WasmtimeCmTriangle` / `WasmtimeCmTriangleAndroid` (plan: `docs/scheme/guest-onscreen-cm.md`).

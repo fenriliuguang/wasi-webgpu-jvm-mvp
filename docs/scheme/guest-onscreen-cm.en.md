@@ -43,7 +43,7 @@ Guest triangle-cm.wasm
 ## Sequence
 
 1. ~~Guest WIT world export (`run-triangle`) + rebuild~~ — done: `guest/triangle-cm` + `triangle_cm.wasm`
-2. Demo / tests: CM instantiate → one-shot draw (frame loop optional later)  
+2. ~~Demo / tests: CM instantiate → one-shot draw~~ — wired: `WasmtimeCmTriangle` + Demo button + instrumented skeleton (desktop skips / CpuHost Unsupported without Surface)
 3. Instrumented green + bilingual docs index  
 4. CHANGELOG
 

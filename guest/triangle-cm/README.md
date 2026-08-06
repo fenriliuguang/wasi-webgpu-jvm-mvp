@@ -26,4 +26,5 @@ wasm-tools component new target/wasm32-unknown-unknown/release/triangle_cm.wasm 
   -o triangle_cm.wasm
 ```
 
-Committed `triangle_cm.wasm` 供后续 Demo / 仪器测试加载（接线见现行计划 `docs/scheme/guest-onscreen-cm.md`）。
+Committed `triangle_cm.wasm` 由 `android-demo` 同步到 `assets/guest/triangle_cm.wasm`；
+运行时入口：`WasmtimeCmTriangle` / `WasmtimeCmTriangleAndroid`（计划：`docs/scheme/guest-onscreen-cm.md`）。
