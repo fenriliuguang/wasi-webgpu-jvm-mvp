@@ -1,6 +1,6 @@
 # Guest CM 上屏 — 仪器测试阻塞 / 踩坑记录
 
-**中文** | 状态：仪器测试已绿灯（2026-08-06）；待补文档 / CHANGELOG  
+**中文** | 状态：**切片完成**（2026-08-06 仪器绿灯；文档 / CHANGELOG 已补，DoD 全勾选）  
 计划：[`guest-onscreen-cm.md`](guest-onscreen-cm.md)
 
 ## 进度快照
@@ -9,8 +9,8 @@
 |----------|------|
 | 1. WIT `run-triangle` + `guest/triangle-cm` + `.wasm` | **完成**（已提交 `ca4aee9`） |
 | 2. Demo / 运行时接线（`WasmtimeCmTriangle` + Demo 按钮） | **完成**（已提交 `adb9c3f`） |
-| 3. 仪器测试绿灯 + 双语文档索引 | **仪器绿灯**（文档索引仍待补） |
-| 4. CHANGELOG | 未做 |
+| 3. 仪器测试绿灯 + 双语文档索引 | **完成**（仪器绿灯；`render-subset` 双语已补 Guest 路径） |
+| 4. CHANGELOG | **完成**（Unreleased：Guest CM on-screen） |
 
 对照：`WasmtimeCmVectorAddInstrumentedTest`（CM compute）同设备绿灯。本切片 DoD 验收是**仪器单次 draw**，不是 Demo 按钮稳定性。
 
@@ -112,8 +112,8 @@ M  patches/UPSTREAM.md / UPSTREAM.en.md
 
 ## 下一步（核心剩余）
 
-1. 补 `render-subset` Guest 路径 + README / 本计划 DoD 勾选  
-2. CHANGELOG  
+~~1. 补 `render-subset` Guest 路径 + README / 本计划 DoD 勾选~~ — 已完成  
+~~2. CHANGELOG~~ — 已完成  
 3. （可选）上游贡献 `ConcurrentCallCodec`；Demo 手点稳性（P6）另开
 
 ## 一句话

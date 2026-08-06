@@ -12,7 +12,7 @@
 - **L2 Host**: `WasiWebGpuHost` (compute + minimal Android surface/render) + desktop `CpuWasiWebGpuHost`
 - **L3 Dawn**: `DawnWasiWebGpuHost` (Android / androidx.webgpu)
 - **Runtime**: Wasmtime4j — **abi-mvp** (core wasm) and **abi-cm** (Component Model / `experimental:webgpu-cm@0.3.0`)
-- **Guest**: vector-add (abi-mvp + CM); Kotlin `SurfaceView` red triangle via L2 Host→Dawn
+- **Guest**: vector-add (abi-mvp + CM); red triangle two ways: Kotlin `SurfaceView` via L2 Host→Dawn, and CM Guest (triangle-cm) via abi-cm → same L2 → Dawn
 - **Engineering**: multi-module Gradle, CI (JVM tests + `assembleDebug`), Bionic / desktop CM-patched native scripts
 
 Package: `io.github.fenriliuguang.wasi.webgpu.experimental.*`
@@ -31,7 +31,7 @@ Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► same L2
 | L2 | `host-api` |
 | L3 | `host-webgpu` |
 | L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
-| Guest | `guest/vector-add`, `guest/vector-add-cm`, `guest/triangle-cm` (CM on-screen wiring) |
+| Guest | `guest/vector-add`, `guest/vector-add-cm`, `guest/triangle-cm` (CM on-screen working) |
 | Demo | `android-demo` |
 
 ## Repository layout
@@ -60,14 +60,14 @@ Instrumented tests (device + WebGPU/Vulkan): run `*InstrumentedTest.kt` in Studi
 
 Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md), [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md), `scripts/build-*.ps1`.
 
-## Current DoD — Guest CM on-screen
+## Current DoD — Guest CM on-screen (achieved 2026-08-06)
 
 Full plan: [`docs/scheme/guest-onscreen-cm.en.md`](docs/scheme/guest-onscreen-cm.en.md)
 
-- [ ] `guest/triangle-cm` (or equivalent) + prebuilt `.wasm`; via abi-cm → same L2 → Dawn red triangle
-- [ ] Host injects native window; Guest only holds `surface`
-- [ ] Android instrumented test green (needs CM-patched Bionic `.so`)
-- [ ] Docs cover Guest on-screen path
+- [x] `guest/triangle-cm` (or equivalent) + prebuilt `.wasm`; via abi-cm → same L2 → Dawn red triangle
+- [x] Host injects native window; Guest only holds `surface`
+- [x] Android instrumented test green (needs CM-patched Bionic `.so`)
+- [x] Docs cover Guest on-screen path
 
 **Out of scope this phase:** wasi-gfx, full compliant `wasi:webgpu`, Maven Central, `abi-mvp` flat render imports.
 

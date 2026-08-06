@@ -12,7 +12,7 @@
 - **L2 Host**：`WasiWebGpuHost`（compute + 最小 Android surface/render）+ 桌面 `CpuWasiWebGpuHost`
 - **L3 Dawn**：`DawnWasiWebGpuHost`（Android / androidx.webgpu）
 - **Runtime**：Wasmtime4j — **abi-mvp**（core wasm）与 **abi-cm**（Component Model / `experimental:webgpu-cm@0.3.0`）
-- **Guest**：向量加（abi-mvp + CM）；Kotlin `SurfaceView` 红三角经 L2 Host→Dawn
+- **Guest**：向量加（abi-mvp + CM）；红三角双路：Kotlin `SurfaceView` 经 L2 Host→Dawn，CM Guest（triangle-cm）经 abi-cm→同一 L2→Dawn
 - **工程**：多模块 Gradle、CI（JVM 单测 + `assembleDebug`）、Bionic / 桌面 CM-patched natives 脚本
 
 包名：`io.github.fenriliuguang.wasi.webgpu.experimental.*`
@@ -31,7 +31,7 @@ Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► 同一 L2
 | L2 | `host-api` |
 | L3 | `host-webgpu` |
 | L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
-| Guest | `guest/vector-add`、`guest/vector-add-cm`、`guest/triangle-cm`（CM 上屏接线中） |
+| Guest | `guest/vector-add`、`guest/vector-add-cm`、`guest/triangle-cm`（CM 上屏已通） |
 | Demo | `android-demo` |
 
 ## 仓库布局
@@ -60,14 +60,14 @@ wasi-webgpu-jvm-mvp/
 
 Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md)、[`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md)、`scripts/build-*.ps1`。
 
-## 当前阶段 DoD — Guest CM 上屏
+## 当前阶段 DoD — Guest CM 上屏（已达成，2026-08-06）
 
 计划全文：[`docs/scheme/guest-onscreen-cm.md`](docs/scheme/guest-onscreen-cm.md)
 
-- [ ] `guest/triangle-cm`（或等价）+ 预编译 `.wasm`；经 abi-cm → 同一 L2 → Dawn 画红三角
-- [ ] Host 注入 native window；Guest 只持 `surface`
-- [ ] Android 仪器测试绿灯（需 CM-patched Bionic `.so`）
-- [ ] 文档补 Guest 上屏路径
+- [x] `guest/triangle-cm`（或等价）+ 预编译 `.wasm`；经 abi-cm → 同一 L2 → Dawn 画红三角
+- [x] Host 注入 native window；Guest 只持 `surface`
+- [x] Android 仪器测试绿灯（需 CM-patched Bionic `.so`）
+- [x] 文档补 Guest 上屏路径
 
 **本阶段不做：** wasi-gfx、合规全量 `wasi:webgpu`、Maven Central、`abi-mvp` render 扁平 import。
 

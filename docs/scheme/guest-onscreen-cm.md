@@ -2,7 +2,7 @@
 
 **中文** | [English](guest-onscreen-cm.en.md)
 
-> **状态：已锁定（主切片 A）。** 根 README 现行 DoD 与此对齐。
+> **状态：已完成（2026-08-06 仪器绿灯，DoD 全勾选）。** 根 README DoD 与此对齐；遗留项见 blockers P6（非本切片）。
 
 ## 一句话
 
@@ -27,11 +27,11 @@ Guest triangle-cm.wasm
 
 ## DoD
 
-- [ ] `guest/triangle-cm`（或等价 world export）+ 预编译 `.wasm`；复用 `create-render-pipeline-triangle` 等特化 API
-- [ ] Host 注入 native window；Guest 不创建 window
-- [ ] Android 仪器测试：CM Guest → Dawn 上屏红三角（需 CM-patched Bionic `.so`）
-- [ ] 文档：`docs/mapping/render-subset` 补 Guest 路径；根 README / 本页 DoD 勾选
-- [ ] 桌面：无 Android Surface 时相关单测 skip（与现 CM 门控一致）
+- [x] `guest/triangle-cm`（或等价 world export）+ 预编译 `.wasm`；复用 `create-render-pipeline-triangle` 等特化 API
+- [x] Host 注入 native window；Guest 不创建 window
+- [x] Android 仪器测试：CM Guest → Dawn 上屏红三角（需 CM-patched Bionic `.so`）
+- [x] 文档：`docs/mapping/render-subset` 补 Guest 路径；根 README / 本页 DoD 勾选
+- [x] 桌面：无 Android Surface 时相关单测 skip（与现 CM 门控一致）
 
 ## 本切片不做
 
@@ -44,8 +44,8 @@ Guest triangle-cm.wasm
 
 1. ~~Guest WIT world export（`run-triangle`）+ wit-bindgen 重建~~ — 已完成：`guest/triangle-cm` + `triangle_cm.wasm`
 2. ~~Demo / 测试：CM instantiate → 单次 draw~~ — 已接线：`WasmtimeCmTriangle` + Demo 按钮 + 仪器测试骨架（桌面无 Surface 时 skip / CpuHost Unsupported）
-3. 仪器测试绿灯 + 双语文档索引  
-4. CHANGELOG
+3. ~~仪器测试绿灯 + 双语文档索引~~ — 绿灯（2026-08-06，vivo V2458A / Mali）；`render-subset` 双语已补 Guest 路径
+4. ~~CHANGELOG~~ — 已补（Unreleased：Guest CM on-screen）
 
 ## 风险
 

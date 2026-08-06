@@ -2,7 +2,7 @@
 
 [中文](guest-onscreen-cm.md) | **English**
 
-> **Status: locked (main slice A).** Root README current DoD matches this page.
+> **Status: complete (instrumented green 2026-08-06, all DoD checked).** Root README DoD matches this page; leftovers in blockers P6 (out of slice).
 
 ## One-liner
 
@@ -27,11 +27,11 @@ Guest triangle-cm.wasm
 
 ## DoD
 
-- [ ] `guest/triangle-cm` (or equivalent world export) + prebuilt `.wasm`; reuse triangle-shaped helpers
-- [ ] Host injects native window; Guest does not create windows
-- [ ] Android instrumented: CM Guest → Dawn on-screen triangle (needs CM-patched Bionic `.so`)
-- [ ] Docs: Guest path in `docs/mapping/render-subset`; check off root README / this DoD
-- [ ] Desktop: skip surface-related unit tests without Android Surface (same CM gating)
+- [x] `guest/triangle-cm` (or equivalent world export) + prebuilt `.wasm`; reuse triangle-shaped helpers
+- [x] Host injects native window; Guest does not create windows
+- [x] Android instrumented: CM Guest → Dawn on-screen triangle (needs CM-patched Bionic `.so`)
+- [x] Docs: Guest path in `docs/mapping/render-subset`; check off root README / this DoD
+- [x] Desktop: skip surface-related unit tests without Android Surface (same CM gating)
 
 ## Out of scope (this slice)
 
@@ -44,8 +44,8 @@ Guest triangle-cm.wasm
 
 1. ~~Guest WIT world export (`run-triangle`) + rebuild~~ — done: `guest/triangle-cm` + `triangle_cm.wasm`
 2. ~~Demo / tests: CM instantiate → one-shot draw~~ — wired: `WasmtimeCmTriangle` + Demo button + instrumented skeleton (desktop skips / CpuHost Unsupported without Surface)
-3. Instrumented green + bilingual docs index  
-4. CHANGELOG
+3. ~~Instrumented green + bilingual docs index~~ — green (2026-08-06, vivo V2458A / Mali); `render-subset` Guest path added in both languages
+4. ~~CHANGELOG~~ — added (Unreleased: Guest CM on-screen)
 
 ## Risks
 

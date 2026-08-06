@@ -9,6 +9,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 - Locked next slice: Guest CM on-screen (`docs/scheme/guest-onscreen-cm.md`); baseline DoD archived from root README
 
+### Guest CM on-screen (triangle-cm) — DoD complete 2026-08-06
+
+- `guest/triangle-cm` + prebuilt `triangle_cm.wasm`: world `triangle` exports `run-triangle(window-handle: u64, width: u32, height: u32)`; Guest only holds `surface`, Host injects the Android native window
+- `WasmtimeCmTriangle` (L1) + android-demo `WasmtimeCmTriangleAndroid` / "CM 三角" button: Wasmtime ComponentLinker + abi-cm → same L2 → Dawn one-shot red triangle
+- Instrumented green: `WasmtimeCmTriangleInstrumentedTest` (vivo V2458A / Mali); desktop CpuHost → Unsupported, surface unit tests skip (same CM gating)
+- Fixes: wasmtime4j `ConcurrentCallCodec` unsigned-u64 window-handle parse (android-demo overlay, `patches/UPSTREAM.md`); vivo `ActivityScenario` intent mismatch → `ActivityLifecycleMonitorRegistry`; L2 skipped under androidx.test Instrumentation
+- Docs: Guest path in `docs/mapping/render-subset`; pitfall log `docs/scheme/guest-onscreen-cm-blockers.md`
+
 ### Surface/render lift (L2 + WIT)
 
 - L2: `WasiWebGpuHost` surface/render minimal API; `DawnWasiWebGpuHost` implements; `CpuWasiWebGpuHost` → Unsupported
