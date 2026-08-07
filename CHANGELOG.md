@@ -10,6 +10,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 - Locked next slice: Demo CM stability + frame loop (`docs/scheme/demo-cm-stability.md`); Guest CM on-screen DoD archived to `docs/scheme/archive-guest-onscreen-cm-dod.md`; root README slimmed to basic info + status
 - Locked next slice: Guest CM on-screen (`docs/scheme/guest-onscreen-cm.md`); baseline DoD archived from root README
 
+### Demo CM stability + frame loop — DoD complete 2026-08-07
+
+- Demo: pause L2 → CM frame loop → resume L2; reuse one CM `DawnWasiWebGpuHost` + `WasmtimeCmTriangle.Session` (avoids process-global linker recreate / `invalid handle`)
+- WIT `@0.3.0` additive: `init-triangle` / `draw-frame` / `drop-triangle` (keep `run-triangle` for one-shot); rebuilt `triangle_cm.wasm`
+- L1: `Session.runFrameLoop`; android-demo `TriangleCmOneShot.runFrameLoopAndAwait` (~60 frames) + `TriangleRenderer.resumeSurfaceAndAwait`
+- Instrumented: `cmGuestRepeatTriangleReusesSession` (same-process Host+Session ×3); existing one-shot path kept
+- Docs: `docs/mapping/threading` CM frame-loop contract; blockers P6 closed; DoD archive `docs/scheme/archive-demo-cm-stability-dod.md`
+
 ### Guest CM on-screen (triangle-cm) — DoD complete 2026-08-06
 
 - `guest/triangle-cm` + prebuilt `triangle_cm.wasm`: world `triangle` exports `run-triangle(window-handle: u64, width: u32, height: u32)`; Guest only holds `surface`, Host injects the Android native window

@@ -3,7 +3,7 @@
 **中文** | [English](archive-guest-onscreen-cm-dod.en.md)
 
 > 自根 README 迁出的**已完成**验收清单归档。  
-> 现行阶段见根 [`README.md`](../../README.md) 与 [`demo-cm-stability.md`](demo-cm-stability.md)。
+> 后续阶段见根 [`README.md`](../../README.md)；P6 收口见 [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md)。
 
 归档对应提交约至：`07ec669` 仪器绿灯修复（u64 JSON + vivo Scenario）+ `47c342d` DoD 勾选与文档收口（2026-08-06）。原计划页：[`guest-onscreen-cm.md`](guest-onscreen-cm.md)。
 
@@ -22,4 +22,4 @@
 - 仪器绿灯：`WasmtimeCmTriangleInstrumentedTest`（2026-08-06，vivo V2458A / Mali；单次 draw 验收）
 - 修复：P2 `ConcurrentCallCodec` u64 无符号解析（android-demo 覆盖）；P5 vivo `ActivityScenario` Intent 不匹配 → `ActivityLifecycleMonitorRegistry`
 - 文档：[`docs/mapping/render-subset.md`](../mapping/render-subset.md) Guest 路径（双语）；踩坑记录 [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)
-- 遗留：P6 手动 Demo 按钮稳定性 → 由 [`demo-cm-stability.md`](demo-cm-stability.md) 承接
+- 遗留：~~P6 手动 Demo 按钮稳定性~~ → 已由 [`demo-cm-stability.md`](demo-cm-stability.md) / [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) 收口（2026-08-07）

@@ -24,17 +24,18 @@ Guest 上屏：[`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCmTr
 
 ```text
 guest/triangle-cm（triangle_cm.wasm，world triangle）
-  export run-triangle(window-handle: u64, width: u32, height: u32)
-  → WasmtimeCmTriangle（L1）/ WasmtimeCmTriangleAndroid（assets 加载）
+  export run-triangle | init-triangle / draw-frame / drop-triangle
+  → WasmtimeCmTriangle.Session（L1）/ WasmtimeCmTriangleAndroid
   → Wasmtime ComponentLinker + abi-cm（上表 imports）
   → 同一 WasiWebGpuHost → Dawn → SurfaceView
 ```
 
 - **Window**：Host 侧注入 native window（`Surface` → ANativeWindow 指针，按 u64 传）；Guest 只持 `surface` resource，不创建 window
-- **Guest 内部序列**（`guest/triangle-cm/src/lib.rs`）：`create-surface-from-native-window` → `configure` → `create-render-pipeline-triangle` → `get-current-texture-view` → `begin-render-pass-clear` → `set-pipeline` / `draw(3)` / `end` → `submit1` → `present` → `unconfigure`；shader 与 L2 `TriangleRenderer` 保持一致
-- **验收形态**：单次 draw；仪器测试 `WasmtimeCmTriangleInstrumentedTest` 绿灯（vivo V2458A / Mali）
+- **One-shot**（`run-triangle`）：configure → draw → present → unconfigure；仪器默认路径
+- **帧循环**（宿主驱动）：`init-triangle` → 循环 `draw-frame` → `drop-triangle`；Demo `TriangleCmOneShot.runFrameLoopAndAwait`；线程约定见 [`threading.md`](threading.md)
+- **验收**：仪器 one-shot + `cmGuestRepeatTriangleReusesSession`；Demo pause→CM→resume（[`archive-demo-cm-stability-dod.md`](../scheme/archive-demo-cm-stability-dod.md)）
 - **桌面**：无 Android Surface 时 `CpuWasiWebGpuHost` → Unsupported，相关单测 skip（与 CM compute 门控一致）
-- **u64 注意**：`window-handle` 高位可超 `Long.MAX_VALUE`；wasmtime4j `ConcurrentCallCodec` 须按无符号解析（android-demo 覆盖，见 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)）；Demo 手点稳定性遗留见 [`../scheme/guest-onscreen-cm-blockers.md`](../scheme/guest-onscreen-cm-blockers.md) P6
+- **u64 注意**：`window-handle` 高位可超 `Long.MAX_VALUE`；wasmtime4j `ConcurrentCallCodec` 须按无符号解析（android-demo 覆盖，见 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)）；P6 Demo 稳性已收口（同上归档）
 
 ## 明确不做（本切片）
 

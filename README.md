@@ -62,8 +62,8 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 
 ## 状态
 
-- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)
-- **进行中**：Demo CM 稳性 + 帧循环 → [计划](docs/scheme/demo-cm-stability.md)
+- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)
+- **进行中**：无锁定切片（更远方向见 [方案摘要](docs/scheme/README.md)）
 
 ## 参考
 
@@ -75,7 +75,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 文档 | 中文 | English |
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
-| 现行计划（Demo CM 稳性 + 帧循环） | [docs/scheme/demo-cm-stability.md](docs/scheme/demo-cm-stability.md) | [docs/scheme/demo-cm-stability.en.md](docs/scheme/demo-cm-stability.en.md) |
+| Demo CM 稳性 DoD 归档 | [docs/scheme/archive-demo-cm-stability-dod.md](docs/scheme/archive-demo-cm-stability-dod.md) | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
 | 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

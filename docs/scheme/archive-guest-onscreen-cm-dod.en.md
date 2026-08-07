@@ -3,7 +3,7 @@
 [中文](archive-guest-onscreen-cm-dod.md) | **English**
 
 > Completed acceptance checklist moved out of the root README.  
-> Current phase: root [`README.en.md`](../../README.en.md) and [`demo-cm-stability.en.md`](demo-cm-stability.en.md).
+> Later stages: root [`README.en.md`](../../README.en.md); P6 closed in [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md).
 
 Archive covers work through: `07ec669` instrumented-green fix (u64 JSON + vivo Scenario) + `47c342d` DoD check-off and docs wrap-up (2026-08-06). Original plan page: [`guest-onscreen-cm.en.md`](guest-onscreen-cm.en.md).
 
@@ -22,4 +22,4 @@ Archive covers work through: `07ec669` instrumented-green fix (u64 JSON + vivo S
 - Instrumented green: `WasmtimeCmTriangleInstrumentedTest` (2026-08-06, vivo V2458A / Mali; one-shot draw acceptance)
 - Fixes: P2 `ConcurrentCallCodec` unsigned-u64 parse (android-demo overlay); P5 vivo `ActivityScenario` intent mismatch → `ActivityLifecycleMonitorRegistry`
 - Docs: Guest path in [`docs/mapping/render-subset.en.md`](../mapping/render-subset.en.md) (bilingual); pitfall log [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)
-- Leftover: P6 manual Demo-button stability → owned by [`demo-cm-stability.en.md`](demo-cm-stability.en.md)
+- Leftover: ~~P6 manual Demo-button stability~~ → closed by [`demo-cm-stability.en.md`](demo-cm-stability.en.md) / [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md) (2026-08-07)

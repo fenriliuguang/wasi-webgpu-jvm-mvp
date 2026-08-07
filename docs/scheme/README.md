@@ -14,8 +14,8 @@
 |------|----------|
 | **基线（P0–语义扩展 / L2 上屏）** | **完成** — 详见 [`archive-baseline-dod.md`](archive-baseline-dod.md) |
 | **Guest CM 上屏（triangle-cm）** | **完成**（2026-08-06）— 详见 [`archive-guest-onscreen-cm-dod.md`](archive-guest-onscreen-cm-dod.md) |
-| **Demo CM 稳性 + 帧循环** | **进行中** — 已定计划 [`demo-cm-stability.md`](demo-cm-stability.md) |
-| **更远** | 更多 WIT records；wasi-gfx / 合规全量 world；Maven Central（均非本切片） |
+| **Demo CM 稳性 + 帧循环** | **完成**（2026-08-07）— 详见 [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) |
+| **更远** | 更多 WIT records；wasi-gfx / 合规全量 world；Maven Central（均未锁定） |
 
 ## 硬原则（摘录）
 

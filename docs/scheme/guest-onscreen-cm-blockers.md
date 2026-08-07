@@ -2,7 +2,7 @@
 
 **中文** | 状态：**切片完成**（2026-08-06 仪器绿灯；文档 / CHANGELOG 已补，DoD 全勾选）  
 计划：[`guest-onscreen-cm.md`](guest-onscreen-cm.md)  
-P6（手动 Demo 稳性）已由新切片承接：[`demo-cm-stability.md`](demo-cm-stability.md)
+P6（手动 Demo 稳性）已由新切片收口：[`demo-cm-stability.md`](demo-cm-stability.md) → [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md)
 
 ## 进度快照
 
@@ -26,7 +26,7 @@ P6（手动 Demo 稳性）已由新切片承接：[`demo-cm-stability.md`](demo-
 | P1 | L2 `webgpu-triangle` + Mali SIGSEGV | **核心周边 / 已绕过**：仪器路径不启 L2（Instrumentation 检测 + `EXTRA_SKIP_L2`） |
 | P3 | `processEvents` / `close()` Scudo | **缓解已做**（`shutdown`+`awaitTermination`）；仪器绿灯下未再复现 |
 | P4 | APK UP-TO-DATE / USB 安装 / adb PATH | 流程噪音；`--rerun-tasks` 或 clean；脚本自带 adb 路径 |
-| P6 | **手动点 Demo「CM 三角」仍崩溃 / 失败** | **非本切片核心 — 跳过**（见下） |
+| P6 | **手动点 Demo「CM 三角」仍崩溃 / 失败** | **已由 demo-cm-stability 收口**（见下） |
 
 ---
 
@@ -75,48 +75,33 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 | adb PATH | `scripts/run-android-instrumented.ps1` 用 SDK `platform-tools` |
 | 进程级 CM host 注册表 | 桌面 `forkEvery=1`；Android 同进程多次 instantiate 需当心 |
 
-### P6 — 手动触发 Demo CM 按钮仍崩溃（非核心，跳过）
+### P6 — 手动触发 Demo CM 按钮仍崩溃（已由 demo-cm-stability 收口）
 
-**不在本切片 DoD 内**（DoD = 仪器单次 CM Guest → Dawn；计划写明「与 Kotlin demo 并存」，未要求 Demo 按钮稳绿）。
+**原不在 Guest CM 上屏 DoD 内**；已由 [`demo-cm-stability.md`](demo-cm-stability.md) / [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) 收口（2026-08-07）。
 
-已知症状（手点 / 连点时）：
+原症状与对策：
 
-- `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` / `native_window_api_connect failed`（L2 或上次 CM 未放干净 Surface）
-- `GPUSurface.getCapabilities failed`
-- 同进程二次 CM：`invalid handle` / destructor callback not found（进程级 host 注册表）
-- 偶发 Mali / Scudo（P1/P3 同类）
+| 症状 | 对策 |
+|------|------|
+| `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` | CM 前 `pauseSurfaceAndAwait`；结束后 `drop-triangle` + `resumeSurfaceAndAwait` |
+| 同进程二次 CM `invalid handle` | 复用 `WasmtimeCmTriangle.Session`（linker/instance） |
+| 每次 Host teardown / Scudo | Demo 复用单个 CM `DawnWasiWebGpuHost` |
+| 连点 | 按钮整段 disable 至 pause→CM→resume 结束 |
 
-后续若做 Demo 稳性：先 `pauseSurfaceAndAwait` 再 CM、单 Host 复用、present 后确认 unconfigure、避免连点。**当前不排。**
+帧循环：`init-triangle` / `draw-frame` / `drop-triangle`；仪器重复：`cmGuestRepeatTriangleReusesSession`。
 
 ---
 
 ## 设备
 
 - vivo V2458A（PD2415）/ Mali  
-- 仪器绿灯：`WasmtimeCmTriangleInstrumentedTest`、`WasmtimeCmVectorAddInstrumentedTest`
+- 仪器：`WasmtimeCmTriangleInstrumentedTest`（含 repeat）、`WasmtimeCmVectorAddInstrumentedTest`
 
-## 未提交改动（排查落地）
+## 下一步
 
-```text
-M  android-demo/.../WasmtimeCmTriangleInstrumentedTest.kt
-M  android-demo/.../MainActivity.kt
-M  android-demo/.../TriangleRenderer.kt
-M  android-demo/src/main/AndroidManifest.xml
-M  android-demo/build.gradle.kts
-M  host-webgpu/.../DawnWasiWebGpuHost.kt
-M  runtime-wasmtime/.../WasmtimeCmTriangle.kt
-M  runtime-wasmtime/.../WasmtimeCmLinker.kt
-?? android-demo/.../CmSurfaceTestActivity.kt
-?? android-demo/.../ConcurrentCallCodec.java   # u64 覆盖
-M  patches/UPSTREAM.md / UPSTREAM.en.md
-```
-
-## 下一步（核心剩余）
-
-~~1. 补 `render-subset` Guest 路径 + README / 本计划 DoD 勾选~~ — 已完成  
-~~2. CHANGELOG~~ — 已完成  
-3. （可选）上游贡献 `ConcurrentCallCodec`；Demo 手点稳性（P6）另开
+~~Demo 手点稳性（P6）~~ — 已完成（demo-cm-stability）  
+（可选）上游贡献 `ConcurrentCallCodec` unsigned-u64
 
 ## 一句话
 
-核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；手动 Demo 崩溃记为 P6，本切片跳过。
+核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；P6 手动 Demo 稳性 + 帧循环已由 demo-cm-stability 收口。

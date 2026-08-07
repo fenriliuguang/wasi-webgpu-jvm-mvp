@@ -62,8 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md)
-- **In progress**: Demo CM stability + frame loop → [plan](docs/scheme/demo-cm-stability.en.md)
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md)
+- **In progress**: no locked slice (see [scheme summary](docs/scheme/README.en.md) for later directions)
 
 ## References
 
@@ -75,7 +75,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Document | Link |
 |----------|------|
 | Root README | [README.en.md](README.en.md) |
-| Current plan (Demo CM stability + frame loop) | [docs/scheme/demo-cm-stability.en.md](docs/scheme/demo-cm-stability.en.md) |
+| Demo CM stability DoD archive | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

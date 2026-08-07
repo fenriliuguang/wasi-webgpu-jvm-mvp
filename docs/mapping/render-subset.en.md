@@ -24,17 +24,18 @@ Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCm
 
 ```text
 guest/triangle-cm (triangle_cm.wasm, world triangle)
-  export run-triangle(window-handle: u64, width: u32, height: u32)
-  → WasmtimeCmTriangle (L1) / WasmtimeCmTriangleAndroid (loads from assets)
+  export run-triangle | init-triangle / draw-frame / drop-triangle
+  → WasmtimeCmTriangle.Session (L1) / WasmtimeCmTriangleAndroid
   → Wasmtime ComponentLinker + abi-cm (imports from the table above)
   → same WasiWebGpuHost → Dawn → SurfaceView
 ```
 
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
-- **Guest sequence** (`guest/triangle-cm/src/lib.rs`): `create-surface-from-native-window` → `configure` → `create-render-pipeline-triangle` → `get-current-texture-view` → `begin-render-pass-clear` → `set-pipeline` / `draw(3)` / `end` → `submit1` → `present` → `unconfigure`; shader matches the L2 `TriangleRenderer`
-- **Acceptance shape**: one-shot draw; instrumented test `WasmtimeCmTriangleInstrumentedTest` green (vivo V2458A / Mali)
+- **One-shot** (`run-triangle`): configure → draw → present → unconfigure; default instrumented path
+- **Frame loop** (host-driven): `init-triangle` → loop `draw-frame` → `drop-triangle`; Demo `TriangleCmOneShot.runFrameLoopAndAwait`; threading: [`threading.en.md`](threading.en.md)
+- **Acceptance**: instrumented one-shot + `cmGuestRepeatTriangleReusesSession`; Demo pause→CM→resume ([`archive-demo-cm-stability-dod.en.md`](../scheme/archive-demo-cm-stability-dod.en.md))
 - **Desktop**: without an Android Surface, `CpuWasiWebGpuHost` → Unsupported and related unit tests skip (same gating as CM compute)
-- **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)); manual Demo-button stability leftover: [`guest-onscreen-cm-blockers.md`](../scheme/guest-onscreen-cm-blockers.md) P6
+- **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)); P6 Demo stability closed (same archive)
 
 ## Explicitly out of scope (this slice)
 
