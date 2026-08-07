@@ -5,9 +5,12 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
+import androidx.webgpu.helper.Util
 import io.github.fenriliuguang.wasi.webgpu.demo.WasmtimeCmTriangleAndroid
+import io.github.fenriliuguang.wasi.webgpu.demo.WasmtimeVectorAddAndroid
 import io.github.fenriliuguang.wasi.webgpu.experimental.dawn.DawnWasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
+import io.github.fenriliuguang.wasi.webgpu.experimental.runtime.cm.WasmtimeCmTriangle
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +19,8 @@ import java.util.concurrent.TimeUnit
  *
  * Does not own a frame loop — call [drawOnceAndAwait] after pausing any L2 [TriangleRenderer]
  * that shares the same Surface. All Host/CM work runs on `webgpu-triangle-cm`.
- * Reuses a single [DawnWasiWebGpuHost] across draws (not shared with L2).
+ * Reuses a single [DawnWasiWebGpuHost] and CM [WasmtimeCmTriangle.Session] across draws
+ * (not shared with L2; avoids process-global linker recreate traps).
  */
 class TriangleCmOneShot(
     private val appContext: Context,
@@ -25,6 +29,7 @@ class TriangleCmOneShot(
     private val thread = HandlerThread("webgpu-triangle-cm").also { it.start() }
     private val handler = Handler(thread.looper)
     private var host: WasiWebGpuHost? = null
+    private var session: WasmtimeCmTriangle.Session? = null
     private var closed = false
 
     /**
@@ -44,16 +49,17 @@ class TriangleCmOneShot(
                 if (closed) return@post
                 posted = true
                 runCatching {
+                    require(surface.isValid) { "Surface is not valid" }
+                    require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
                     val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
-                    WasmtimeCmTriangleAndroid.runOnce(
-                        appContext,
-                        surface,
-                        width,
-                        height,
-                        host = h,
-                    )
+                    val s = session ?: run {
+                        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+                        WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
+                    }
+                    val windowHandle = Util.windowFromSurface(surface)
+                    s.runTriangle(windowHandle, width, height)
                 }.onSuccess {
-                    postStatus("CM Guest triangle OK (one-shot, host reused)")
+                    postStatus("CM Guest triangle OK (one-shot, host+session reused)")
                 }.onFailure {
                     Log.e(TAG, "CM triangle failed", it)
                     postStatus("CM triangle FAILED: ${it.message}")
@@ -71,6 +77,8 @@ class TriangleCmOneShot(
         handler.post {
             try {
                 closed = true
+                runCatching { session?.close() }
+                session = null
                 runCatching { host?.close() }
                 host = null
             } finally {

@@ -12,11 +12,19 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.runtime.cm.WasmtimeCmTri
  *
  * Host injects native window from [Surface]; Guest only holds `surface`.
  * Call from a background / render thread (not the UI thread).
+ *
+ * Demo path: prefer [openSession] + repeated [WasmtimeCmTriangle.Session.runTriangle]
+ * (process-global CM registry). Instrumented one-shot may still use [runOnce].
  */
 object WasmtimeCmTriangleAndroid {
 
     fun loadGuestComponent(context: Context): ByteArray =
         context.assets.open("guest/triangle_cm.wasm").use { it.readBytes() }
+
+    fun openSession(context: Context, host: WasiWebGpuHost): WasmtimeCmTriangle.Session {
+        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        return WasmtimeCmTriangle.openSession(loadGuestComponent(context), host)
+    }
 
     fun runOnce(
         context: Context,
@@ -33,9 +41,13 @@ object WasmtimeCmTriangleAndroid {
         val ownedHost = host == null
         val h = host ?: DawnWasiWebGpuHost.create()
         try {
-            WasmtimeCmTriangle.run(component, windowHandle, width, height, h)
+            WasmtimeCmTriangle.openSession(component, h).use { session ->
+                session.runTriangle(windowHandle, width, height)
+            }
         } finally {
             if (ownedHost) {
+                // Present/GPU settle before Host teardown (Session does not own [h] here).
+                Thread.sleep(100)
                 h.close()
             }
         }

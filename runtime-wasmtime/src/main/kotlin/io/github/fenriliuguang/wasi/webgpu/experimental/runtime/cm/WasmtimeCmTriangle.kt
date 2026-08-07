@@ -15,8 +15,61 @@ import java.nio.file.Path
  * Host injects Android native window; Guest only holds `surface`.
  * Desktop CpuHost has no Android Surface — expect [io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException.Unsupported]
  * (or a trap wrapping it). Successful draw is Android / Dawn only.
+ *
+ * Prefer [Session] for repeated Demo draws — wasmtime4j CM host callbacks are process-global
+ * and back-to-back linker recreate can trap (`invalid handle` / missing destructor).
  */
 object WasmtimeCmTriangle {
+
+    /**
+     * Long-lived CM linker + instance for repeated [runTriangle] calls on one Host.
+     * Aligns with [WasmtimeCmVectorAdd.runAll]: do not recreate the linker between draws.
+     */
+    class Session internal constructor(
+        private val linker: WasmtimeCmLinker,
+        private val instance: ComponentInstance,
+        private val host: WasiWebGpuHost,
+        private val ownedHost: Boolean,
+    ) : AutoCloseable {
+        private var closed = false
+
+        fun runTriangle(windowHandle: Long, width: Int, height: Int) {
+            check(!closed) { "CM triangle session is closed" }
+            require(windowHandle != 0L) { "window-handle is null" }
+            require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
+            invokeRun(instance, windowHandle, width, height)
+        }
+
+        override fun close() {
+            if (closed) return
+            closed = true
+            runCatching { linker.close() }
+            if (ownedHost) {
+                // Let Dawn finish present / GPU work before tearing down the Host.
+                Thread.sleep(100)
+                host.close()
+            }
+        }
+    }
+
+    fun openSession(
+        componentBytes: ByteArray,
+        host: WasiWebGpuHost? = null,
+    ): Session {
+        val ownedHost = host == null
+        val h = host ?: CpuWasiWebGpuHost()
+        val linker = WasmtimeCmLinker(h)
+        return try {
+            val instance = linker.instantiate(componentBytes)
+            Session(linker, instance, h, ownedHost)
+        } catch (t: Throwable) {
+            runCatching { linker.close() }
+            if (ownedHost) {
+                runCatching { h.close() }
+            }
+            throw t
+        }
+    }
 
     fun run(
         componentBytes: ByteArray,
@@ -25,23 +78,8 @@ object WasmtimeCmTriangle {
         height: Int,
         host: WasiWebGpuHost? = null,
     ) {
-        require(windowHandle != 0L) { "window-handle is null" }
-        require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-        val ownedHost = host == null
-        val h = host ?: CpuWasiWebGpuHost()
-        try {
-            WasmtimeCmLinker(h).use { linker ->
-                val instance = linker.instantiate(componentBytes)
-                invokeRun(instance, windowHandle, width, height)
-            }
-            // Let Dawn finish present / GPU work before tearing down the Host.
-            if (ownedHost) {
-                Thread.sleep(100)
-            }
-        } finally {
-            if (ownedHost) {
-                h.close()
-            }
+        openSession(componentBytes, host).use { session ->
+            session.runTriangle(windowHandle, width, height)
         }
     }
 
