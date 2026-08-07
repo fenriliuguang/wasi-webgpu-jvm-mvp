@@ -10,6 +10,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
+import androidx.webgpu.helper.Util
+import io.github.fenriliuguang.wasi.webgpu.experimental.dawn.DawnWasiWebGpuHost
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 /**
- * Android acceptance: CM Guest `run-triangle` → Wasmtime + abi-cm → Dawn one-shot present.
+ * Android acceptance: CM Guest `run-triangle` → Wasmtime + abi-cm → Dawn present.
  *
  * Does **not** use [androidx.test.core.app.ActivityScenario]: on vivo, starting MainActivity
  * (even with an explicit Intent + extras) often resumes the launcher-task MainActivity whose
@@ -37,6 +39,86 @@ class WasmtimeCmTriangleInstrumentedTest {
 
     @Test
     fun cmGuestDrawsOneShotTriangle() {
+        withReadySurface { ctx ->
+            val done = CountDownLatch(1)
+            val error = AtomicReference<Throwable?>(null)
+            Thread({
+                try {
+                    WasmtimeCmTriangleAndroid.runOnce(
+                        ctx.context,
+                        ctx.surface,
+                        ctx.width,
+                        ctx.height,
+                    )
+                } catch (t: Throwable) {
+                    error.set(t)
+                } finally {
+                    done.countDown()
+                }
+            }, "cm-triangle-instrumented").start()
+            assertTrue("CM runOnce timed out", done.await(60, TimeUnit.SECONDS))
+            val failure = error.get()
+            if (failure != null) {
+                throw AssertionError("CM Guest triangle failed: ${failure.message}", failure)
+            }
+        }
+    }
+
+    /**
+     * Same-process repeat: one Dawn Host + one CM Session, three [runTriangle] calls.
+     * Guards process-global registry traps (`invalid handle` / missing destructor) from
+     * back-to-back linker recreate (demo-cm-stability Phase 2/3).
+     */
+    @Test
+    fun cmGuestRepeatTriangleReusesSession() {
+        withReadySurface { ctx ->
+            val done = CountDownLatch(1)
+            val error = AtomicReference<Throwable?>(null)
+            Thread({
+                try {
+                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
+                    val host = DawnWasiWebGpuHost.create()
+                    try {
+                        WasmtimeCmTriangleAndroid.openSession(ctx.context, host).use { session ->
+                            val windowHandle = Util.windowFromSurface(ctx.surface)
+                            repeat(REPEAT_COUNT) { i ->
+                                session.runTriangle(windowHandle, ctx.width, ctx.height)
+                                // Brief settle between presents on the same Surface.
+                                if (i < REPEAT_COUNT - 1) {
+                                    Thread.sleep(150)
+                                }
+                            }
+                        }
+                    } finally {
+                        Thread.sleep(100)
+                        host.close()
+                    }
+                } catch (t: Throwable) {
+                    error.set(t)
+                } finally {
+                    done.countDown()
+                }
+            }, "cm-triangle-repeat-instrumented").start()
+            assertTrue("CM repeat session timed out", done.await(120, TimeUnit.SECONDS))
+            val failure = error.get()
+            if (failure != null) {
+                throw AssertionError(
+                    "CM Guest repeat triangle failed: ${failure.message}",
+                    failure,
+                )
+            }
+        }
+    }
+
+    private data class ReadySurface(
+        val context: android.content.Context,
+        val activity: MainActivity,
+        val surface: Surface,
+        val width: Int,
+        val height: Int,
+    )
+
+    private fun withReadySurface(block: (ReadySurface) -> Unit) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
 
@@ -115,28 +197,20 @@ class WasmtimeCmTriangleInstrumentedTest {
         )
         Thread.sleep(300)
 
-        val surface = requireNotNull(surfaceRef.get())
-        val width = widthRef.get()
-        val height = heightRef.get()
-        val done = CountDownLatch(1)
-        val error = AtomicReference<Throwable?>(null)
-        Thread({
-            try {
-                WasmtimeCmTriangleAndroid.runOnce(context, surface, width, height)
-            } catch (t: Throwable) {
-                error.set(t)
-            } finally {
-                done.countDown()
-            }
-        }, "cm-triangle-instrumented").start()
-        assertTrue("CM runOnce timed out", done.await(60, TimeUnit.SECONDS))
-        val failure = error.get()
-        if (failure != null) {
-            throw AssertionError("CM Guest triangle failed: ${failure.message}", failure)
+        try {
+            block(
+                ReadySurface(
+                    context = context,
+                    activity = activity,
+                    surface = requireNotNull(surfaceRef.get()),
+                    width = widthRef.get(),
+                    height = heightRef.get(),
+                ),
+            )
+        } finally {
+            instrumentation.runOnMainSync { activity.finish() }
+            instrumentation.waitForIdleSync()
         }
-
-        instrumentation.runOnMainSync { activity.finish() }
-        instrumentation.waitForIdleSync()
     }
 
     private fun waitForResumedMainActivity(timeoutMs: Long): MainActivity {
@@ -154,5 +228,9 @@ class WasmtimeCmTriangleInstrumentedTest {
             Thread.sleep(50)
         }
         error("MainActivity not RESUMED within ${timeoutMs}ms")
+    }
+
+    companion object {
+        private const val REPEAT_COUNT = 3
     }
 }
