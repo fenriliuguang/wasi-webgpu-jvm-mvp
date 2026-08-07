@@ -15,6 +15,7 @@
 | **基线（P0–语义扩展 / L2 上屏）** | **完成** — 详见 [`archive-baseline-dod.md`](archive-baseline-dod.md) |
 | **Guest CM 上屏（triangle-cm）** | **完成**（2026-08-06）— 详见 [`archive-guest-onscreen-cm-dod.md`](archive-guest-onscreen-cm-dod.md) |
 | **Demo CM 稳性 + 帧循环** | **完成**（2026-08-07）— 详见 [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) |
+| **Demo CM 真机稳性回归** | **进行中（锁定）** — D2/D3 优先；见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) |
 | **更远** | 更多 WIT records；wasi-gfx / 合规全量 world；Maven Central（均未锁定） |
 
 ## 硬原则（摘录）

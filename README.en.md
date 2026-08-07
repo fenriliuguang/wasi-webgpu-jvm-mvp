@@ -63,7 +63,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 ## Status
 
 - **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md)
-- **In progress**: no locked slice (see [scheme summary](docs/scheme/README.en.md) for later directions)
+- **In progress (locked)**: Demo CM **device stability regression** — prioritize D2/D3 (`VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` / Host `close` leak), then D1 (Mali SIGSEGV mitigate→root cause), D5 (`NO_BUFFER_AVAILABLE`), D6 (CM Session re-entry). Pitfalls & acceptance: [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH)
 
 ## References
 
@@ -76,6 +76,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 |----------|------|
 | Root README | [README.en.md](README.en.md) |
 | Demo CM stability DoD archive | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
+| Demo CM device stability regression blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) (ZH) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)
-- **进行中**：无锁定切片（更远方向见 [方案摘要](docs/scheme/README.md)）
+- **进行中（锁定）**：Demo CM **真机稳性回归** — 优先 D2/D3（`VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` / Host `close` 泄漏），并行盯 D1（Mali SIGSEGV 缓解→根治）、D5（`NO_BUFFER_AVAILABLE`）、D6（CM Session 重入）。踩坑与验收：[blockers](docs/scheme/demo-cm-stability-blockers.md)
 
 ## 参考
 
@@ -76,6 +76,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
 | Demo CM 稳性 DoD 归档 | [docs/scheme/archive-demo-cm-stability-dod.md](docs/scheme/archive-demo-cm-stability-dod.md) | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
+| Demo CM 真机稳性回归 blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) | （仅中文） |
 | 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

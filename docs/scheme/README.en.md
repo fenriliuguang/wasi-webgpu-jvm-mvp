@@ -15,6 +15,7 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **Baseline (P0–semantic expansion / L2 on-screen)** | **Done** — see [`archive-baseline-dod.en.md`](archive-baseline-dod.en.md) |
 | **Guest CM on-screen (triangle-cm)** | **Done** (2026-08-06) — see [`archive-guest-onscreen-cm-dod.en.md`](archive-guest-onscreen-cm-dod.en.md) |
 | **Demo CM stability + frame loop** | **Done** (2026-08-07) — see [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md) |
+| **Demo CM device stability regression** | **In progress (locked)** — D2/D3 first; see [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH) |
 | **Later** | More WIT records; wasi-gfx / full compliant world; Maven Central (none locked) |
 
 ## Hard rules (excerpt)

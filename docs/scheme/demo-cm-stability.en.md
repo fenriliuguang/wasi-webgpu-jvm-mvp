@@ -3,7 +3,8 @@
 [中文](demo-cm-stability.md) | **English**
 
 > **Status: complete (2026-08-07).** DoD archive: [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md).  
-> Continues P6: [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md).
+> Continues P6: [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md).  
+> **Regression (locked priority)**: device Demo still hits SIGSEGV / `WINDOW_IN_USE` etc. → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH).
 
 ## One-liner
 

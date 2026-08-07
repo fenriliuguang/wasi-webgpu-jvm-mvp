@@ -3,7 +3,8 @@
 **中文** | [English](demo-cm-stability.en.md)
 
 > **状态：已完成（2026-08-07）。** DoD 归档：[`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md)。  
-> 承接 P6：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)。
+> 承接 P6：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)。  
+> **回归（锁定优先）**：真机 Demo 仍见 SIGSEGV / `WINDOW_IN_USE` 等 → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)。
 
 ## 一句话
 
