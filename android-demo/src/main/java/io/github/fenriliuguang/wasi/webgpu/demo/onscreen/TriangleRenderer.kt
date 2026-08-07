@@ -105,12 +105,43 @@ class TriangleRenderer(
             try {
                 stopLoop()
                 releaseSurface()
-                postStatus("Surface destroyed")
+                postStatus("L2 Surface paused for CM")
             } finally {
                 latch.countDown()
             }
         }
         return latch.await(timeoutMs, TimeUnit.MILLISECONDS)
+    }
+
+    /**
+     * Re-attach [surface] and restart the L2 frame loop after CM Guest has released it.
+     * Call from a non-render caller (bg thread) once CM present/unconfigure has finished.
+     */
+    fun resumeSurfaceAndAwait(
+        surface: Surface,
+        w: Int,
+        h: Int,
+        timeoutMs: Long = 5_000L,
+    ): Boolean {
+        val latch = CountDownLatch(1)
+        var ok = false
+        handler.post {
+            try {
+                if (closed) return@post
+                require(surface.isValid) { "Surface is not valid" }
+                ensureDevice()
+                attachOrResize(surface, w, h)
+                startLoop()
+                ok = true
+                postStatus("Triangle rendering (L2 Host→Dawn Surface)")
+            } catch (t: Throwable) {
+                Log.e(TAG, "resume surface failed", t)
+                postStatus("L2 resume FAILED: ${t.message}")
+            } finally {
+                latch.countDown()
+            }
+        }
+        return latch.await(timeoutMs, TimeUnit.MILLISECONDS) && ok
     }
 
     fun release() {

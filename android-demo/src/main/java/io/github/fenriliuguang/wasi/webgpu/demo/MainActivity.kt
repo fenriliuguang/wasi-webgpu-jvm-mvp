@@ -47,10 +47,7 @@ class MainActivity : AppCompatActivity() {
         // WasmtimeCmTriangleAndroid.runOnce directly (avoids double-present / WINDOW_IN_USE).
         if (!skipL2) {
             triangleCmOneShot = TriangleCmOneShot(applicationContext) { message ->
-                runOnUiThread {
-                    status.text = message
-                    cmTriangleButton.isEnabled = true
-                }
+                runOnUiThread { status.text = message }
             }
         } else {
             cmTriangleButton.isEnabled = false
@@ -121,17 +118,44 @@ class MainActivity : AppCompatActivity() {
             }
             cmTriangleButton.isEnabled = false
             status.text = "Running CM Guest triangle (one-shot)…"
-            // Pause L2 on a bg thread (await render-thread release), then CM one-shot.
+            // Pause L2 → CM one-shot (await) → resume L2; button stays disabled for the whole span.
             thread {
                 val l2 = triangleRenderer
-                if (l2 != null && !l2.pauseSurfaceAndAwait()) {
-                    runOnUiThread {
-                        status.text = "CM triangle FAILED: L2 pause timeout"
-                        cmTriangleButton.isEnabled = true
+                try {
+                    if (l2 != null && !l2.pauseSurfaceAndAwait()) {
+                        runOnUiThread {
+                            status.text = "CM triangle FAILED: L2 pause timeout"
+                        }
+                        return@thread
                     }
-                    return@thread
+                    val cm = triangleCmOneShot
+                    if (cm == null) {
+                        runOnUiThread { status.text = "CM triangle FAILED: CM path not wired" }
+                        return@thread
+                    }
+                    if (!cm.drawOnceAndAwait(surface, w, h)) {
+                        runOnUiThread {
+                            status.text = "CM triangle FAILED: timeout or released"
+                        }
+                    }
+                } finally {
+                    val resumeSurface = latestSurface
+                    val rw = surfaceWidth
+                    val rh = surfaceHeight
+                    if (l2 != null &&
+                        resumeSurface != null &&
+                        resumeSurface.isValid &&
+                        rw > 0 &&
+                        rh > 0
+                    ) {
+                        if (!l2.resumeSurfaceAndAwait(resumeSurface, rw, rh)) {
+                            runOnUiThread {
+                                status.text = "CM done but L2 resume failed/timeout"
+                            }
+                        }
+                    }
+                    runOnUiThread { cmTriangleButton.isEnabled = true }
                 }
-                triangleCmOneShot?.drawOnce(surface, w, h)
             }
         }
     }
