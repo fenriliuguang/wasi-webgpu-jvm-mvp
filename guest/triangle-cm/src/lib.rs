@@ -1,8 +1,13 @@
-//! Experimental Component Model guest for a single-shot on-screen red triangle.
+//! Experimental Component Model guest for on-screen red triangle.
 //! Imports experimental:webgpu-cm/host — NOT compliant wasi:webgpu.
 //! Host injects Android native window; Guest only holds `surface`.
+//!
+//! - `run-triangle`: one-shot configure → draw → present → unconfigure
+//! - `init-triangle` / `draw-frame` / `drop-triangle`: host-driven frame loop
 
 #![no_main]
+
+use std::cell::RefCell;
 
 wit_bindgen::generate!({
     world: "triangle",
@@ -24,18 +29,24 @@ const SHADER: &str = concat!(
     "}\n",
 );
 
+struct TriangleState {
+    device: experimental::webgpu_cm::host::Device,
+    queue: experimental::webgpu_cm::host::Queue,
+    surface: experimental::webgpu_cm::host::Surface,
+    pipeline: experimental::webgpu_cm::host::RenderPipeline,
+}
+
+thread_local! {
+    static STATE: RefCell<Option<TriangleState>> = RefCell::new(None);
+}
+
 struct Component;
 
 impl Guest for Component {
     fn run_triangle(window_handle: u64, width: u32, height: u32) -> Result<(), String> {
         use experimental::webgpu_cm::host;
 
-        if width == 0 || height == 0 {
-            return Err(format!("invalid surface size {width}x{height}"));
-        }
-        if window_handle == 0 {
-            return Err("window-handle is null".into());
-        }
+        validate_window(window_handle, width, height)?;
 
         let adapter = host::request_adapter();
         let device = adapter.request_device();
@@ -47,20 +58,89 @@ impl Guest for Component {
         let shader = device.create_shader_module(SHADER);
         let pipeline = device.create_render_pipeline_triangle(&shader, format);
 
-        let view = surface.get_current_texture_view();
-        let encoder = device.create_command_encoder();
-        let pass = encoder.begin_render_pass_clear(&view, 0.08, 0.09, 0.12, 1.0);
-        pass.set_pipeline(&pipeline);
-        pass.draw(3);
-        pass.end();
-
-        let cmd = encoder.finish();
-        queue.submit1(cmd);
-        surface.present();
+        draw_once(&device, &queue, &surface, &pipeline)?;
         surface.unconfigure();
 
         Ok(())
     }
+
+    fn init_triangle(window_handle: u64, width: u32, height: u32) -> Result<(), String> {
+        use experimental::webgpu_cm::host;
+
+        validate_window(window_handle, width, height)?;
+
+        STATE.with(|cell| {
+            if cell.borrow().is_some() {
+                return Err("triangle already initialized; call drop-triangle first".into());
+            }
+
+            let adapter = host::request_adapter();
+            let device = adapter.request_device();
+            let queue = device.get_queue();
+            let surface = host::create_surface_from_native_window(window_handle);
+            let format = surface.configure(&device, &adapter, width, height);
+            let shader = device.create_shader_module(SHADER);
+            let pipeline = device.create_render_pipeline_triangle(&shader, format);
+
+            *cell.borrow_mut() = Some(TriangleState {
+                device,
+                queue,
+                surface,
+                pipeline,
+            });
+            Ok(())
+        })
+    }
+
+    fn draw_frame() -> Result<(), String> {
+        STATE.with(|cell| {
+            let state = cell.borrow();
+            let state = state
+                .as_ref()
+                .ok_or_else(|| "triangle not initialized; call init-triangle first".to_string())?;
+            draw_once(&state.device, &state.queue, &state.surface, &state.pipeline)
+        })
+    }
+
+    fn drop_triangle() -> Result<(), String> {
+        STATE.with(|cell| {
+            let Some(state) = cell.borrow_mut().take() else {
+                return Err("triangle not initialized".into());
+            };
+            state.surface.unconfigure();
+            // Resources drop with `state`.
+            Ok(())
+        })
+    }
+}
+
+fn validate_window(window_handle: u64, width: u32, height: u32) -> Result<(), String> {
+    if width == 0 || height == 0 {
+        return Err(format!("invalid surface size {width}x{height}"));
+    }
+    if window_handle == 0 {
+        return Err("window-handle is null".into());
+    }
+    Ok(())
+}
+
+fn draw_once(
+    device: &experimental::webgpu_cm::host::Device,
+    queue: &experimental::webgpu_cm::host::Queue,
+    surface: &experimental::webgpu_cm::host::Surface,
+    pipeline: &experimental::webgpu_cm::host::RenderPipeline,
+) -> Result<(), String> {
+    let view = surface.get_current_texture_view();
+    let encoder = device.create_command_encoder();
+    let pass = encoder.begin_render_pass_clear(&view, 0.08, 0.09, 0.12, 1.0);
+    pass.set_pipeline(pipeline);
+    pass.draw(3);
+    pass.end();
+
+    let cmd = encoder.finish();
+    queue.submit1(cmd);
+    surface.present();
+    Ok(())
 }
 
 export!(Component with_types_in self);

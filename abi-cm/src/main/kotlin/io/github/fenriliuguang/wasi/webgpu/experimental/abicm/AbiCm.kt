@@ -17,6 +17,9 @@ object AbiCm {
 
     const val EXPORT_RUN_VECTOR_ADD: String = "run-vector-add"
     const val EXPORT_RUN_TRIANGLE: String = "run-triangle"
+    const val EXPORT_INIT_TRIANGLE: String = "init-triangle"
+    const val EXPORT_DRAW_FRAME: String = "draw-frame"
+    const val EXPORT_DROP_TRIANGLE: String = "drop-triangle"
 
     object Resource {
         const val ADAPTER = "adapter"

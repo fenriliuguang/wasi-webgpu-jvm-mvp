@@ -15,11 +15,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * One-shot CM Guest red triangle on an Android [Surface].
+ * CM Guest red triangle on an Android [Surface] (host-driven frame loop).
  *
- * Does not own a frame loop — call [drawOnceAndAwait] after pausing any L2 [TriangleRenderer]
- * that shares the same Surface. All Host/CM work runs on `webgpu-triangle-cm`.
- * Reuses a single [DawnWasiWebGpuHost] and CM [WasmtimeCmTriangle.Session] across draws
+ * Call [runFrameLoopAndAwait] after pausing any L2 [TriangleRenderer] that shares the same
+ * Surface. All Host/CM work runs on `webgpu-triangle-cm`.
+ * Reuses a single [DawnWasiWebGpuHost] and CM [WasmtimeCmTriangle.Session] across runs
  * (not shared with L2; avoids process-global linker recreate traps).
  */
 class TriangleCmOneShot(
@@ -33,13 +33,14 @@ class TriangleCmOneShot(
     private var closed = false
 
     /**
-     * Run CM Guest one-shot on the CM thread and wait until present/unconfigure finishes.
+     * init-triangle → [frameCount]× draw-frame → drop-triangle on the CM thread.
      * Returns false on timeout or if already released.
      */
-    fun drawOnceAndAwait(
+    fun runFrameLoopAndAwait(
         surface: Surface,
         width: Int,
         height: Int,
+        frameCount: Int = DEFAULT_FRAME_COUNT,
         timeoutMs: Long = 60_000L,
     ): Boolean {
         val latch = CountDownLatch(1)
@@ -57,11 +58,12 @@ class TriangleCmOneShot(
                         WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
                     }
                     val windowHandle = Util.windowFromSurface(surface)
-                    s.runTriangle(windowHandle, width, height)
+                    postStatus("CM Guest triangle frame loop ($frameCount frames)…")
+                    s.runFrameLoop(windowHandle, width, height, frameCount)
                 }.onSuccess {
-                    postStatus("CM Guest triangle OK (one-shot, host+session reused)")
+                    postStatus("CM Guest triangle OK (frame loop, host+session reused)")
                 }.onFailure {
-                    Log.e(TAG, "CM triangle failed", it)
+                    Log.e(TAG, "CM triangle frame loop failed", it)
                     postStatus("CM triangle FAILED: ${it.message}")
                 }
             } finally {
@@ -95,5 +97,6 @@ class TriangleCmOneShot(
 
     companion object {
         private const val TAG = "TriangleCmOneShot"
+        private const val DEFAULT_FRAME_COUNT = 60
     }
 }

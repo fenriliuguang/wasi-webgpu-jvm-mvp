@@ -16,6 +16,13 @@
 - The frame loop `postDelayed`s on the same render thread; `surfaceDestroyed` stops the loop and `surfaceUnconfigure`s / `drop`s the Surface.  
 - Separate `DawnWasiWebGpuHost` instance (and `GPUInstance`) from vector-add; they do not share.
 
+## Surface / render (CM Guest)
+
+- The CM path uses a **separate** `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-triangle-cm`); do **not** share it across threads with the L2 Host.  
+- Host-driven frame loop: same thread `init-triangle` → loop `draw-frame` → `drop-triangle` (see `WasmtimeCmTriangle.Session.runFrameLoop`).  
+- Demo: `pauseSurfaceAndAwait` before CM (L2 releases the Surface); after CM `drop-triangle` (Guest unconfigure) then `resumeSurfaceAndAwait`.  
+- Repeated CM in one process: reuse a single CM Session (linker/instance); do not recreate the linker repeatedly (process-global host registry).
+
 ## Instance / Device / Queue
 
 | Object | Convention |

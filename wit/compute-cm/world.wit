@@ -136,8 +136,9 @@ world vector-add {
   export run-vector-add: func(a: list<f32>, b: list<f32>) -> result<list<f32>, string>;
 }
 
-/// Single-shot on-screen red triangle (Host injects Android native window).
+/// On-screen red triangle (Host injects Android native window).
 /// Guest only holds `surface`; does not create windows / wasi-gfx canvas.
+/// `run-triangle` = one-shot; `init-triangle` / `draw-frame` / `drop-triangle` = host-driven loop.
 world triangle {
   import host;
   export run-triangle: func(
@@ -145,4 +146,14 @@ world triangle {
     width: u32,
     height: u32,
   ) -> result<_, string>;
+  /// Configure surface + pipeline; leave surface configured for subsequent draw-frame.
+  export init-triangle: func(
+    window-handle: u64,
+    width: u32,
+    height: u32,
+  ) -> result<_, string>;
+  /// Acquire → clear pass → submit → present (no unconfigure).
+  export draw-frame: func() -> result<_, string>;
+  /// Unconfigure + release guest-held GPU resources from init-triangle.
+  export drop-triangle: func() -> result<_, string>;
 }

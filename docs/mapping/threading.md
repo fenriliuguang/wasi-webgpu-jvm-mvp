@@ -16,6 +16,13 @@
 - 帧循环在同一渲染线程 `postDelayed`；`surfaceDestroyed` 时停循环并 `surfaceUnconfigure` / `drop` Surface。  
 - 与向量加用的另一个 `DawnWasiWebGpuHost` 实例各用各的 `GPUInstance`，互不共享。
 
+## Surface / render（CM Guest）
+
+- CM 路径使用**单独** `DawnWasiWebGpuHost` + `HandlerThread`（`webgpu-triangle-cm`）；**不**与 L2 Host 跨线程共享。  
+- 宿主驱动帧循环：同线程 `init-triangle` → 循环 `draw-frame` → `drop-triangle`（见 `WasmtimeCmTriangle.Session.runFrameLoop`）。  
+- Demo：CM 前 `pauseSurfaceAndAwait`（L2 放 Surface）；CM 后 `drop-triangle`（Guest unconfigure）再 `resumeSurfaceAndAwait`。  
+- 同进程多次 CM：复用单个 CM Session（linker/instance），勿反复 recreate linker（进程级 host 注册表）。
+
 ## Instance / Device / Queue
 
 | 对象 | 约定 |

@@ -2,11 +2,13 @@
 
 **中文** | [English](README.en.md)
 
-Experimental **Component Model** Guest：单次上屏红三角。
+Experimental **Component Model** Guest：上屏红三角（one-shot + 宿主驱动帧循环）。
 
 - Imports `experimental:webgpu-cm/host@0.3.0`（WIT resources + methods；钉在 `wit/`）
 - **Not** compliant `wasi:webgpu` / wasi-gfx
-- Export: `run-triangle(window-handle, width, height) -> result<_, string>`
+- Exports:
+  - `run-triangle` — 单次 configure → draw → present → unconfigure
+  - `init-triangle` / `draw-frame` / `drop-triangle` — 宿主驱动帧循环
 - Host 注入 Android native window；Guest **只持** `surface`
 
 ## Rebuild

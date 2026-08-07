@@ -117,8 +117,8 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             cmTriangleButton.isEnabled = false
-            status.text = "Running CM Guest triangle (one-shot)…"
-            // Pause L2 → CM one-shot (await) → resume L2; button stays disabled for the whole span.
+            status.text = "Running CM Guest triangle (frame loop)…"
+            // Pause L2 → CM init/draw-frame/drop (await) → resume L2; button disabled for whole span.
             thread {
                 val l2 = triangleRenderer
                 try {
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread { status.text = "CM triangle FAILED: CM path not wired" }
                         return@thread
                     }
-                    if (!cm.drawOnceAndAwait(surface, w, h)) {
+                    if (!cm.runFrameLoopAndAwait(surface, w, h)) {
                         runOnUiThread {
                             status.text = "CM triangle FAILED: timeout or released"
                         }
