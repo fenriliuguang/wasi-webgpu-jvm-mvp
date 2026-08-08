@@ -639,6 +639,12 @@ class DawnWasiWebGpuHost private constructor(
         drop(handle, closeResource = true)
     }
 
+    override fun tryDrop(handle: GpuHandle): Boolean {
+        synchronized(gpuLock) {
+            return tryDropLocked(handle, closeResource = true)
+        }
+    }
+
     /**
      * @param closeResource when false, only remove the handle table entry (abort paths before
      * present). After [surfacePresent], prefer [releaseFrameResources] / closeResource=true so
@@ -646,19 +652,29 @@ class DawnWasiWebGpuHost private constructor(
      */
     fun drop(handle: GpuHandle, closeResource: Boolean) {
         synchronized(gpuLock) {
-            dropLocked(handle, closeResource)
+            if (!tryDropLocked(handle, closeResource)) {
+                throw HostException.InvalidHandle(handle, "already dropped or unknown")
+            }
         }
     }
 
     /** Caller must hold [gpuLock]. */
     private fun dropLocked(handle: GpuHandle, closeResource: Boolean) {
-        val entry = handles.drop(handle)
+        if (!tryDropLocked(handle, closeResource)) {
+            throw HostException.InvalidHandle(handle, "already dropped or unknown")
+        }
+    }
+
+    /** Caller must hold [gpuLock]. */
+    private fun tryDropLocked(handle: GpuHandle, closeResource: Boolean): Boolean {
+        val entry = handles.tryDrop(handle) ?: return false
         pipelineLayouts.remove(handle.raw)?.let { layout ->
             runCatching { layout.close() }
         }
         if (closeResource) {
             closeGpuResource(entry.resource)
         }
+        return true
     }
 
     private fun closeGpuResource(resource: Any) {
@@ -685,7 +701,7 @@ class DawnWasiWebGpuHost private constructor(
             )
         ) {
             for (handle in handles.handlesOfKind(kind)) {
-                runCatching { dropLocked(handle, closeResource = true) }
+                tryDropLocked(handle, closeResource = true)
             }
         }
         runCatching { instance.processEvents() }
@@ -699,15 +715,14 @@ class DawnWasiWebGpuHost private constructor(
 
     override fun releaseSurfaces() {
         synchronized(gpuLock) {
-            // Guest WIT destructors are not wired — per-frame Texture/View stay in the table
-            // and can pin the Android swapchain so GPUSurface.close() never api_disconnects
-            // (VK_ERROR_NATIVE_WINDOW_IN_USE_KHR for the next owner).
+            // Per-frame Texture/View (and unpaired orphans) can pin the Android swapchain so
+            // GPUSurface.close() never api_disconnects (WINDOW_IN_USE for the next owner).
             releaseFrameResourcesLocked()
             for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
                 runCatching {
                     handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()
                 }
-                runCatching { dropLocked(handle, closeResource = true) }
+                tryDropLocked(handle, closeResource = true)
             }
             runCatching { instance.processEvents() }
         }
@@ -740,12 +755,12 @@ class DawnWasiWebGpuHost private constructor(
             )
             for (kind in closeOrder) {
                 for (handle in handles.handlesOfKind(kind)) {
-                    runCatching { dropLocked(handle, closeResource = true) }
+                    tryDropLocked(handle, closeResource = true)
                 }
             }
             for (kind in ResourceKind.entries) {
                 for (handle in handles.handlesOfKind(kind)) {
-                    runCatching { dropLocked(handle, closeResource = true) }
+                    tryDropLocked(handle, closeResource = true)
                 }
             }
             handles.clear()

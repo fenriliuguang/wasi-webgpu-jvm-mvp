@@ -72,9 +72,12 @@ class HandleTable {
     }
 
     fun drop(handle: GpuHandle): Entry {
-        return entries.remove(handle.raw)
+        return tryDrop(handle)
             ?: throw HostException.InvalidHandle(handle, "already dropped or unknown")
     }
+
+    /** Remove [handle] if present; returns null when already dropped / unknown. */
+    fun tryDrop(handle: GpuHandle): Entry? = entries.remove(handle.raw)
 
     /** Snapshot of live handles with [kind] (safe to drop while iterating the returned list). */
     fun handlesOfKind(kind: ResourceKind): List<GpuHandle> =

@@ -43,9 +43,11 @@ A WIT records（render / pipeline 等）
 
 ### B — Guest 资源析构接线
 
-- [ ] WIT resource destructor（或等价 drop 路径）接到 Host，帧内 Texture/View 等可随 Guest drop 释放
-- [ ] 文档标明：哪些清理仍靠 Host 保险（`releaseFrameResources` / `releaseAllGpuObjects`），哪些已由析构覆盖
-- [ ] Demo CM×N + L2 resume 不回归 `WINDOW_IN_USE` / `NO_BUFFER` / trap（对照 blockers D2/D3/D5/D6）
+- [x] 帧内等价 drop：AbiCm 跟踪 View↔Texture 配对，`present` / 下次 acquire 时 `tryDrop`（Texture 非 WIT resource）
+- [x] Host `tryDrop` 幂等；`HandleTable.tryDrop`
+- [x] 文档标明：配对释放 vs 仍靠 `releaseFrameResources`（encoder 孤儿）/ Demo `releaseAllGpuObjects`（Surface/Device；真 WIT dtor 仍受 wasmtime4j `resourceTable` 阻塞）
+- [ ] Demo CM×N + L2 resume 真机复验（对照 blockers D2/D3/D5/D6）
+- [ ] （可选增量）wasmtime4j destructor miss → `host.drop(rep)` 补丁 — 可并入 C
 
 ### C — 上游贡献准备
 

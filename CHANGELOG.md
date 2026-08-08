@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening slice B (partial) — frame View↔Texture drop
+
+- L2: `tryDrop` / `HandleTable.tryDrop` (idempotent)
+- AbiCm: track View↔Texture from `getCurrentTextureView`; `tryDrop` pair on present / next acquire; `releaseFrameResources` remains encoder/orphan sweep
+- True WIT destructors still blocked by wasmtime4j `resourceTable` (optional C follow-up)
+
 ### Semantic hardening slice E — Guest vertex-buffer triangle
 
 - `guest/triangle-cm`: upload float32x2 verts (`VERTEX|COPY_DST`), `create-render-pipeline-triangle-buffers` + `set-vertex-buffer`; shader `@location(0)` (same coords/color as L2)

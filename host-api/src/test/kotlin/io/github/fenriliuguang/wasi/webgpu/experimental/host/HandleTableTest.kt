@@ -44,6 +44,15 @@ class HandleTableTest {
     }
 
     @Test
+    fun tryDropIsIdempotent() {
+        val table = HandleTable()
+        val handle = table.insert(ResourceKind.TextureView, "view")
+        assertTrue(table.tryDrop(handle) != null)
+        assertTrue(table.tryDrop(handle) == null)
+        assertFalse(table.contains(handle))
+    }
+
+    @Test
     fun handlesOfKindSnapshot() {
         val table = HandleTable()
         val s1 = table.insert(ResourceKind.Surface, "surf-1")

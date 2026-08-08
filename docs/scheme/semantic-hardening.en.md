@@ -43,9 +43,11 @@ A WIT records (render / pipeline, …)
 
 ### B — Guest resource destructor wiring
 
-- [ ] Wire WIT resource destructors (or equivalent drop) to Host so in-frame Texture/View etc. can release on Guest drop
-- [ ] Document what still relies on Host insurance (`releaseFrameResources` / `releaseAllGpuObjects`) vs destructor coverage
-- [ ] Demo CM×N + L2 resume must not regress `WINDOW_IN_USE` / `NO_BUFFER` / trap (blockers D2/D3/D5/D6)
+- [x] Frame-equivalent drop: AbiCm tracks View↔Texture pairs; `tryDrop` on present / next acquire (Texture is not a WIT resource)
+- [x] Idempotent Host `tryDrop`; `HandleTable.tryDrop`
+- [x] Docs: paired release vs still-needed `releaseFrameResources` (encoder orphans) / Demo `releaseAllGpuObjects` (Surface/Device; true WIT dtor still blocked by wasmtime4j `resourceTable`)
+- [ ] Demo CM×N + L2 resume device re-check (blockers D2/D3/D5/D6)
+- [ ] (Optional) wasmtime4j destructor miss → `host.drop(rep)` patch — may fold into C
 
 ### C — Upstream contribution prep
 

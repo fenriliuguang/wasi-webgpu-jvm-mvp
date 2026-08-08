@@ -23,10 +23,16 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
  *
  * WIT resource reps arrive as u32 and map 1:1 to L2 [GpuHandle.raw].
  * No Guest linear-memory dependency — buffer bytes arrive as [ByteArray].
+ *
+ * Slice B: tracks View↔Texture pairs created by [surfaceGetCurrentTextureView] because
+ * Texture is not a WIT resource and Guest never sees its rep. Pairs are [WasiWebGpuHost.tryDrop]ped
+ * on present / next acquire; [WasiWebGpuHost.releaseFrameResources] still sweeps encoders/orphans.
  */
 class AbiCmHostBindings(
     private val host: WasiWebGpuHost,
 ) {
+    /** view.raw → texture.raw for the current (or last) acquired swapchain frame. */
+    private val frameTextureByView = LinkedHashMap<Int, Int>()
 
     fun requestAdapter(): Int = host.requestAdapter().raw
 
@@ -136,7 +142,8 @@ class AbiCmHostBindings(
         )
 
     fun surfaceGetCurrentTextureView(surface: Int): Int {
-        // Previous frame leftovers (Guest WIT drop is not wired) pin BLAST buffers.
+        // Drop prior View↔Texture pair (and sweep encoder orphans) before acquire (D5).
+        releaseTrackedFrameTextures()
         host.releaseFrameResources()
         val result = host.surfaceGetCurrentTexture(GpuHandle(surface))
         if (
@@ -147,15 +154,27 @@ class AbiCmHostBindings(
         }
         val texture = result.texture
             ?: throw HostException.Validation("surface get-current-texture returned null texture")
-        // Texture stays in the Host table until present/releaseFrameResources — Guest only
-        // receives the view rep and never sees the texture handle.
-        return host.textureCreateView(texture).raw
+        // Guest only receives the view rep; Texture is Host-private — pair for present/drop.
+        val view = host.textureCreateView(texture)
+        frameTextureByView[view.raw] = texture.raw
+        return view.raw
     }
 
     fun surfacePresent(surface: Int) {
         host.surfacePresent(GpuHandle(surface))
-        // Return swapchain buffers to BLAST (D5); destructors are not wired from Guest.
+        // Return swapchain buffers via paired drop first; sweep covers leftover encoders.
+        releaseTrackedFrameTextures()
         host.releaseFrameResources()
+    }
+
+    private fun releaseTrackedFrameTextures() {
+        if (frameTextureByView.isEmpty()) return
+        val pairs = frameTextureByView.entries.toList()
+        frameTextureByView.clear()
+        for ((viewRaw, textureRaw) in pairs) {
+            host.tryDrop(GpuHandle(viewRaw))
+            host.tryDrop(GpuHandle(textureRaw))
+        }
     }
 
     fun surfaceUnconfigure(surface: Int) {

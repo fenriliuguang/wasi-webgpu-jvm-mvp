@@ -320,6 +320,8 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         handles.drop(handle)
     }
 
+    override fun tryDrop(handle: GpuHandle): Boolean = handles.tryDrop(handle) != null
+
     override fun releaseFrameResources() {
         for (
             kind in listOf(
@@ -332,7 +334,7 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
             )
         ) {
             for (handle in handles.handlesOfKind(kind)) {
-                runCatching { drop(handle) }
+                tryDrop(handle)
             }
         }
     }

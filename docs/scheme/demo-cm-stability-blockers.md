@@ -105,8 +105,8 @@ Guest/L2 未在 present 后释放 swapchain Texture（WIT destructor 未接线�
 
 ### 对策
 
-- `WasiWebGpuHost.releaseFrameResources()`  
-- AbiCm：`getCurrentTextureView` 前、`present` 后调用  
+- `WasiWebGpuHost.releaseFrameResources()`（encoder / 孤儿扫表保险）  
+- AbiCm（本阶段 B）：`getCurrentTextureView` 记录 View↔Texture，`present` / 下次 acquire 时 `tryDrop` 配对；仍辅以 `releaseFrameResources`  
 - L2：`drawFrame` finally 调用；`Timeout` 跳帧  
 
 ---

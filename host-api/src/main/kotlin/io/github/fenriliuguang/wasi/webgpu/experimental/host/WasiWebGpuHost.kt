@@ -180,29 +180,33 @@ interface WasiWebGpuHost : AutoCloseable {
     fun drop(handle: GpuHandle)
 
     /**
+     * Drop [handle] if still live. Returns false when already dropped / unknown
+     * (safe for paired View/Texture cleanup + future Guest destructor double-drop).
+     */
+    fun tryDrop(handle: GpuHandle): Boolean
+
+    /**
      * Drop per-frame GPU objects (TextureView / Texture / encoders / command buffers).
      *
-     * Needed because wasmtime4j WIT destructors are not wired — CM Guest draw leaves
-     * swapchain textures in the handle table and BLAST can hit `NO_BUFFER_AVAILABLE`.
-     * Call after [surfacePresent] (or on frame abort).
+     * Slice B: AbiCm tracks View↔Texture pairs and [tryDrop]s them on present / next acquire;
+     * this sweep remains the insurance for encoders / orphans (true WIT destructors still
+     * blocked on wasmtime4j `resourceTable`). Call after [surfacePresent] (or on frame abort).
      */
     fun releaseFrameResources()
 
     /**
      * Unconfigure + drop every live [ResourceKind.Surface] on this host.
      *
-     * Needed after CM Guest `drop-triangle`: wasmtime4j resource destructors are not wired,
-     * so Guest drop does not release Dawn [GPUSurface] / ANativeWindow. Call before L2
-     * re-attaches the same Android Surface.
+     * Needed after CM Guest `drop-triangle` when Surface/Device may still pin ANativeWindow.
+     * Call before L2 re-attaches the same Android Surface.
      */
     fun releaseSurfaces()
 
     /**
      * Drop all GPU objects in the handle table but keep the Host / GPUInstance alive.
      *
-     * Demo CM: stronger than [releaseSurfaces] (also drops Device/Adapter/… that Guest left
-     * behind without WIT destructors) so ANativeWindow disconnects, without closing the
-     * CM Session (process-global linker recreate traps — D6).
+     * Demo CM: stronger than [releaseSurfaces] (also drops Device/Adapter/…) so ANativeWindow
+     * disconnects, without closing the CM Session (process-global linker recreate traps — D6).
      */
     fun releaseAllGpuObjects()
 
