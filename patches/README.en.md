@@ -13,7 +13,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 Source checkout under `.deps/wasmtime4j` is **not** committed (see root `.gitignore`).  
 Patches themselves are committed; build scripts clone the tag then `git apply`.
 
-Upstream contribution brief (phase C; not an opened PR): [`UPSTREAM.en.md`](UPSTREAM.en.md) — ConcurrentCallCodec u64, Validation, destructor gap, outbound order.
+Upstream gap notes (phase C; **do not open upstream PRs**): [`UPSTREAM.en.md`](UPSTREAM.en.md) — ConcurrentCallCodec u64, Validation, destructor gap, local overlays.
 
 ## Apply
 

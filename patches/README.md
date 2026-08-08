@@ -13,7 +13,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 源码检出目录 `.deps/wasmtime4j` **不入库**（见根 `.gitignore`）。  
 补丁本身入库；构建脚本 clone tag 后 `git apply`。
 
-上游贡献 brief（本阶段 C；非已提 PR）：[`UPSTREAM.md`](UPSTREAM.md) / [EN](UPSTREAM.en.md) — 含 ConcurrentCallCodec u64、Validation、destructor 缺口与外发顺序。
+上游缺口备忘（本阶段 C；**不对上游提 PR**）：[`UPSTREAM.md`](UPSTREAM.md) / [EN](UPSTREAM.en.md) — ConcurrentCallCodec u64、Validation、destructor 与本地 overlay。
 
 ## 应用
 

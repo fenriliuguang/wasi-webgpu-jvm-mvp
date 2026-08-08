@@ -13,7 +13,7 @@ Without wasi-gfx or a full compliant world, push the CM semantic surface toward 
 ```text
 A WIT records (render / pipeline, …)
   → B Guest/Host resource destructor wiring
-  → C Upstream wasmtime4j patch contribution prep
+  → C Upstream gap notes in-repo (no upstream PRs)
   → D D7 Studio instrumented vs script alignment
   → E Richer Guest demo (still experimental WIT)
 ```
@@ -28,7 +28,7 @@ A WIT records (render / pipeline, …)
 | WIT version | **Bump** `experimental:webgpu-cm` when records change import shape (expect `0.3.0` → `0.4.0`); pure additive tweaks may stay unbumped (same convention as prior slice) |
 | Specialized APIs | Keep helpers such as `create-render-pipeline-triangle` or mark deprecated; new path prefers records/descriptors |
 | Destructor policy | WIT resource drop → Host `drop*`; reduce **semantic** reliance on `releaseFrameResources` / `releaseAllGpuObjects` (Demo may keep settle as belt-and-suspenders) |
-| Upstream (C) | Brief in [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md); phase goal is submittable notes + keep in-repo overlay; upstream PR merge **not** required |
+| Upstream (C) | In-repo notes + overlay strategy in [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md); **do not** open upstream issues/PRs |
 | Instrumented (D) | Close D7: align Studio `*InstrumentedTest` with `scripts/run-android-instrumented.ps1`, or document a single recommended entry |
 | Acceptance | Desktop unit tests (with natives) + Android instrumented green + Demo taps must not regress D1–D6; docs / CHANGELOG per sub-slice |
 
@@ -47,12 +47,12 @@ A WIT records (render / pipeline, …)
 - [x] Idempotent Host `tryDrop`; `HandleTable.tryDrop`
 - [x] Docs: paired release vs still-needed `releaseFrameResources` (encoder orphans) / Demo `releaseAllGpuObjects` (Surface/Device; true WIT dtor still blocked by wasmtime4j `resourceTable`)
 - [ ] Demo CM×N + L2 resume device re-check (blockers D2/D3/D5/D6)
-- [x] (Optional note) wasmtime4j destructor miss → `host.drop(rep)` documented in UPSTREAM §4 (real patch / PR still optional)
+- [x] (Optional note) wasmtime4j destructor miss → `host.drop(rep)` documented in UPSTREAM §4 (notes only; no upstream submit)
 
-### C — Upstream contribution prep
+### C — Upstream gap notes (no upstream PRs)
 
-- [x] `ConcurrentCallCodec` unsigned-u64 (plus Validation / destructor / native patches) packaged as outbound brief: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)
-- [x] In-repo overlay / filtered-jar strategy documented; unchanged until upstream merges; **no** mandatory open PR
+- [x] `ConcurrentCallCodec` unsigned-u64 (plus Validation / destructor / native patches) recorded in-repo: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)
+- [x] Overlay / filtered-jar strategy documented and self-contained; **do not** open upstream issues/PRs for this project
 
 ### D — D7 instrumented peripheral
 

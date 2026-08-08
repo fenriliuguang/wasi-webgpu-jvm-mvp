@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)
-- **本阶段**：语义加固与工程清债（A WIT records → B 资源析构 → C 上游 brief → D D7 仪器 → E 更丰富 Guest demo）→ [计划](docs/scheme/semantic-hardening.md)
+- **本阶段**：语义加固与工程清债（A WIT records → B 资源析构 → C 上游缺口备忘（不对上游提 PR）→ D D7 仪器 → E 更丰富 Guest demo）→ [计划](docs/scheme/semantic-hardening.md)
 - **未锁定（本阶段不做）**：wasi-gfx / 合规全量 world；Maven Central；`abi-mvp` 扁平 render
 
 ## 参考

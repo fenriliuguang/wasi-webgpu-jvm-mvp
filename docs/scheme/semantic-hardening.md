@@ -13,7 +13,7 @@
 ```text
 A WIT records（render / pipeline 等）
   → B Guest/Host 资源析构接线
-  → C 上游 wasmtime4j 补丁贡献准备
+  → C 上游缺口本仓备忘（不对上游提 PR）
   → D D7 Studio 仪器与脚本对齐
   → E 更丰富 Guest demo（仍走 experimental WIT）
 ```
@@ -28,7 +28,7 @@ A WIT records（render / pipeline 等）
 | WIT 版本 | records 足以改变 import 形状时 **bump** `experimental:webgpu-cm`（预期 `0.3.0` → `0.4.0`）；纯 additive 小改可不 bump（与上一切片惯例一致） |
 | 特化 API | `create-render-pipeline-triangle` 等可保留为便捷路径，或标 deprecated；新路径以 records/descriptor 为主 |
 | 析构策略 | WIT resource drop → Host `drop*`；目标减少对 `releaseFrameResources` / `releaseAllGpuObjects` 的**语义依赖**（Demo 交接仍可保留 settle 保险） |
-| 上游（C） | 以 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) 为 brief；本阶段目标是可提交的说明 + 本仓可继续用 overlay；**不强制**上游 PR 合并 |
+| 上游（C） | 以 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) 为本仓备忘 + overlay 策略；**不对上游提 issue/PR** |
 | 仪器（D） | 收口 D7：Studio 仪器路径与 `scripts/run-android-instrumented.ps1` 对齐或文档标明唯一推荐入口 |
 | 验收形态 | 桌面单测（有 natives）+ Android 仪器绿灯 + Demo 手点不回归 D1–D6；每子切片文档 / CHANGELOG |
 
@@ -47,12 +47,12 @@ A WIT records（render / pipeline 等）
 - [x] Host `tryDrop` 幂等；`HandleTable.tryDrop`
 - [x] 文档标明：配对释放 vs 仍靠 `releaseFrameResources`（encoder 孤儿）/ Demo `releaseAllGpuObjects`（Surface/Device；真 WIT dtor 仍受 wasmtime4j `resourceTable` 阻塞）
 - [ ] Demo CM×N + L2 resume 真机复验（对照 blockers D2/D3/D5/D6）
-- [x] （可选增量说明）wasmtime4j destructor miss → `host.drop(rep)` 已写入 UPSTREAM §4（真补丁 / PR 仍可选）
+- [x] （可选增量说明）wasmtime4j destructor miss → `host.drop(rep)` 已写入 UPSTREAM §4（仅备忘，不向上游提）
 
-### C — 上游贡献准备
+### C — 上游缺口备忘（不对上游提 PR）
 
-- [x] `ConcurrentCallCodec` unsigned-u64（及 Validation / destructor / native patches）整理为可外发 brief：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)
-- [x] 本仓 overlay / 过滤 jar 策略写明；上游合并前不变；**不强制**已提 PR
+- [x] `ConcurrentCallCodec` unsigned-u64（及 Validation / destructor / native patches）写入本仓备忘：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)
+- [x] 本仓 overlay / 过滤 jar 策略写明并长期自洽；**禁止**对本项目代提上游 issue/PR
 
 ### D — D7 仪器外围
 

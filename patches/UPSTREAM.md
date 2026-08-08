@@ -2,11 +2,12 @@
 
 **中文** | [English](UPSTREAM.en.md)
 
-> **本阶段 C（2026-08-08）**：本文为可外发 contribution brief（非已提 PR）。  
-> 对照实现仓：本仓库 `wasi-webgpu-jvm-mvp`；上游 [tegmentum/wasmtime4j](https://github.com/tegmentum/wasmtime4j)。  
+> **本阶段 C（2026-08-08）**：本文为**本仓备忘**（对照上游缺口与本地 workaround）。  
+> 对照实现仓：本仓库 `wasi-webgpu-jvm-mvp`；上游参考 [tegmentum/wasmtime4j](https://github.com/tegmentum/wasmtime4j)。  
 > 钉定版本：`v47.0.2-1.5.0`（`ai.tegmentum:wasmtime4j`）。
 
-仅在有精力维护上游时再开 issue/PR。本仓 **overlay / 过滤 jar / 本地 patch 策略保持不变**，上游合并后可再撤本地覆盖。
+**硬约束：本项目不对上游仓库提交 issue / PR，也不代用户推送。**  
+依赖本仓 **overlay / 过滤 jar / 本地 patch** 长期自洽；若上游自行合并同类修复，再考虑撤本地覆盖。
 
 ---
 
@@ -15,9 +16,9 @@
 | 项 | 状态 | 本仓 workaround |
 |----|------|-----------------|
 | Native Android / CM resources patches | 已入库 diff，构建脚本 `git apply` | `scripts/build-wasmtime4j-*.ps1` |
-| Java `ConcurrentCallCodec` unsigned-u64 | **优先外发**；上游未修 | android-demo 过滤 jar + 本地类 |
-| Java `Validation` TBI 句柄 | 可随 u64 一并提 | 同上 |
-| CM resource destructor → Host `drop(rep)` | **建议外发**（本阶段 B 记录缺口） | AbiCm View↔Texture 配对 + `releaseFrame*` 保险 |
+| Java `ConcurrentCallCodec` unsigned-u64 | 上游未修；备忘优先项 | android-demo 过滤 jar + 本地类 |
+| Java `Validation` TBI 句柄 | 上游未修 | 同上 |
+| CM resource destructor → Host `drop(rep)` | 缺口已记录（本阶段 B） | AbiCm View↔Texture 配对 + `releaseFrame*` 保险 |
 
 ---
 
@@ -68,9 +69,9 @@ E JniComponentLinker: Host function callback failed for ID: …
 - 同库 `ComponentTypeCodec.parseNumber` **已有** `Long.parseUnsignedLong` 回退；`ConcurrentCallCodec` 漏对齐
 - U64 **序列化**若用有符号十进制，高位句柄 round-trip 也会坏
 
-### 建议上游改动（最小）
+### 期望行为（若上游自行修复；本仓不代提）
 
-与 `ComponentTypeCodec` 对齐：
+与 `ComponentTypeCodec` 对齐即可：
 
 1. **Parse**：`Long.parseLong` 失败时 `Long.parseUnsignedLong(numStr)`（bits 经 `Number.longValue()` 回传）
 2. **Serialize U64**：`Long.toUnsignedString(val.asU64())`，勿用有符号 `append(long)`
@@ -81,9 +82,9 @@ E JniComponentLinker: Host function callback failed for ID: …
 - 构建：[`android-demo/build.gradle.kts`](../android-demo/build.gradle.kts) 过滤 jar，排除 `ConcurrentCallCodec*.class`（含内部类）后用本地类
 - 踩坑记录：[`docs/scheme/guest-onscreen-cm-blockers.md`](../docs/scheme/guest-onscreen-cm-blockers.md) **P2**
 
-### 验收建议（上游）
+### 本仓自测要点
 
-单元测试：`parseNumber("18446744073709551615")`（或任一 `> Long.MAX_VALUE` 的十进制）不抛；U64 serialize → parse 位型相等。
+`parseNumber` 接受任一 `> Long.MAX_VALUE` 的无符号十进制不抛；U64 serialize → parse 位型相等（见本地 overlay）。
 
 ---
 
@@ -93,11 +94,11 @@ E JniComponentLinker: Host function callback failed for ID: …
 |-------------|---------|---------------------------|
 | `ai.tegmentum.wasmtime4j.util.Validation` | ARM64 TBI/PAC 指针按 signed `long` 看像“负数”被拒 | 允许非零 opaque handle（或文档说明 bit-cast） |
 
-本仓同样经过滤 jar + android-demo 本地类覆盖。可与 §2 同 PR 或分 issue。
+本仓同样经过滤 jar + android-demo 本地类覆盖。
 
 ---
 
-## 4. CM resource destructor → Host `drop(rep)`（建议外发）
+## 4. CM resource destructor → Host `drop(rep)`（缺口备忘）
 
 ### 缺口
 
@@ -111,33 +112,24 @@ E JniComponentLinker: Host function callback failed for ID: …
 
 本仓对策（本阶段 B）：AbiCm **View↔Texture 配对** `tryDrop` + `releaseFrameResources` / Demo `releaseAllGpuObjects` 保险——**不是**真 WIT destructor。
 
-### 建议上游改动（二选一或组合）
+### 期望行为（若上游自行修复；本仓不代提）
 
-**A（推荐，兼容 L2-rep 模型）**  
+**A（兼容 L2-rep 模型）**  
 `resourceTable` miss 时仍调用可选 `IntConsumer` / destructor，参数为 **rep u32**（由 host 自行映射到自有表）。
 
 **B**  
-文档明确：destructor 仅在走了 `.constructor` 填充 `resourceTable` 时生效；并提供「rep-only host resources」官方示例。
+文档明确：destructor 仅在走了 `.constructor` 填充 `resourceTable` 时生效；并提供「rep-only host resources」示例。
 
-相关：已有 CM resources native patch（§1）；destructor 路径是 Java/JNI 侧增量。本仓计划：[`docs/scheme/semantic-hardening.md`](../docs/scheme/semantic-hardening.md) 子切片 B/C。
+相关：已有 CM resources native patch（§1）。本仓计划：[`docs/scheme/semantic-hardening.md`](../docs/scheme/semantic-hardening.md) 子切片 B。
 
 ---
 
-## 5. 本仓 overlay 策略（切换说明）
+## 5. 本仓 overlay 策略
 
-| 层 | 策略 | 上游合并后 |
-|----|------|------------|
+| 层 | 策略 | 若上游日后自带同类修复 |
+|----|------|------------------------|
 | Native `.so` | 构建时 `git apply` 入库 patch | 升依赖版本；可删对应 patch 段 |
 | Java Validation / ConcurrentCallCodec | 过滤 Maven jar + android-demo 同名包覆盖 | 去掉 `filterWasmtime4jJar` exclude 与本地类 |
-| 帧 Texture 清理 | AbiCm 配对 + Host sweep | 若 §4A 落地，可收窄 sweep 语义依赖 |
+| 帧 Texture 清理 | AbiCm 配对 + Host sweep | 若 §4A 类行为出现，可收窄 sweep 语义依赖 |
 
-**本阶段不强制上游 PR 合并**；brief 就绪即可勾选 C。
-
----
-
-## 建议外发顺序
-
-1. **Issue / 小 PR**：`ConcurrentCallCodec` unsigned-u64（§2）— 纯 Java、风险低、本仓已验证  
-2. **Issue**：`Validation` opaque handles（§3）  
-3. **Issue**：CM destructor miss → rep callback（§4）— 需设计评审  
-4. Native patches（§1）— 体积更大，可另开里程碑  
+**C 验收**：本仓备忘写清即可；**不对上游提 issue/PR**。

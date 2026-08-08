@@ -63,7 +63,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 ## Status
 
 - **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH)
-- **Current phase**: semantic hardening & engineering debt (A WIT records → B destructors → C upstream brief → D D7 instrumented → E richer Guest demo) → [plan](docs/scheme/semantic-hardening.en.md)
+- **Current phase**: semantic hardening & engineering debt (A WIT records → B destructors → C upstream gap notes — no upstream PRs → D D7 instrumented → E richer Guest demo) → [plan](docs/scheme/semantic-hardening.en.md)
 - **Unlocked (out of this phase)**: wasi-gfx / full compliant world; Maven Central; `abi-mvp` flat render
 
 ## References

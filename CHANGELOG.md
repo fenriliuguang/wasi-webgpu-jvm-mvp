@@ -5,10 +5,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
-### Semantic hardening slice C — upstream contribution brief
+### Semantic hardening slice C — upstream gap notes (in-repo only)
 
-- Expanded [`patches/UPSTREAM.md`](patches/UPSTREAM.md) / EN: ConcurrentCallCodec unsigned-u64 (primary), Validation TBI, CM destructor→rep gap, native patch index, overlay switchover
-- Phase plan C checked; no upstream PR required this slice
+- Expanded [`patches/UPSTREAM.md`](patches/UPSTREAM.md) / EN: ConcurrentCallCodec unsigned-u64, Validation TBI, CM destructor→rep gap, native patch index, overlay strategy
+- Hard rule: **do not** open issues/PRs against tegmentum/wasmtime4j from this project; overlays stay long-term
 
 ### Semantic hardening slice B (partial) — frame View↔Texture drop
 
