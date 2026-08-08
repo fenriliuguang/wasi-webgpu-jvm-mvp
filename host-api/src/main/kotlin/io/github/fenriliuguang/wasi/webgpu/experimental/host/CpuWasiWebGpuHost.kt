@@ -305,10 +305,37 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         handles.drop(handle)
     }
 
+    override fun releaseFrameResources() {
+        for (
+            kind in listOf(
+                ResourceKind.TextureView,
+                ResourceKind.Texture,
+                ResourceKind.CommandBuffer,
+                ResourceKind.RenderPassEncoder,
+                ResourceKind.ComputePassEncoder,
+                ResourceKind.CommandEncoder,
+            )
+        ) {
+            for (handle in handles.handlesOfKind(kind)) {
+                runCatching { drop(handle) }
+            }
+        }
+    }
+
     override fun releaseSurfaces() {
+        releaseFrameResources()
         for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
             runCatching { drop(handle) }
         }
+    }
+
+    override fun releaseAllGpuObjects() {
+        for (kind in ResourceKind.entries) {
+            for (handle in handles.handlesOfKind(kind)) {
+                runCatching { drop(handle) }
+            }
+        }
+        handles.clear()
     }
 
     override fun close() {

@@ -4,7 +4,7 @@
 
 > **Status: complete (2026-08-07).** DoD archive: [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md).  
 > Continues P6: [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md).  
-> **Device regression (locked, in progress)**: D2/D3 (`WINDOW_IN_USE`) closed on V2458A; remaining D5 / D6 / D1 → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH).
+> **Device regression**: D1–D6 closed on V2458A (2026-08-08) → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH).
 
 ## One-liner
 
@@ -12,9 +12,9 @@ Close out P6: make the manual Demo "CM triangle" as green as the instrumented pa
 
 ```text
 MainActivity "CM triangle" button
-  → pauseSurfaceAndAwait (L2 stops frames + full Host teardown)
-  → CM owns the Surface: init → draw-frame loop (per-press Host + Session)
-  → finish: drop-triangle → tearDownCmGpu (releaseSurfaces + Host.close) → resume L2
+  → pauseSurfaceAndAwait (L2 stops frames + Host teardown)
+  → CM owns the Surface: init → draw-frame loop (reused Host + Session)
+  → finish: drop-triangle → releaseAllGpuObjects → resume L2
 ```
 
 ## Locked decisions
@@ -23,9 +23,9 @@ MainActivity "CM triangle" button
 |----------|----------|
 | Main slice | Close out the four P6 symptom classes + host-driven frame loop; no WIT semantic-surface changes (no records), no wasi-gfx |
 | Surface ownership | L2 fully paused while CM runs (`pauseSurfaceAndAwait` → `teardownGpu`); then `resumeSurfaceAndAwait` |
-| Host / Session (Demo) | **After regression**: create and tear down CM `DawnWasiWebGpuHost` + Session each press (else Mali `WINDOW_IN_USE`). Instrumented path may still reuse Session (`cmGuestRepeatTriangleReusesSession`) |
+| Host / Session (Demo) | Reuse Host + Session; each press `releaseAllGpuObjects` (keep Instance/linker) |
 | Frame-loop shape | Stay on WIT `@0.3.0`; append `init-triangle` / `draw-frame` / `drop-triangle` (additive, no bump); host `webgpu-triangle-cm` drives the loop. Keep `run-triangle` for instrumented one-shot |
-| Same-process repeat | Instrumented: reuse Session; Demo taps: full teardown (see blockers D2/D3) |
+| Same-process repeat | Demo and instrumented reuse Session; frame cleanup via `releaseFrameResources` |
 | Acceptance | Manual tap gating + instrumented repeat-trigger case |
 
 ## DoD

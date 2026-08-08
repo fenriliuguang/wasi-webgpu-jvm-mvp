@@ -16,9 +16,9 @@ import java.nio.file.Path
  * Desktop CpuHost has no Android Surface — expect [io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException.Unsupported]
  * (or a trap wrapping it). Successful draw is Android / Dawn only.
  *
- * Prefer [Session] for instrumented same-process repeats — wasmtime4j CM host callbacks are
- * process-global and back-to-back linker recreate can trap (`invalid handle` / missing destructor).
- * Manual Demo tears down Host+Session each CM press (Mali `WINDOW_IN_USE` otherwise).
+ * Prefer [Session] for Demo taps and instrumented same-process repeats — wasmtime4j CM host
+ * callbacks are process-global and back-to-back linker recreate can trap. Free the Android
+ * window with [WasiWebGpuHost.releaseAllGpuObjects] between presses (keep Instance/Session).
  */
 object WasmtimeCmTriangle {
 

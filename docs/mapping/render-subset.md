@@ -32,8 +32,8 @@ guest/triangle-cm（triangle_cm.wasm，world triangle）
 
 - **Window**：Host 侧注入 native window（`Surface` → ANativeWindow 指针，按 u64 传）；Guest 只持 `surface` resource，不创建 window
 - **One-shot**（`run-triangle`）：configure → draw → present → unconfigure；仪器默认路径
-- **帧循环**（宿主驱动）：`init-triangle` → 循环 `draw-frame` → `drop-triangle`；Demo `TriangleCmOneShot.runFrameLoopAndAwait`（每次完整 Host+Session teardown）；线程约定见 [`threading.md`](threading.md)
-- **验收**：仪器 one-shot + `cmGuestRepeatTriangleReusesSession`；Demo pause→CM→resume（[`archive-demo-cm-stability-dod.md`](../scheme/archive-demo-cm-stability-dod.md)）；真机回归剩余项 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)
+- **帧循环**（宿主驱动）：`init-triangle` → 循环 `draw-frame` → `drop-triangle`；Demo `TriangleCmOneShot.runFrameLoopAndAwait`（复用 Session + `releaseAllGpuObjects`）；线程约定见 [`threading.md`](threading.md)
+- **验收**：仪器 one-shot + `cmGuestRepeatTriangleReusesSession`；Demo pause→CM→resume；真机回归 D1–D6 见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)
 - **桌面**：无 Android Surface 时 `CpuWasiWebGpuHost` → Unsupported，相关单测 skip（与 CM compute 门控一致）
 - **u64 注意**：`window-handle` 高位可超 `Long.MAX_VALUE`；wasmtime4j `ConcurrentCallCodec` 须按无符号解析（android-demo 覆盖，见 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)）；P6 Demo 稳性已收口（同上归档）
 

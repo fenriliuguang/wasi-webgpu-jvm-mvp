@@ -161,6 +161,15 @@ interface WasiWebGpuHost : AutoCloseable {
     fun drop(handle: GpuHandle)
 
     /**
+     * Drop per-frame GPU objects (TextureView / Texture / encoders / command buffers).
+     *
+     * Needed because wasmtime4j WIT destructors are not wired — CM Guest draw leaves
+     * swapchain textures in the handle table and BLAST can hit `NO_BUFFER_AVAILABLE`.
+     * Call after [surfacePresent] (or on frame abort).
+     */
+    fun releaseFrameResources()
+
+    /**
      * Unconfigure + drop every live [ResourceKind.Surface] on this host.
      *
      * Needed after CM Guest `drop-triangle`: wasmtime4j resource destructors are not wired,
@@ -168,6 +177,15 @@ interface WasiWebGpuHost : AutoCloseable {
      * re-attaches the same Android Surface.
      */
     fun releaseSurfaces()
+
+    /**
+     * Drop all GPU objects in the handle table but keep the Host / GPUInstance alive.
+     *
+     * Demo CM: stronger than [releaseSurfaces] (also drops Device/Adapter/… that Guest left
+     * behind without WIT destructors) so ANativeWindow disconnects, without closing the
+     * CM Session (process-global linker recreate traps — D6).
+     */
+    fun releaseAllGpuObjects()
 
     override fun close()
 }

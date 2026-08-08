@@ -5,17 +5,17 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
-### Demo CM device stability regression (D2/D3)
+### Demo CM device stability regression — complete 2026-08-08 (V2458A)
 
-- Fix Mali `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` after CM→L2: `DawnWasiWebGpuHost.close()` closes GPU objects (not `handles.clear()` only); `releaseSurfaces()` drops pinned per-frame Texture/View before Surface; each CM press full Host+Session teardown
-- L2: `gpuLock`, deferred first frame, `pausedForCm`, resume retries; swapchain Texture/View table-only drop
-- Docs: blockers D2/D3 closed on vivo V2458A; sync scheme/README, threading, render-subset, demo-cm-stability plan + archives (Demo per-press Host teardown); D5/D6/D1 still open
+- D2/D3: `close()` closes GPU objects; `releaseAllGpuObjects()` clears handle table (keep Instance) so CM can reuse Session without `WINDOW_IN_USE`
+- D5: `releaseFrameResources()` after present; AbiCm `getCurrentTextureView`/`present` hooks (Guest WIT destructors unwired)
+- D6: Demo keeps Host+Session across presses; recreate Session only on trap
+- D1: render-path `gpuLock` (encode/submit/present/drop vs `processEvents`); deferred first frame; Vulkan + Fifo
+- Docs: blockers D1–D6 closed; README / scheme stage unlocked for later work
 
 ### Planning
 
-- Locked next slice: Demo CM device stability regression (`docs/scheme/demo-cm-stability-blockers.md` — D5/D6 / D1 root-cause); prior Demo CM stability DoD remains archived
-- Locked next slice: Demo CM stability + frame loop (`docs/scheme/demo-cm-stability.md`); Guest CM on-screen DoD archived to `docs/scheme/archive-guest-onscreen-cm-dod.md`; root README slimmed to basic info + status
-- Locked next slice: Guest CM on-screen (`docs/scheme/guest-onscreen-cm.md`); baseline DoD archived from root README
+- Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
 
 ### Demo CM stability + frame loop — DoD complete 2026-08-07
 

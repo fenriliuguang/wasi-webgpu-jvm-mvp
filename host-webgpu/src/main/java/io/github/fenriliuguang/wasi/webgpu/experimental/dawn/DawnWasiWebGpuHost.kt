@@ -274,11 +274,13 @@ class DawnWasiWebGpuHost private constructor(
         device: GpuHandle,
         descriptor: CommandEncoderDescriptor,
     ): GpuHandle {
-        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
-        val encoder = gpuDevice.createCommandEncoder(
-            GPUCommandEncoderDescriptor(label = descriptor.label),
-        )
-        return handles.insert(ResourceKind.CommandEncoder, encoder)
+        synchronized(gpuLock) {
+            val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+            val encoder = gpuDevice.createCommandEncoder(
+                GPUCommandEncoderDescriptor(label = descriptor.label),
+            )
+            return handles.insert(ResourceKind.CommandEncoder, encoder)
+        }
     }
 
     override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle {
@@ -370,31 +372,35 @@ class DawnWasiWebGpuHost private constructor(
         shader: GpuHandle,
         format: Int,
     ): GpuHandle {
-        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
-        val module = handles.get<GPUShaderModule>(shader, ResourceKind.ShaderModule)
-        val pipelineLayout = gpuDevice.createPipelineLayout(
-            GPUPipelineLayoutDescriptor(bindGroupLayouts = emptyArray()),
-        )
-        val pipeline = gpuDevice.createRenderPipeline(
-            GPURenderPipelineDescriptor(
-                vertex = GPUVertexState(module = module, entryPoint = "vs_main"),
-                layout = pipelineLayout,
-                primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList),
-                fragment = GPUFragmentState(
-                    module = module,
-                    entryPoint = "fs_main",
-                    targets = arrayOf(GPUColorTargetState(format = format)),
+        synchronized(gpuLock) {
+            val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+            val module = handles.get<GPUShaderModule>(shader, ResourceKind.ShaderModule)
+            val pipelineLayout = gpuDevice.createPipelineLayout(
+                GPUPipelineLayoutDescriptor(bindGroupLayouts = emptyArray()),
+            )
+            val pipeline = gpuDevice.createRenderPipeline(
+                GPURenderPipelineDescriptor(
+                    vertex = GPUVertexState(module = module, entryPoint = "vs_main"),
+                    layout = pipelineLayout,
+                    primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList),
+                    fragment = GPUFragmentState(
+                        module = module,
+                        entryPoint = "fs_main",
+                        targets = arrayOf(GPUColorTargetState(format = format)),
+                    ),
                 ),
-            ),
-        )
-        val handle = handles.insert(ResourceKind.RenderPipeline, pipeline)
-        pipelineLayouts[handle.raw] = pipelineLayout
-        return handle
+            )
+            val handle = handles.insert(ResourceKind.RenderPipeline, pipeline)
+            pipelineLayouts[handle.raw] = pipelineLayout
+            return handle
+        }
     }
 
     override fun textureCreateView(texture: GpuHandle): GpuHandle {
-        val gpuTexture = handles.get<GPUTexture>(texture, ResourceKind.Texture)
-        return handles.insert(ResourceKind.TextureView, gpuTexture.createView())
+        synchronized(gpuLock) {
+            val gpuTexture = handles.get<GPUTexture>(texture, ResourceKind.Texture)
+            return handles.insert(ResourceKind.TextureView, gpuTexture.createView())
+        }
     }
 
     override fun commandEncoderBeginRenderPassClear(
@@ -405,32 +411,36 @@ class DawnWasiWebGpuHost private constructor(
         clearB: Float,
         clearA: Float,
     ): GpuHandle {
-        val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
-        val textureView = handles.get<GPUTextureView>(view, ResourceKind.TextureView)
-        val pass = commandEncoder.beginRenderPass(
-            GPURenderPassDescriptor(
-                colorAttachments = arrayOf(
-                    GPURenderPassColorAttachment(
-                        clearValue = GPUColor(
-                            clearR.toDouble(),
-                            clearG.toDouble(),
-                            clearB.toDouble(),
-                            clearA.toDouble(),
+        synchronized(gpuLock) {
+            val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
+            val textureView = handles.get<GPUTextureView>(view, ResourceKind.TextureView)
+            val pass = commandEncoder.beginRenderPass(
+                GPURenderPassDescriptor(
+                    colorAttachments = arrayOf(
+                        GPURenderPassColorAttachment(
+                            clearValue = GPUColor(
+                                clearR.toDouble(),
+                                clearG.toDouble(),
+                                clearB.toDouble(),
+                                clearA.toDouble(),
+                            ),
+                            view = textureView,
+                            loadOp = LoadOp.Clear,
+                            storeOp = StoreOp.Store,
                         ),
-                        view = textureView,
-                        loadOp = LoadOp.Clear,
-                        storeOp = StoreOp.Store,
                     ),
                 ),
-            ),
-        )
-        return handles.insert(ResourceKind.RenderPassEncoder, pass)
+            )
+            return handles.insert(ResourceKind.RenderPassEncoder, pass)
+        }
     }
 
     override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) {
-        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
-        val renderPipeline = handles.get<GPURenderPipeline>(pipeline, ResourceKind.RenderPipeline)
-        renderPass.setPipeline(renderPipeline)
+        synchronized(gpuLock) {
+            val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+            val renderPipeline = handles.get<GPURenderPipeline>(pipeline, ResourceKind.RenderPipeline)
+            renderPass.setPipeline(renderPipeline)
+        }
     }
 
     override fun renderPassDraw(
@@ -440,14 +450,18 @@ class DawnWasiWebGpuHost private constructor(
         firstVertex: Int,
         firstInstance: Int,
     ) {
-        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
-        renderPass.draw(vertexCount, instanceCount, firstVertex, firstInstance)
+        synchronized(gpuLock) {
+            val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+            renderPass.draw(vertexCount, instanceCount, firstVertex, firstInstance)
+        }
     }
 
     override fun renderPassEnd(pass: GpuHandle) {
-        val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
-        renderPass.end()
-        handles.drop(pass)
+        synchronized(gpuLock) {
+            val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+            renderPass.end()
+            dropLocked(pass, closeResource = true)
+        }
     }
 
     override fun commandEncoderBeginComputePass(
@@ -509,10 +523,12 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     override fun commandEncoderFinish(encoder: GpuHandle): GpuHandle {
-        val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
-        val commandBuffer = commandEncoder.finish()
-        handles.drop(encoder)
-        return handles.insert(ResourceKind.CommandBuffer, commandBuffer)
+        synchronized(gpuLock) {
+            val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
+            val commandBuffer = commandEncoder.finish()
+            dropLocked(encoder, closeResource = true)
+            return handles.insert(ResourceKind.CommandBuffer, commandBuffer)
+        }
     }
 
     override fun queueWriteBuffer(
@@ -565,8 +581,9 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     /**
-     * @param closeResource when false, only remove the handle table entry (use for swapchain
-     * textures/views from [surfaceGetCurrentTexture] — closing them races Mali/Dawn).
+     * @param closeResource when false, only remove the handle table entry (abort paths before
+     * present). After [surfacePresent], prefer [releaseFrameResources] / closeResource=true so
+     * Dawn returns the BLAST buffer (D5).
      */
     fun drop(handle: GpuHandle, closeResource: Boolean) {
         synchronized(gpuLock) {
@@ -595,36 +612,86 @@ class DawnWasiWebGpuHost private constructor(
         }
     }
 
+    /** Caller must hold [gpuLock]. */
+    private fun releaseFrameResourcesLocked() {
+        // Order: views → textures (return swapchain buffers) → encoders/buffers.
+        for (
+            kind in listOf(
+                ResourceKind.TextureView,
+                ResourceKind.Texture,
+                ResourceKind.CommandBuffer,
+                ResourceKind.RenderPassEncoder,
+                ResourceKind.ComputePassEncoder,
+                ResourceKind.CommandEncoder,
+            )
+        ) {
+            for (handle in handles.handlesOfKind(kind)) {
+                runCatching { dropLocked(handle, closeResource = true) }
+            }
+        }
+        runCatching { instance.processEvents() }
+    }
+
+    override fun releaseFrameResources() {
+        synchronized(gpuLock) {
+            releaseFrameResourcesLocked()
+        }
+    }
+
     override fun releaseSurfaces() {
         synchronized(gpuLock) {
             // Guest WIT destructors are not wired — per-frame Texture/View stay in the table
             // and can pin the Android swapchain so GPUSurface.close() never api_disconnects
             // (VK_ERROR_NATIVE_WINDOW_IN_USE_KHR for the next owner).
-            for (handle in handles.handlesOfKind(ResourceKind.TextureView)) {
-                runCatching { dropLocked(handle, closeResource = true) }
-            }
-            for (handle in handles.handlesOfKind(ResourceKind.Texture)) {
-                // Swapchain textures: table-only drop (native close races Mali/Dawn).
-                runCatching { dropLocked(handle, closeResource = false) }
-            }
-            for (
-                kind in listOf(
-                    ResourceKind.CommandBuffer,
-                    ResourceKind.RenderPassEncoder,
-                    ResourceKind.ComputePassEncoder,
-                    ResourceKind.CommandEncoder,
-                )
-            ) {
-                for (handle in handles.handlesOfKind(kind)) {
-                    runCatching { dropLocked(handle, closeResource = true) }
-                }
-            }
+            releaseFrameResourcesLocked()
             for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
                 runCatching {
                     handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()
                 }
                 runCatching { dropLocked(handle, closeResource = true) }
             }
+            runCatching { instance.processEvents() }
+        }
+    }
+
+    override fun releaseAllGpuObjects() {
+        synchronized(gpuLock) {
+            for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
+                runCatching {
+                    handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()
+                }
+            }
+            val closeOrder = listOf(
+                ResourceKind.TextureView,
+                ResourceKind.Texture,
+                ResourceKind.CommandBuffer,
+                ResourceKind.RenderPassEncoder,
+                ResourceKind.ComputePassEncoder,
+                ResourceKind.CommandEncoder,
+                ResourceKind.RenderPipeline,
+                ResourceKind.ComputePipeline,
+                ResourceKind.BindGroup,
+                ResourceKind.BindGroupLayout,
+                ResourceKind.ShaderModule,
+                ResourceKind.Buffer,
+                ResourceKind.Queue,
+                ResourceKind.Surface,
+                ResourceKind.Device,
+                ResourceKind.Adapter,
+            )
+            for (kind in closeOrder) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    runCatching { dropLocked(handle, closeResource = true) }
+                }
+            }
+            for (kind in ResourceKind.entries) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    runCatching { dropLocked(handle, closeResource = true) }
+                }
+            }
+            handles.clear()
+            pipelineLayouts.values.forEach { runCatching { it.close() } }
+            pipelineLayouts.clear()
             runCatching { instance.processEvents() }
         }
     }

@@ -4,7 +4,7 @@
 
 > **状态：已完成（2026-08-07）。** DoD 归档：[`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md)。  
 > 承接 P6：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)。  
-> **真机回归（锁定进行中）**：D2/D3（`WINDOW_IN_USE`）已在 V2458A 收口；剩余 D5 / D6 / D1 → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)。
+> **真机回归**：D1–D6 已在 V2458A 收口（2026-08-08）→ [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)。
 
 ## 一句话
 
@@ -12,9 +12,9 @@
 
 ```text
 MainActivity「CM 三角」
-  → pauseSurfaceAndAwait（L2 停帧 + 完整 Host teardown）
-  → CM 拥有 Surface：init → draw-frame 循环（该次独立 Host + Session）
-  → 结束：drop-triangle → tearDownCmGpu（releaseSurfaces + Host.close）→ 恢复 L2
+  → pauseSurfaceAndAwait（L2 停帧 + Host teardown）
+  → CM 拥有 Surface：init → draw-frame 循环（复用 Host + Session）
+  → 结束：drop-triangle → releaseAllGpuObjects → 恢复 L2
 ```
 
 ## 已定决策
@@ -23,9 +23,9 @@ MainActivity「CM 三角」
 |------|------|
 | 主切片 | P6 四类症状收口 + 宿主驱动帧循环；不动 WIT 语义面（不加 records）、不碰 wasi-gfx |
 | Surface 独占 | CM 期间 L2 完全 pause（`pauseSurfaceAndAwait` → `teardownGpu`）；CM 结束后再 `resumeSurfaceAndAwait` |
-| Host / Session（Demo） | **回归后**：每次按键新建并拆掉 CM `DawnWasiWebGpuHost` + Session（否则 Mali `WINDOW_IN_USE`）。仪器路径仍可复用 Session（见 `cmGuestRepeatTriangleReusesSession`） |
+| Host / Session（Demo） | 复用 Host + Session；每轮 `releaseAllGpuObjects`（不断 Instance/linker） |
 | 帧循环形态 | WIT 仍挂 `@0.3.0`，world `triangle` 追加 `init-triangle` / `draw-frame` / `drop-triangle`（additive 不 bump）；宿主 `webgpu-triangle-cm` 驱动。保留 `run-triangle` 作仪器 one-shot |
-| 同进程重复 | 仪器：复用 Session；Demo 手点：完整 teardown（见 blockers D2/D3） |
+| 同进程重复 | Demo / 仪器均复用 Session；帧资源靠 `releaseFrameResources` |
 | 验收 | 手动连点门控 + 仪器重复触发用例 |
 
 ## DoD

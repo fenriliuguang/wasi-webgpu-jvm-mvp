@@ -281,13 +281,17 @@ class TriangleRenderer(
         val dev = device ?: return
         val q = queue ?: return
         val pipe = pipeline ?: return
-        if (width <= 0 || height <= 0) return
+        if (width <= 0 || height <= 0 || pausedForCm || closed) return
 
         val acquired = h.surfaceGetCurrentTexture(surf)
         when (acquired.status) {
             SurfaceTextureStatus.SuccessOptimal,
             SurfaceTextureStatus.SuccessSuboptimal,
             -> Unit
+            SurfaceTextureStatus.Timeout -> {
+                // Backpressure — skip; do not treat as hard error (D5).
+                return
+            }
             else -> {
                 Log.w(TAG, "getCurrentTexture status=${acquired.status}")
                 return
@@ -309,24 +313,13 @@ class TriangleRenderer(
             h.renderPassDraw(pass, vertexCount = 3)
             h.renderPassEnd(pass)
             val cmd = h.commandEncoderFinish(encoder)
+            // D1: submit+present before releasing swapchain textures (gpuLock serializes Dawn).
             h.queueSubmit(q, listOf(cmd))
             h.surfacePresent(surf)
             runCatching { h.drop(cmd) }
         } finally {
-            // Drop handle-table entries only — closing swapchain GPUTexture/View races Mali/Dawn
-            // (D1). Present returns the buffer to BLAST (D5).
-            runCatching { dropSwapchainRef(h, view) }
-            runCatching { dropSwapchainRef(h, texture) }
-            runCatching { h.drop(pass) }
-            runCatching { h.drop(encoder) }
-        }
-    }
-
-    /** Remove table entry without native close (swapchain textures are owned by the Surface). */
-    private fun dropSwapchainRef(h: WasiWebGpuHost, handle: GpuHandle) {
-        when (h) {
-            is DawnWasiWebGpuHost -> h.drop(handle, closeResource = false)
-            else -> h.drop(handle)
+            // D5: close natives so BLAST reclaims buffers (also clears abort-path leftovers).
+            runCatching { h.releaseFrameResources() }
         }
     }
 

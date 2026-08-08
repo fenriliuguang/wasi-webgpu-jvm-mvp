@@ -20,10 +20,9 @@ import java.util.concurrent.TimeUnit
  * Call [runFrameLoopAndAwait] after pausing any L2 [TriangleRenderer] that shares the same
  * Surface. All Host/CM work runs on `webgpu-triangle-cm`.
  *
- * Each press uses a fresh [DawnWasiWebGpuHost] + CM [WasmtimeCmTriangle.Session] (not shared
- * with L2). After the loop, full Host close is required so VkSurface / ANativeWindow
- * disconnect — [WasiWebGpuHost.releaseSurfaces] alone still left `WINDOW_IN_USE` on Mali when
- * per-frame Texture handles pinned the swapchain (Guest WIT destructors are not wired).
+ * Keeps one [DawnWasiWebGpuHost] + [WasmtimeCmTriangle.Session] for the Activity (D6). After each
+ * loop calls [WasiWebGpuHost.releaseAllGpuObjects] so ANativeWindow disconnects without tearing
+ * down the CM linker / GPUInstance (D2).
  */
 class TriangleCmOneShot(
     private val appContext: Context,
@@ -55,32 +54,24 @@ class TriangleCmOneShot(
                 runCatching {
                     require(surface.isValid) { "Surface is not valid" }
                     require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-                    tearDownCmGpu()
-                    val h = DawnWasiWebGpuHost.create().also { host = it }
-                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
-                    var s = WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
+                    // Drop leftover Device/Surface from a prior press before Guest re-inits.
+                    releaseGpuOwnership()
                     val windowHandle = Util.windowFromSurface(surface)
                     postStatus("CM Guest triangle frame loop ($frameCount frames)…")
-                    try {
-                        s.runFrameLoop(windowHandle, width, height, frameCount)
-                    } catch (t: Throwable) {
-                        // Trap / "cannot enter component instance" → recreate Session once.
-                        Log.w(TAG, "CM frame loop failed; recreating Session", t)
-                        runCatching { session?.close() }
-                        session = null
-                        s = WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
-                        s.runFrameLoop(windowHandle, width, height, frameCount)
-                    } finally {
-                        // Full Host teardown (same as L2 pause) so BufferQueue disconnects.
-                        tearDownCmGpu()
-                        Thread.sleep(SURFACE_RELEASE_SETTLE_MS)
-                    }
+                    ensureSession().runFrameLoop(windowHandle, width, height, frameCount)
+                }.recoverCatching { first ->
+                    Log.w(TAG, "CM frame loop failed; recreating Session", first)
+                    recreateSession()
+                    val windowHandle = Util.windowFromSurface(surface)
+                    ensureSession().runFrameLoop(windowHandle, width, height, frameCount)
                 }.onSuccess {
                     postStatus("CM Guest triangle OK (frame loop)")
                 }.onFailure {
                     Log.e(TAG, "CM triangle frame loop failed", it)
                     postStatus("CM triangle FAILED: ${it.message}")
-                    tearDownCmGpu()
+                }.also {
+                    releaseGpuOwnership()
+                    Thread.sleep(SURFACE_RELEASE_SETTLE_MS)
                 }
             } finally {
                 latch.countDown()
@@ -95,7 +86,15 @@ class TriangleCmOneShot(
         handler.post {
             try {
                 closed = true
-                tearDownCmGpu()
+                runCatching { session?.close() }
+                session = null
+                val h = host
+                host = null
+                if (h != null) {
+                    runCatching { h.releaseAllGpuObjects() }
+                    (h as? DawnWasiWebGpuHost)?.flushEvents()
+                    runCatching { h.close() }
+                }
             } finally {
                 latch.countDown()
             }
@@ -104,17 +103,27 @@ class TriangleCmOneShot(
         thread.quitSafely()
     }
 
-    /** Drop Session + releaseSurfaces + close Host (idempotent). */
-    private fun tearDownCmGpu() {
+    private fun ensureSession(): WasmtimeCmTriangle.Session {
+        val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
+        session?.let { return it }
+        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        return WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
+    }
+
+    private fun recreateSession() {
         runCatching { session?.close() }
         session = null
-        val h = host
-        host = null
-        if (h != null) {
-            runCatching { h.releaseSurfaces() }
-            (h as? DawnWasiWebGpuHost)?.flushEvents()
-            runCatching { h.close() }
-        }
+        Thread.sleep(SESSION_RECREATE_SETTLE_MS)
+        releaseGpuOwnership()
+        val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
+        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        session = WasmtimeCmTriangleAndroid.openSession(appContext, h)
+    }
+
+    private fun releaseGpuOwnership() {
+        val h = host ?: return
+        runCatching { h.releaseAllGpuObjects() }
+        (h as? DawnWasiWebGpuHost)?.flushEvents()
     }
 
     private fun postStatus(message: String) {
@@ -125,5 +134,6 @@ class TriangleCmOneShot(
         private const val TAG = "TriangleCmOneShot"
         private const val DEFAULT_FRAME_COUNT = 30
         private const val SURFACE_RELEASE_SETTLE_MS = 400L
+        private const val SESSION_RECREATE_SETTLE_MS = 250L
     }
 }

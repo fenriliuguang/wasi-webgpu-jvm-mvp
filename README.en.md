@@ -62,8 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md)
-- **In progress (locked)**: Demo CM **device stability regression** — D2/D3 (`WINDOW_IN_USE` / Host close) closed on V2458A; next: D5 (`NO_BUFFER_AVAILABLE`), D6 (CM Session re-entry), D1 (Mali SIGSEGV root cause). Pitfalls & acceptance: [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH)
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH)
+- **Unlocked**: more WIT records; wasi-gfx / full compliant world; Maven Central; D7 instrumented peripheral bypass
 
 ## References
 

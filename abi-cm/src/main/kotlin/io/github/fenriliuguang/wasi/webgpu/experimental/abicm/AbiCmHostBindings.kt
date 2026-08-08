@@ -122,6 +122,8 @@ class AbiCmHostBindings(
         )
 
     fun surfaceGetCurrentTextureView(surface: Int): Int {
+        // Previous frame leftovers (Guest WIT drop is not wired) pin BLAST buffers.
+        host.releaseFrameResources()
         val result = host.surfaceGetCurrentTexture(GpuHandle(surface))
         if (
             result.status != SurfaceTextureStatus.SuccessOptimal &&
@@ -131,11 +133,15 @@ class AbiCmHostBindings(
         }
         val texture = result.texture
             ?: throw HostException.Validation("surface get-current-texture returned null texture")
+        // Texture stays in the Host table until present/releaseFrameResources — Guest only
+        // receives the view rep and never sees the texture handle.
         return host.textureCreateView(texture).raw
     }
 
     fun surfacePresent(surface: Int) {
         host.surfacePresent(GpuHandle(surface))
+        // Return swapchain buffers to BLAST (D5); destructors are not wired from Guest.
+        host.releaseFrameResources()
     }
 
     fun surfaceUnconfigure(surface: Int) {

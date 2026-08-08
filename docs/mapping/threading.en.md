@@ -20,9 +20,10 @@
 
 - The CM path uses a **separate** `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-triangle-cm`); do **not** share it across threads with the L2 Host.  
 - Host-driven frame loop: same thread `init-triangle` → loop `draw-frame` → `drop-triangle` (see `WasmtimeCmTriangle.Session.runFrameLoop`).  
-- Demo: `pauseSurfaceAndAwait` before CM (L2 `teardownGpu` = full Host.close); after CM `drop-triangle` → `tearDownCmGpu` (`releaseSurfaces` + Host.close) → settle → `resumeSurfaceAndAwait`.  
-- **Demo taps**: create and tear down Host + Session **each** CM press (Guest WIT destructors are unwired; else Mali `WINDOW_IN_USE`). See [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md).  
-- **Instrumented**: may reuse one CM Session (`cmGuestRepeatTriangleReusesSession`); back-to-back linker recreate can still hit the process-global host registry (D6).
+- Demo: `pauseSurfaceAndAwait` before CM (L2 `teardownGpu`); after CM `drop-triangle` → `releaseAllGpuObjects` (keep Instance/Session) → settle → `resumeSurfaceAndAwait`.  
+- **Demo taps**: reuse Host + Session; each press `releaseAllGpuObjects` to free ANativeWindow (avoid back-to-back linker teardown). See [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md).  
+- **Instrumented**: reuse Session (`cmGuestRepeatTriangleReusesSession`).  
+- Frame resources: `releaseFrameResources` after present (Guest WIT destructors unwired).
 
 ## Instance / Device / Queue
 

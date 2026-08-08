@@ -62,8 +62,8 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 
 ## 状态
 
-- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)
-- **进行中（锁定）**：Demo CM **真机稳性回归** — D2/D3（`WINDOW_IN_USE` / Host close）已在 V2458A 收口；下一步 D5（`NO_BUFFER_AVAILABLE`）、D6（CM Session 重入）、D1（Mali SIGSEGV 根治）。踩坑与验收：[blockers](docs/scheme/demo-cm-stability-blockers.md)
+- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)
+- **未锁定**：更多 WIT records；wasi-gfx / 合规全量 world；Maven Central；D7 仪器外围旁路
 
 ## 参考
 
