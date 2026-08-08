@@ -10,7 +10,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 object AbiCm {
     const val PACKAGE: String = "experimental:webgpu-cm"
     const val INTERFACE: String = "host"
-    const val VERSION: String = "0.3.0"
+    const val VERSION: String = "0.4.0"
 
     /** Full import interface id as emitted by wit-bindgen / wasm-tools. */
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
@@ -71,6 +71,8 @@ object AbiCm {
         const val DEVICE_CREATE_COMPUTE_PIPELINE = "[method]device.create-compute-pipeline"
         const val DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE =
             "[method]device.create-render-pipeline-triangle"
+        const val DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE_BUFFERS =
+            "[method]device.create-render-pipeline-triangle-buffers"
         const val DEVICE_CREATE_COMMAND_ENCODER = "[method]device.create-command-encoder"
         const val SURFACE_CONFIGURE = "[method]surface.configure"
         const val SURFACE_GET_CURRENT_TEXTURE_VIEW = "[method]surface.get-current-texture-view"
@@ -86,6 +88,7 @@ object AbiCm {
             "[method]compute-pass-encoder.dispatch-workgroups"
         const val COMPUTE_PASS_END = "[method]compute-pass-encoder.end"
         const val RENDER_PASS_SET_PIPELINE = "[method]render-pass-encoder.set-pipeline"
+        const val RENDER_PASS_SET_VERTEX_BUFFER = "[method]render-pass-encoder.set-vertex-buffer"
         const val RENDER_PASS_DRAW = "[method]render-pass-encoder.draw"
         const val RENDER_PASS_END = "[method]render-pass-encoder.end"
         const val COMMAND_ENCODER_COPY_BUFFER_TO_BUFFER =

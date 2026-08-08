@@ -49,6 +49,8 @@ import androidx.webgpu.GPUSurfaceDescriptor
 import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
 import androidx.webgpu.GPUTexture
 import androidx.webgpu.GPUTextureView
+import androidx.webgpu.GPUVertexAttribute
+import androidx.webgpu.GPUVertexBufferLayout
 import androidx.webgpu.GPUVertexState
 import androidx.webgpu.LoadOp
 import androidx.webgpu.PowerPreference as DawnPowerPreference
@@ -58,6 +60,8 @@ import androidx.webgpu.StoreOp
 import androidx.webgpu.SurfaceGetCurrentTextureStatus
 import androidx.webgpu.TextureUsage
 import androidx.webgpu.UncapturedErrorCallback
+import androidx.webgpu.VertexFormat
+import androidx.webgpu.VertexStepMode
 import androidx.webgpu.helper.initLibrary
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
@@ -67,6 +71,8 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.CommandEncoderDescr
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePassDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuVertexFormat
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuVertexStepMode
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HandleTable
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PowerPreference
@@ -75,6 +81,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureResult
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -107,6 +114,13 @@ class DawnWasiWebGpuHost private constructor(
     @Volatile private var closed = false
 
     init {
+        // Keep L2 GpuVertex* constants aligned with androidx.webgpu for CM Guest u32 flags.
+        check(GpuVertexFormat.FLOAT32X2 == VertexFormat.Float32x2) {
+            "GpuVertexFormat.FLOAT32X2=${GpuVertexFormat.FLOAT32X2} != VertexFormat.Float32x2=${VertexFormat.Float32x2}"
+        }
+        check(GpuVertexStepMode.VERTEX == VertexStepMode.Vertex) {
+            "GpuVertexStepMode.VERTEX=${GpuVertexStepMode.VERTEX} != VertexStepMode.Vertex=${VertexStepMode.Vertex}"
+        }
         eventPoller.execute {
             while (!closed) {
                 synchronized(gpuLock) {
@@ -371,6 +385,20 @@ class DawnWasiWebGpuHost private constructor(
         device: GpuHandle,
         shader: GpuHandle,
         format: Int,
+    ): GpuHandle = createRenderPipelineTriangle(device, shader, format, vertexBuffers = emptyList())
+
+    override fun deviceCreateRenderPipelineTriangleBuffers(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+        vertexBuffers: List<VertexBufferLayout>,
+    ): GpuHandle = createRenderPipelineTriangle(device, shader, format, vertexBuffers)
+
+    private fun createRenderPipelineTriangle(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+        vertexBuffers: List<VertexBufferLayout>,
     ): GpuHandle {
         synchronized(gpuLock) {
             val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
@@ -378,9 +406,26 @@ class DawnWasiWebGpuHost private constructor(
             val pipelineLayout = gpuDevice.createPipelineLayout(
                 GPUPipelineLayoutDescriptor(bindGroupLayouts = emptyArray()),
             )
+            val dawnBuffers = vertexBuffers.map { layout ->
+                GPUVertexBufferLayout(
+                    arrayStride = layout.arrayStride,
+                    stepMode = layout.stepMode,
+                    attributes = layout.attributes.map { attr ->
+                        GPUVertexAttribute(
+                            format = attr.format,
+                            offset = attr.offset,
+                            shaderLocation = attr.shaderLocation,
+                        )
+                    }.toTypedArray(),
+                )
+            }.toTypedArray()
             val pipeline = gpuDevice.createRenderPipeline(
                 GPURenderPipelineDescriptor(
-                    vertex = GPUVertexState(module = module, entryPoint = "vs_main"),
+                    vertex = GPUVertexState(
+                        module = module,
+                        entryPoint = "vs_main",
+                        buffers = dawnBuffers,
+                    ),
                     layout = pipelineLayout,
                     primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList),
                     fragment = GPUFragmentState(
@@ -440,6 +485,20 @@ class DawnWasiWebGpuHost private constructor(
             val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
             val renderPipeline = handles.get<GPURenderPipeline>(pipeline, ResourceKind.RenderPipeline)
             renderPass.setPipeline(renderPipeline)
+        }
+    }
+
+    override fun renderPassSetVertexBuffer(
+        pass: GpuHandle,
+        slot: Int,
+        buffer: GpuHandle,
+        offset: Long,
+        size: Long,
+    ) {
+        synchronized(gpuLock) {
+            val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+            val gpuBuffer = handles.get<GPUBuffer>(buffer, ResourceKind.Buffer)
+            renderPass.setVertexBuffer(slot, gpuBuffer, offset, size)
         }
     }
 

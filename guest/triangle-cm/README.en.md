@@ -4,7 +4,7 @@
 
 Experimental **Component Model** Guest: on-screen red triangle (one-shot + host-driven frame loop).
 
-- Imports `experimental:webgpu-cm/host@0.3.0` (WIT resources + methods; pinned under `wit/`)
+- Imports `experimental:webgpu-cm/host@0.4.0` (WIT resources + methods; pinned under `wit/`)
 - **Not** compliant `wasi:webgpu` / wasi-gfx
 - Exports:
   - `run-triangle` — one-shot configure → draw → present → unconfigure

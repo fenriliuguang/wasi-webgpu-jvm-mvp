@@ -14,11 +14,15 @@ Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCm
 | `surface.get-current-texture-view` | `surfaceGetCurrentTexture` + `textureCreateView` | `getCurrentTexture` + `createView` | L2 exposes status; CM wraps and throws Validation if not Success |
 | `surface.present` | `surfacePresent` | `present` | |
 | `surface.unconfigure` | `surfaceUnconfigure` | `unconfigure` | |
-| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | empty layout + TriangleList | Requires `vs_main` / `fs_main` |
+| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | `vertex_index` path; requires `vs_main` / `fs_main` |
+| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | `@0.4.0`; `list<vertex-buffer-layout>` |
 | `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | Single color attachment |
 | `render-pass-encoder.set-pipeline` | `renderPassSetPipeline` | `setPipeline` | |
+| `render-pass-encoder.set-vertex-buffer` | `renderPassSetVertexBuffer` | `setVertexBuffer` | `@0.4.0`; slot + buffer + offset/size |
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
 | `render-pass-encoder.end` | `renderPassEnd` | `end` | |
+
+Records (`@0.4.0`): `vertex-attribute` / `vertex-buffer-layout`; flag aliases `vertex-format` / `vertex-step-mode` (same numeric values as `androidx.webgpu`; see L2 `GpuVertexFormat`). Guest vertex-buffer acceptance is phase E — [`semantic-hardening.en.md`](../scheme/semantic-hardening.en.md).
 
 ## Guest CM on-screen path (working)
 

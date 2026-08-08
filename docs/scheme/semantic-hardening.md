@@ -24,6 +24,7 @@ A WIT records（render / pipeline 等）
 |------|------|
 | 本阶段范围 | 锁定 **A+B+C+D+E** 为当前阶段；**F/G/H/I** 明确不做；**J**（perf）不阻塞、可选旁路 |
 | 主线顺序 | 先 **A**（records）再 **B**（destructor）；**C/D** 可与 A/B 交错；**E** 在 A（必要时 B）之后验收 |
+| **E 选型** | **顶点缓冲**（Guest `create-buffer` + `write-buffer` + `set-vertex-buffer` + `@location(0)`）；不用每帧变色 / 多 draw 作主验收 |
 | WIT 版本 | records 足以改变 import 形状时 **bump** `experimental:webgpu-cm`（预期 `0.3.0` → `0.4.0`）；纯 additive 小改可不 bump（与上一切片惯例一致） |
 | 特化 API | `create-render-pipeline-triangle` 等可保留为便捷路径，或标 deprecated；新路径以 records/descriptor 为主 |
 | 析构策略 | WIT resource drop → Host `drop*`；目标减少对 `releaseFrameResources` / `releaseAllGpuObjects` 的**语义依赖**（Demo 交接仍可保留 settle 保险） |
@@ -35,10 +36,10 @@ A WIT records（render / pipeline 等）
 
 ### A — WIT records 扩展
 
-- [ ] `experimental:webgpu-cm` 增加渲染侧必要 records / flags（至少覆盖当前特化 triangle 路径可表达的 descriptor 形状；对照 buffer `0.2.0` 先例）
-- [ ] L2 + `abi-cm` + Guest 绑定走新 API；旧特化 import 保留或明确迁移说明
-- [ ] `docs/mapping/render-subset`（及必要时 compute）更新映射表
-- [ ] 现有 triangle / vector-add 路径仍绿（仪器或等价门控）
+- [x] `experimental:webgpu-cm` **0.4.0**：`vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers`（对照 buffer `0.2.0` 先例）
+- [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker 接线；旧 `create-render-pipeline-triangle` 保留
+- [x] `docs/mapping/render-subset` 更新；Guest wasm 已按 `@0.4.0` 重建（仍走旧 triangle helper）
+- [ ] Guest 改用 buffers API（属 **E**）；仪器真机复验 triangle / vector-add
 
 ### B — Guest 资源析构接线
 
@@ -56,9 +57,10 @@ A WIT records（render / pipeline 等）
 - [ ] Studio 跑 `*InstrumentedTest` 与脚本路径行为一致，或 README / `docs/android-wasmtime` **唯一推荐**入口写清且 Studio 失败有已知原因链接
 - [ ] blockers D7 标收口或「文档旁路正式化」
 
-### E — 更丰富 Guest demo
+### E — 更丰富 Guest demo（已锁定：顶点缓冲）
 
-- [ ] 在 A（必要时 B）之上：Guest 侧增加可感知差异（如顶点缓冲 / 每帧颜色变化 / 多 draw 之一），仍挂 experimental WIT
+- [ ] Guest 上传 float32x2 顶点（`VERTEX \| COPY_DST`），`set-vertex-buffer(0, …)` 后 `draw(3)`；shader 读 `@location(0)`（可相对 L2 硬编码三角有轻微坐标差，但必须走 buffer）
+- [ ] 使用 A 的 `create-render-pipeline-triangle-buffers`（或等价）+ records；旧 `create-render-pipeline-triangle`（vertex_index）可保留给对照
 - [ ] Demo 或仪器至少一条路径验收；不引入 wasi-gfx
 
 ## 本阶段不做

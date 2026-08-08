@@ -14,6 +14,8 @@ import ai.tegmentum.wasmtime4j.component.ComponentVal
 import ai.tegmentum.wasmtime4j.factory.WasmRuntimeFactory
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCm
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCmHostBindings
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
@@ -59,8 +61,8 @@ class WasmtimeCmLinker(
 
     private fun registerResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.3.0" that yields
-        // "experimental:webgpu-cm/host@0.3.0" — matching defineFunction / guest import.
+        // With PACKAGE "experimental:webgpu-cm" + "host@0.4.0" that yields
+        // "experimental:webgpu-cm/host@0.4.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
@@ -100,6 +102,42 @@ class WasmtimeCmLinker(
                 null
             }
             return BufferDescriptorFields(size, usage, mapped, label)
+        }
+
+        fun parseVertexAttribute(val_: ComponentVal): VertexAttribute {
+            require(val_.isRecord) { "expected vertex-attribute record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return VertexAttribute(
+                format = fields.getValue("format").asU32().toInt(),
+                offset = fields.getValue("offset").asU64(),
+                shaderLocation = fields.getValue("shader-location").asU32().toInt(),
+            )
+        }
+
+        fun parseVertexBufferLayout(val_: ComponentVal): VertexBufferLayout {
+            require(val_.isRecord) { "expected vertex-buffer-layout record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val attrsVal = fields.getValue("attributes")
+            require(attrsVal.isList) { "expected attributes list, got ${attrsVal.type}" }
+            val attributes = attrsVal.asList().map { el ->
+                val attr = el as? ComponentVal
+                    ?: error("expected ComponentVal attribute, got ${el?.javaClass}")
+                parseVertexAttribute(attr)
+            }
+            return VertexBufferLayout(
+                arrayStride = fields.getValue("array-stride").asU64(),
+                stepMode = fields.getValue("step-mode").asU32().toInt(),
+                attributes = attributes,
+            )
+        }
+
+        fun parseVertexBufferLayouts(val_: ComponentVal): List<VertexBufferLayout> {
+            require(val_.isList) { "expected list<vertex-buffer-layout>, got ${val_.type}" }
+            return val_.asList().map { el ->
+                val layout = el as? ComponentVal
+                    ?: error("expected ComponentVal layout, got ${el?.javaClass}")
+                parseVertexBufferLayout(layout)
+            }
         }
 
         define(AbiCm.Func.REQUEST_ADAPTER, ComponentHostFunction.singleValue {
@@ -190,6 +228,19 @@ class WasmtimeCmLinker(
                         paramU32(params, 0),
                         paramU32(params, 1),
                         paramU32(params, 2),
+                    ),
+                )
+            },
+        )
+        define(
+            AbiCm.Func.DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE_BUFFERS,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateRenderPipelineTriangleBuffers(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        paramU32(params, 2),
+                        parseVertexBufferLayouts(params[3]),
                     ),
                 )
             },
@@ -287,6 +338,18 @@ class WasmtimeCmLinker(
             AbiCm.Func.RENDER_PASS_SET_PIPELINE,
             ComponentHostFunction.voidFunctionWithParams { params ->
                 bindings.renderPassSetPipeline(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiCm.Func.RENDER_PASS_SET_VERTEX_BUFFER,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassSetVertexBuffer(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    paramU32(params, 2),
+                    paramU64(params, 3),
+                    paramU64(params, 4),
+                )
             },
         )
         define(

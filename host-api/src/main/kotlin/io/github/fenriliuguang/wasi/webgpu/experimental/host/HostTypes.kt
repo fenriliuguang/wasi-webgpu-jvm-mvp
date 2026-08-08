@@ -49,6 +49,37 @@ data class BufferDescriptor(
     val label: String? = null,
 )
 
+/**
+ * WebGPU / Dawn GPUVertexFormat numeric values (`androidx.webgpu.VertexFormat`).
+ * Only formats needed by the experimental render subset are listed.
+ */
+object GpuVertexFormat {
+    /** `androidx.webgpu.VertexFormat.Float32x2` */
+    const val FLOAT32X2: Int = 0x0000001d
+}
+
+/**
+ * WebGPU / Dawn GPUVertexStepMode numeric values (`androidx.webgpu.VertexStepMode`).
+ */
+object GpuVertexStepMode {
+    /** `androidx.webgpu.VertexStepMode.Vertex` */
+    const val VERTEX: Int = 0x00000001
+    /** `androidx.webgpu.VertexStepMode.Instance` */
+    const val INSTANCE: Int = 0x00000002
+}
+
+data class VertexAttribute(
+    val format: Int,
+    val offset: Long,
+    val shaderLocation: Int,
+)
+
+data class VertexBufferLayout(
+    val arrayStride: Long,
+    val stepMode: Int = GpuVertexStepMode.VERTEX,
+    val attributes: List<VertexAttribute>,
+)
+
 data class ShaderModuleDescriptor(
     val code: String,
     val label: String? = null,

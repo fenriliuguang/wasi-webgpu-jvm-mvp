@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.3.0
+# experimental:webgpu-cm@0.4.0
 
 **中文** | [English](README.en.md)
 
@@ -11,7 +11,8 @@ Component Model compute + 最小 surface/render 切片。
 - bind-group helpers 仍是 vector-add 特化
 - **0.2.0：** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags`（u32 别名）；`create-buffer(descriptor)`；`map-async(mode, …)` 取代 `map-read`
 - **0.3.0：** Android native-window `surface` + triangle 形 `render-pipeline` / `render-pass`
-- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle`（Host 注入 native window）
+- **0.4.0：** `vertex-attribute` / `vertex-buffer-layout`；`set-vertex-buffer`；`create-render-pipeline-triangle-buffers`
+- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`（Host 注入 native window）
 
 Guest：`guest/vector-add-cm/`、`guest/triangle-cm/`  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  

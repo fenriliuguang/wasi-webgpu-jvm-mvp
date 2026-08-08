@@ -11,8 +11,10 @@
 /// 0.2.0: buffer-descriptor + buffer-usage/map-mode flag aliases (u32),
 /// aligned with pinned wasi:webgpu record/flag shape for create-buffer / map-async.
 /// 0.3.0: surface + render-pipeline / render-pass (Android native window; no Guest canvas).
+/// 0.4.0: vertex-buffer-layout records + set-vertex-buffer +
+/// create-render-pipeline-triangle-buffers (slice A / E vertex-buffer path).
 
-package experimental:webgpu-cm@0.3.0;
+package experimental:webgpu-cm@0.4.0;
 
 interface host {
   /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
@@ -21,12 +23,28 @@ interface host {
   type map-mode-flags = u32;
   /// Dawn / WebGPU texture format enum value (u32).
   type texture-format = u32;
+  /// Dawn / WebGPU GPUVertexFormat enum value (u32); e.g. float32x2.
+  type vertex-format = u32;
+  /// Dawn / WebGPU GPUVertexStepMode enum value (u32); vertex / instance.
+  type vertex-step-mode = u32;
 
   record buffer-descriptor {
     size: u64,
     usage: buffer-usage-flags,
     mapped-at-creation: bool,
     label: option<string>,
+  }
+
+  record vertex-attribute {
+    format: vertex-format,
+    offset: u64,
+    shader-location: u32,
+  }
+
+  record vertex-buffer-layout {
+    array-stride: u64,
+    step-mode: vertex-step-mode,
+    attributes: list<vertex-attribute>,
   }
 
   resource adapter {
@@ -50,10 +68,17 @@ interface host {
       shader: borrow<shader-module>,
       entry-point: string,
     ) -> compute-pipeline;
-    /// Empty-layout TriangleList; shader must export vs_main / fs_main.
+    /// Empty vertex-buffer layout TriangleList; shader uses @builtin(vertex_index).
+    /// Prefer create-render-pipeline-triangle-buffers for @location attributes.
     create-render-pipeline-triangle: func(
       shader: borrow<shader-module>,
       format: texture-format,
+    ) -> render-pipeline;
+    /// TriangleList with explicit vertex-buffer layouts (slice A / E).
+    create-render-pipeline-triangle-buffers: func(
+      shader: borrow<shader-module>,
+      format: texture-format,
+      buffers: list<vertex-buffer-layout>,
     ) -> render-pipeline;
     create-command-encoder: func() -> command-encoder;
   }
@@ -120,6 +145,13 @@ interface host {
 
   resource render-pass-encoder {
     set-pipeline: func(pipeline: borrow<render-pipeline>);
+    /// Bind a GPU buffer to a vertex slot (offset/size in bytes).
+    set-vertex-buffer: func(
+      slot: u32,
+      buffer: borrow<buffer>,
+      offset: u64,
+      size: u64,
+    );
     draw: func(vertex-count: u32);
     end: func();
   }

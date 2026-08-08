@@ -15,6 +15,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
@@ -109,6 +110,19 @@ class AbiCmHostBindings(
             format,
         ).raw
 
+    fun deviceCreateRenderPipelineTriangleBuffers(
+        device: Int,
+        shader: Int,
+        format: Int,
+        vertexBuffers: List<VertexBufferLayout>,
+    ): Int =
+        host.deviceCreateRenderPipelineTriangleBuffers(
+            GpuHandle(device),
+            GpuHandle(shader),
+            format,
+            vertexBuffers,
+        ).raw
+
     fun deviceCreateCommandEncoder(device: Int): Int =
         host.deviceCreateCommandEncoder(GpuHandle(device)).raw
 
@@ -186,6 +200,16 @@ class AbiCmHostBindings(
 
     fun renderPassSetPipeline(pass: Int, pipeline: Int) {
         host.renderPassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))
+    }
+
+    fun renderPassSetVertexBuffer(pass: Int, slot: Int, buffer: Int, offset: Long, size: Long) {
+        host.renderPassSetVertexBuffer(
+            GpuHandle(pass),
+            slot,
+            GpuHandle(buffer),
+            offset,
+            size,
+        )
     }
 
     fun renderPassDraw(pass: Int, vertexCount: Int) {

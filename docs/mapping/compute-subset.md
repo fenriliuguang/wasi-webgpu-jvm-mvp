@@ -61,7 +61,7 @@
 | Texture / sampler / query set | ⚠️ 仅 swapchain texture/view（render-subset）；无 sampler/query |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌（显式 layout） |
-| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.3.0`（仍非合规 wasi:webgpu） |
+| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.4.0`（仍非合规 wasi:webgpu） |
 | 完整错误 `result` 抬升 | ⚠️ 现为 Kotlin 异常；见 [errors-async.md](errors-async.md) / [EN](errors-async.en.md) |
 
 ## 偏差列表（摘要）

@@ -5,6 +5,13 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening slice A (partial) — `experimental:webgpu-cm` 0.3.0 → 0.4.0
+
+- WIT: `vertex-attribute` / `vertex-buffer-layout` records; `vertex-format` / `vertex-step-mode` aliases; `create-render-pipeline-triangle-buffers`; `render-pass-encoder.set-vertex-buffer`
+- L2 / Dawn / Cpu / abi-cm / WasmtimeCmLinker wired; keep `create-render-pipeline-triangle` (`vertex_index`) for existing Guest path
+- Rebuilt `triangle_cm.wasm` / `vector_add_cm.wasm` against `@0.4.0` (Guest still uses old triangle helper; vertex-buffer Guest = slice E)
+- Docs: render-subset + wit READMEs; E locked to vertex buffer in `semantic-hardening`
+
 ### Demo CM device stability regression — complete 2026-08-08 (V2458A)
 
 - D2/D3: `close()` closes GPU objects; `releaseAllGpuObjects()` clears handle table (keep Instance) so CM can reuse Session without `WINDOW_IN_USE`

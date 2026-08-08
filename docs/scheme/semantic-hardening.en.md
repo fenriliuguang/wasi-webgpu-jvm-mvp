@@ -24,6 +24,7 @@ A WIT records (render / pipeline, …)
 |----------|----------|
 | Phase scope | Lock **A+B+C+D+E** as the current phase; **F/G/H/I** explicitly out; **J** (perf) optional, non-blocking |
 | Main order | **A** (records) then **B** (destructors); **C/D** may interleave; **E** after A (and B if needed) |
+| **E choice** | **Vertex buffer** (Guest `create-buffer` + `write-buffer` + `set-vertex-buffer` + `@location(0)`); not per-frame color / multi-draw as primary acceptance |
 | WIT version | **Bump** `experimental:webgpu-cm` when records change import shape (expect `0.3.0` → `0.4.0`); pure additive tweaks may stay unbumped (same convention as prior slice) |
 | Specialized APIs | Keep helpers such as `create-render-pipeline-triangle` or mark deprecated; new path prefers records/descriptors |
 | Destructor policy | WIT resource drop → Host `drop*`; reduce **semantic** reliance on `releaseFrameResources` / `releaseAllGpuObjects` (Demo may keep settle as belt-and-suspenders) |
@@ -35,10 +36,10 @@ A WIT records (render / pipeline, …)
 
 ### A — WIT records expansion
 
-- [ ] Add render-side records / flags to `experimental:webgpu-cm` (at least express today’s specialized triangle path; follow buffer `0.2.0` precedent)
-- [ ] Wire L2 + `abi-cm` + Guest to the new APIs; keep or document migration for old specialized imports
-- [ ] Update `docs/mapping/render-subset` (and compute if needed)
-- [ ] Existing triangle / vector-add paths stay green (instrumented or equivalent gate)
+- [x] `experimental:webgpu-cm` **0.4.0**: `vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers` (follow buffer `0.2.0` precedent)
+- [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker wired; keep old `create-render-pipeline-triangle`
+- [x] `docs/mapping/render-subset` updated; Guest wasm rebuilt for `@0.4.0` (still uses old triangle helper)
+- [ ] Guest switches to buffers API (**E**); instrumented device re-check triangle / vector-add
 
 ### B — Guest resource destructor wiring
 
@@ -56,9 +57,10 @@ A WIT records (render / pipeline, …)
 - [ ] Studio `*InstrumentedTest` matches script behavior, **or** README / `docs/android-wasmtime` names one recommended entry with a known-failure link for Studio
 - [ ] Mark blockers D7 closed or “documented bypass formalized”
 
-### E — Richer Guest demo
+### E — Richer Guest demo (locked: vertex buffer)
 
-- [ ] On top of A (and B if needed): a Guest-visible difference (vertex buffer / per-frame color / multi-draw — pick one); still experimental WIT
+- [ ] Guest uploads float32x2 vertices (`VERTEX \| COPY_DST`), `set-vertex-buffer(0, …)` then `draw(3)`; shader reads `@location(0)` (coords may differ slightly from L2 hardcoded triangle, but must use a buffer)
+- [ ] Use A's `create-render-pipeline-triangle-buffers` (or equivalent) + records; keep old `create-render-pipeline-triangle` (`vertex_index`) for contrast
 - [ ] At least one Demo or instrumented acceptance path; no wasi-gfx
 
 ## Out of scope (this phase)
