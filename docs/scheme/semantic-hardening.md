@@ -47,12 +47,12 @@ A WIT records（render / pipeline 等）
 - [x] Host `tryDrop` 幂等；`HandleTable.tryDrop`
 - [x] 文档标明：配对释放 vs 仍靠 `releaseFrameResources`（encoder 孤儿）/ Demo `releaseAllGpuObjects`（Surface/Device；真 WIT dtor 仍受 wasmtime4j `resourceTable` 阻塞）
 - [ ] Demo CM×N + L2 resume 真机复验（对照 blockers D2/D3/D5/D6）
-- [ ] （可选增量）wasmtime4j destructor miss → `host.drop(rep)` 补丁 — 可并入 C
+- [x] （可选增量说明）wasmtime4j destructor miss → `host.drop(rep)` 已写入 UPSTREAM §4（真补丁 / PR 仍可选）
 
 ### C — 上游贡献准备
 
-- [ ] `ConcurrentCallCodec` unsigned-u64（及 UPSTREAM 表内相关项）整理为可外发 brief / 补丁说明
-- [ ] 本仓 overlay / 过滤 jar 策略不变或可平滑切换；`patches/UPSTREAM.md` 状态更新
+- [x] `ConcurrentCallCodec` unsigned-u64（及 Validation / destructor / native patches）整理为可外发 brief：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)
+- [x] 本仓 overlay / 过滤 jar 策略写明；上游合并前不变；**不强制**已提 PR
 
 ### D — D7 仪器外围
 

@@ -5,6 +5,11 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening slice C — upstream contribution brief
+
+- Expanded [`patches/UPSTREAM.md`](patches/UPSTREAM.md) / EN: ConcurrentCallCodec unsigned-u64 (primary), Validation TBI, CM destructor→rep gap, native patch index, overlay switchover
+- Phase plan C checked; no upstream PR required this slice
+
 ### Semantic hardening slice B (partial) — frame View↔Texture drop
 
 - L2: `tryDrop` / `HandleTable.tryDrop` (idempotent)

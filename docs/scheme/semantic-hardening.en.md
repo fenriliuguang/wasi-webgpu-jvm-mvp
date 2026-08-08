@@ -47,12 +47,12 @@ A WIT records (render / pipeline, …)
 - [x] Idempotent Host `tryDrop`; `HandleTable.tryDrop`
 - [x] Docs: paired release vs still-needed `releaseFrameResources` (encoder orphans) / Demo `releaseAllGpuObjects` (Surface/Device; true WIT dtor still blocked by wasmtime4j `resourceTable`)
 - [ ] Demo CM×N + L2 resume device re-check (blockers D2/D3/D5/D6)
-- [ ] (Optional) wasmtime4j destructor miss → `host.drop(rep)` patch — may fold into C
+- [x] (Optional note) wasmtime4j destructor miss → `host.drop(rep)` documented in UPSTREAM §4 (real patch / PR still optional)
 
 ### C — Upstream contribution prep
 
-- [ ] Package `ConcurrentCallCodec` unsigned-u64 (and related UPSTREAM rows) as an outward-facing brief / patch note
-- [ ] Keep or smoothly migrate in-repo overlay / filtered-jar strategy; refresh `patches/UPSTREAM.md` status
+- [x] `ConcurrentCallCodec` unsigned-u64 (plus Validation / destructor / native patches) packaged as outbound brief: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)
+- [x] In-repo overlay / filtered-jar strategy documented; unchanged until upstream merges; **no** mandatory open PR
 
 ### D — D7 instrumented peripheral
 
