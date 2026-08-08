@@ -101,7 +101,7 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 
 ~~Demo 手点稳性（P6）~~ — 已完成（demo-cm-stability）  
 ~~真机回归 D1–D6~~ — 已收口（[`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)）  
-**本阶段**：[`semantic-hardening.md`](semantic-hardening.md)（含上游 `ConcurrentCallCodec` unsigned-u64 = 子切片 C；D7 = 子切片 D）
+**本阶段**：[`semantic-hardening.md`](semantic-hardening.md)（C = 上游缺口本仓备忘，**不对上游提 PR**；D7 = 子切片 D）
 
 ## 一句话
 
