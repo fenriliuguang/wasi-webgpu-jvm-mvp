@@ -5,11 +5,17 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening slice E — Guest vertex-buffer triangle
+
+- `guest/triangle-cm`: upload float32x2 verts (`VERTEX|COPY_DST`), `create-render-pipeline-triangle-buffers` + `set-vertex-buffer`; shader `@location(0)` (same coords/color as L2)
+- Rebuilt `triangle_cm.wasm` (imports buffers path from `@0.4.0`)
+- Device instrumented / Demo hand-tap re-check still pending
+
 ### Semantic hardening slice A (partial) — `experimental:webgpu-cm` 0.3.0 → 0.4.0
 
 - WIT: `vertex-attribute` / `vertex-buffer-layout` records; `vertex-format` / `vertex-step-mode` aliases; `create-render-pipeline-triangle-buffers`; `render-pass-encoder.set-vertex-buffer`
-- L2 / Dawn / Cpu / abi-cm / WasmtimeCmLinker wired; keep `create-render-pipeline-triangle` (`vertex_index`) for existing Guest path
-- Rebuilt `triangle_cm.wasm` / `vector_add_cm.wasm` against `@0.4.0` (Guest still uses old triangle helper; vertex-buffer Guest = slice E)
+- L2 / Dawn / Cpu / abi-cm / WasmtimeCmLinker wired; keep `create-render-pipeline-triangle` (`vertex_index`) for contrast
+- Rebuilt guests against `@0.4.0`; E migrates triangle Guest to buffers API
 - Docs: render-subset + wit READMEs; E locked to vertex buffer in `semantic-hardening`
 
 ### Demo CM device stability regression — complete 2026-08-08 (V2458A)

@@ -36,6 +36,7 @@ guest/triangle-cm (triangle_cm.wasm, world triangle)
 
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
 - **One-shot** (`run-triangle`): configure → draw → present → unconfigure; default instrumented path
+- **Vertex buffer (phase E)**: Guest `create-buffer` + `write-buffer` → `create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`; shader `@location(0)`
 - **Frame loop** (host-driven): `init-triangle` → loop `draw-frame` → `drop-triangle`; Demo `TriangleCmOneShot.runFrameLoopAndAwait` (reuse Session + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
 - **Acceptance**: instrumented one-shot + `cmGuestRepeatTriangleReusesSession`; Demo pause→CM→resume; device regression D1–D6 in [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md) (ZH)
 - **Desktop**: without an Android Surface, `CpuWasiWebGpuHost` → Unsupported and related unit tests skip (same gating as CM compute)

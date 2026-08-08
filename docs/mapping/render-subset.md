@@ -36,6 +36,7 @@ guest/triangle-cm（triangle_cm.wasm，world triangle）
 
 - **Window**：Host 侧注入 native window（`Surface` → ANativeWindow 指针，按 u64 传）；Guest 只持 `surface` resource，不创建 window
 - **One-shot**（`run-triangle`）：configure → draw → present → unconfigure；仪器默认路径
+- **顶点缓冲（本阶段 E）**：Guest `create-buffer` + `write-buffer` → `create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`；shader `@location(0)`
 - **帧循环**（宿主驱动）：`init-triangle` → 循环 `draw-frame` → `drop-triangle`；Demo `TriangleCmOneShot.runFrameLoopAndAwait`（复用 Session + `releaseAllGpuObjects`）；线程约定见 [`threading.md`](threading.md)
 - **验收**：仪器 one-shot + `cmGuestRepeatTriangleReusesSession`；Demo pause→CM→resume；真机回归 D1–D6 见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)
 - **桌面**：无 Android Surface 时 `CpuWasiWebGpuHost` → Unsupported，相关单测 skip（与 CM compute 门控一致）

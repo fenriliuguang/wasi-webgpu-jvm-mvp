@@ -10,6 +10,7 @@ Experimental **Component Model** Guest: on-screen red triangle (one-shot + host-
   - `run-triangle` — one-shot configure → draw → present → unconfigure
   - `init-triangle` / `draw-frame` / `drop-triangle` — host-driven frame loop
 - Host injects Android native window; Guest **only holds** `surface`
+- Vertices via `create-buffer` + `write-buffer` + `set-vertex-buffer` (`create-render-pipeline-triangle-buffers` / `@location(0)`)
 
 ## Rebuild
 

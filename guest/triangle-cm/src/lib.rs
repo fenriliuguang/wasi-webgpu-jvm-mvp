@@ -4,6 +4,9 @@
 //!
 //! - `run-triangle`: one-shot configure → draw → present → unconfigure
 //! - `init-triangle` / `draw-frame` / `drop-triangle`: host-driven frame loop
+//!
+//! Slice E: vertices live in a GPU buffer (`set-vertex-buffer` + `@location(0)`),
+//! not in a WGSL `vertex_index` constant array.
 
 #![no_main]
 
@@ -14,26 +17,42 @@ wit_bindgen::generate!({
     path: "wit",
 });
 
-/// Must match `TriangleRenderer.SHADER` (L2 Kotlin demo) for visual parity.
+/// Same triangle coords / color as L2 `TriangleRenderer.SHADER`, but via vertex buffer.
 const SHADER: &str = concat!(
-    "@vertex fn vs_main(@builtin(vertex_index) vertexIndex : u32) -> @builtin(position) vec4f {\n",
-    "  let pos = array(\n",
-    "    vec2f( 0.0,  0.6),\n",
-    "    vec2f(-0.6, -0.6),\n",
-    "    vec2f( 0.6, -0.6)\n",
-    "  );\n",
-    "  return vec4f(pos[vertexIndex], 0.0, 1.0);\n",
+    "struct VertexInput {\n",
+    "  @location(0) position: vec2f,\n",
+    "}\n",
+    "@vertex fn vs_main(in: VertexInput) -> @builtin(position) vec4f {\n",
+    "  return vec4f(in.position, 0.0, 1.0);\n",
     "}\n",
     "@fragment fn fs_main() -> @location(0) vec4f {\n",
     "  return vec4f(1.0, 0.15, 0.1, 1.0);\n",
     "}\n",
 );
 
+/// float32x2: (0, 0.6), (-0.6, -0.6), (0.6, -0.6) — little-endian
+const VERTEX_BYTES: [u8; 24] = [
+    0x00, 0x00, 0x00, 0x00, // 0.0
+    0x9a, 0x99, 0x19, 0x3f, // 0.6
+    0x9a, 0x99, 0x19, 0xbf, // -0.6
+    0x9a, 0x99, 0x19, 0xbf, // -0.6
+    0x9a, 0x99, 0x19, 0x3f, // 0.6
+    0x9a, 0x99, 0x19, 0xbf, // -0.6
+];
+
+/// VERTEX | COPY_DST (`GpuBufferUsage`)
+const USAGE_VERTEX: u32 = 0x28;
+/// `androidx.webgpu.VertexFormat.Float32x2`
+const VERTEX_FORMAT_FLOAT32X2: u32 = 0x0000_001d;
+/// `androidx.webgpu.VertexStepMode.Vertex`
+const VERTEX_STEP_VERTEX: u32 = 0x0000_0001;
+
 struct TriangleState {
     device: experimental::webgpu_cm::host::Device,
     queue: experimental::webgpu_cm::host::Queue,
     surface: experimental::webgpu_cm::host::Surface,
     pipeline: experimental::webgpu_cm::host::RenderPipeline,
+    vertex_buffer: experimental::webgpu_cm::host::Buffer,
 }
 
 thread_local! {
@@ -55,10 +74,8 @@ impl Guest for Component {
         let surface = host::create_surface_from_native_window(window_handle);
         let format = surface.configure(&device, &adapter, width, height);
 
-        let shader = device.create_shader_module(SHADER);
-        let pipeline = device.create_render_pipeline_triangle(&shader, format);
-
-        draw_once(&device, &queue, &surface, &pipeline)?;
+        let (pipeline, vertex_buffer) = create_pipeline_and_vertices(&device, &queue, format);
+        draw_once(&device, &queue, &surface, &pipeline, &vertex_buffer)?;
         surface.unconfigure();
 
         Ok(())
@@ -79,14 +96,14 @@ impl Guest for Component {
             let queue = device.get_queue();
             let surface = host::create_surface_from_native_window(window_handle);
             let format = surface.configure(&device, &adapter, width, height);
-            let shader = device.create_shader_module(SHADER);
-            let pipeline = device.create_render_pipeline_triangle(&shader, format);
+            let (pipeline, vertex_buffer) = create_pipeline_and_vertices(&device, &queue, format);
 
             *cell.borrow_mut() = Some(TriangleState {
                 device,
                 queue,
                 surface,
                 pipeline,
+                vertex_buffer,
             });
             Ok(())
         })
@@ -98,7 +115,13 @@ impl Guest for Component {
             let state = state
                 .as_ref()
                 .ok_or_else(|| "triangle not initialized; call init-triangle first".to_string())?;
-            draw_once(&state.device, &state.queue, &state.surface, &state.pipeline)
+            draw_once(
+                &state.device,
+                &state.queue,
+                &state.surface,
+                &state.pipeline,
+                &state.vertex_buffer,
+            )
         })
     }
 
@@ -124,16 +147,53 @@ fn validate_window(window_handle: u64, width: u32, height: u32) -> Result<(), St
     Ok(())
 }
 
+fn create_pipeline_and_vertices(
+    device: &experimental::webgpu_cm::host::Device,
+    queue: &experimental::webgpu_cm::host::Queue,
+    format: u32,
+) -> (
+    experimental::webgpu_cm::host::RenderPipeline,
+    experimental::webgpu_cm::host::Buffer,
+) {
+    use experimental::webgpu_cm::host::{
+        BufferDescriptor, VertexAttribute, VertexBufferLayout,
+    };
+
+    let shader = device.create_shader_module(SHADER);
+    let layouts = vec![VertexBufferLayout {
+        array_stride: 8,
+        step_mode: VERTEX_STEP_VERTEX,
+        attributes: vec![VertexAttribute {
+            format: VERTEX_FORMAT_FLOAT32X2,
+            offset: 0,
+            shader_location: 0,
+        }],
+    }];
+    let pipeline = device.create_render_pipeline_triangle_buffers(&shader, format, &layouts);
+
+    let vertex_buffer = device.create_buffer(&BufferDescriptor {
+        size: VERTEX_BYTES.len() as u64,
+        usage: USAGE_VERTEX,
+        mapped_at_creation: false,
+        label: None,
+    });
+    queue.write_buffer(&vertex_buffer, 0, &VERTEX_BYTES);
+
+    (pipeline, vertex_buffer)
+}
+
 fn draw_once(
     device: &experimental::webgpu_cm::host::Device,
     queue: &experimental::webgpu_cm::host::Queue,
     surface: &experimental::webgpu_cm::host::Surface,
     pipeline: &experimental::webgpu_cm::host::RenderPipeline,
+    vertex_buffer: &experimental::webgpu_cm::host::Buffer,
 ) -> Result<(), String> {
     let view = surface.get_current_texture_view();
     let encoder = device.create_command_encoder();
     let pass = encoder.begin_render_pass_clear(&view, 0.08, 0.09, 0.12, 1.0);
     pass.set_pipeline(pipeline);
+    pass.set_vertex_buffer(0, vertex_buffer, 0, VERTEX_BYTES.len() as u64);
     pass.draw(3);
     pass.end();
 

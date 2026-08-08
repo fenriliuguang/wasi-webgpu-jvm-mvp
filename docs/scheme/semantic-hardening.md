@@ -39,7 +39,7 @@ A WIT records（render / pipeline 等）
 - [x] `experimental:webgpu-cm` **0.4.0**：`vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers`（对照 buffer `0.2.0` 先例）
 - [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker 接线；旧 `create-render-pipeline-triangle` 保留
 - [x] `docs/mapping/render-subset` 更新；Guest wasm 已按 `@0.4.0` 重建（仍走旧 triangle helper）
-- [ ] Guest 改用 buffers API（属 **E**）；仪器真机复验 triangle / vector-add
+- [x] Guest 改用 buffers API（**E** 已接线）；仪器真机复验 triangle / vector-add 仍待设备
 
 ### B — Guest 资源析构接线
 
@@ -59,9 +59,9 @@ A WIT records（render / pipeline 等）
 
 ### E — 更丰富 Guest demo（已锁定：顶点缓冲）
 
-- [ ] Guest 上传 float32x2 顶点（`VERTEX \| COPY_DST`），`set-vertex-buffer(0, …)` 后 `draw(3)`；shader 读 `@location(0)`（可相对 L2 硬编码三角有轻微坐标差，但必须走 buffer）
-- [ ] 使用 A 的 `create-render-pipeline-triangle-buffers`（或等价）+ records；旧 `create-render-pipeline-triangle`（vertex_index）可保留给对照
-- [ ] Demo 或仪器至少一条路径验收；不引入 wasi-gfx
+- [x] Guest 上传 float32x2 顶点（`VERTEX \| COPY_DST`），`set-vertex-buffer(0, …)` 后 `draw(3)`；shader 读 `@location(0)`
+- [x] 使用 `create-render-pipeline-triangle-buffers` + records；Host 仍保留旧 `create-render-pipeline-triangle`（对照）
+- [ ] Demo / 仪器真机复验（需设备）；桌面 CpuHost 仍 Unsupported / skip
 
 ## 本阶段不做
 

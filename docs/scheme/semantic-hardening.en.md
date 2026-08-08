@@ -39,7 +39,7 @@ A WIT records (render / pipeline, …)
 - [x] `experimental:webgpu-cm` **0.4.0**: `vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers` (follow buffer `0.2.0` precedent)
 - [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker wired; keep old `create-render-pipeline-triangle`
 - [x] `docs/mapping/render-subset` updated; Guest wasm rebuilt for `@0.4.0` (still uses old triangle helper)
-- [ ] Guest switches to buffers API (**E**); instrumented device re-check triangle / vector-add
+- [x] Guest switches to buffers API (**E** wired); instrumented device re-check still pending
 
 ### B — Guest resource destructor wiring
 
@@ -59,9 +59,9 @@ A WIT records (render / pipeline, …)
 
 ### E — Richer Guest demo (locked: vertex buffer)
 
-- [ ] Guest uploads float32x2 vertices (`VERTEX \| COPY_DST`), `set-vertex-buffer(0, …)` then `draw(3)`; shader reads `@location(0)` (coords may differ slightly from L2 hardcoded triangle, but must use a buffer)
-- [ ] Use A's `create-render-pipeline-triangle-buffers` (or equivalent) + records; keep old `create-render-pipeline-triangle` (`vertex_index`) for contrast
-- [ ] At least one Demo or instrumented acceptance path; no wasi-gfx
+- [x] Guest uploads float32x2 vertices (`VERTEX \| COPY_DST`), `set-vertex-buffer(0, …)` then `draw(3)`; shader reads `@location(0)`
+- [x] Uses `create-render-pipeline-triangle-buffers` + records; Host still keeps old `create-render-pipeline-triangle` (contrast)
+- [ ] Demo / instrumented device re-check (needs device); desktop CpuHost still Unsupported / skip
 
 ## Out of scope (this phase)
 

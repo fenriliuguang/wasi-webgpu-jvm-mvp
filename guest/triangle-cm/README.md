@@ -10,6 +10,7 @@ Experimental **Component Model** Guest：上屏红三角（one-shot + 宿主驱�
   - `run-triangle` — 单次 configure → draw → present → unconfigure
   - `init-triangle` / `draw-frame` / `drop-triangle` — 宿主驱动帧循环
 - Host 注入 Android native window；Guest **只持** `surface`
+- 顶点经 `create-buffer` + `write-buffer` + `set-vertex-buffer`（`create-render-pipeline-triangle-buffers` / `@location(0)`）
 
 ## Rebuild
 
