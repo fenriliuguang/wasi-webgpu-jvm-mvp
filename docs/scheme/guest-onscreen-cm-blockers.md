@@ -100,9 +100,9 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 ## 下一步
 
 ~~Demo 手点稳性（P6）~~ — 已完成（demo-cm-stability）  
-真机回归剩余项（D5 / D6 / D1）→ [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)  
-（可选）上游贡献 `ConcurrentCallCodec` unsigned-u64
+~~真机回归 D1–D6~~ — 已收口（[`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)）  
+**本阶段**：[`semantic-hardening.md`](semantic-hardening.md)（含上游 `ConcurrentCallCodec` unsigned-u64 = 子切片 C；D7 = 子切片 D）
 
 ## 一句话
 
-核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；P6 与 D2/D3 已收口；剩余真机项见 demo-cm-stability-blockers。
+核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；P6 与真机 D1–D6 已收口；后续见本阶段 [`semantic-hardening.md`](semantic-hardening.md)。

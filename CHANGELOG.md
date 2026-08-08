@@ -15,7 +15,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
+- **Current phase locked** (2026-08-08): semantic hardening & engineering debt — A WIT records → B resource destructors → C upstream brief → D D7 instrumented → E richer Guest demo; plan [`docs/scheme/semantic-hardening.md`](docs/scheme/semantic-hardening.md)
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
+- Explicitly out of this phase: wasi-gfx / full compliant world / Maven Central / `abi-mvp` flat render
 
 ### Demo CM stability + frame loop — DoD complete 2026-08-07
 

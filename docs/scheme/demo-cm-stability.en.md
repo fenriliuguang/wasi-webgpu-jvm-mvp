@@ -35,8 +35,7 @@ See archive [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-do
 ## Out of scope (this slice)
 
 - wasi-gfx canvas abstraction, full compliant `wasi:webgpu` world
-- More WIT records (slice B), Maven Central
-- `abi-mvp` flat render imports
+- More WIT records, Maven Central, `abi-mvp` flat render (moved to current phase [`semantic-hardening.en.md`](semantic-hardening.en.md) / later unlocked items)
 
 ## Sequence (done)
 
