@@ -32,8 +32,8 @@ guest/triangle-cm (triangle_cm.wasm, world triangle)
 
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
 - **One-shot** (`run-triangle`): configure → draw → present → unconfigure; default instrumented path
-- **Frame loop** (host-driven): `init-triangle` → loop `draw-frame` → `drop-triangle`; Demo `TriangleCmOneShot.runFrameLoopAndAwait`; threading: [`threading.en.md`](threading.en.md)
-- **Acceptance**: instrumented one-shot + `cmGuestRepeatTriangleReusesSession`; Demo pause→CM→resume ([`archive-demo-cm-stability-dod.en.md`](../scheme/archive-demo-cm-stability-dod.en.md))
+- **Frame loop** (host-driven): `init-triangle` → loop `draw-frame` → `drop-triangle`; Demo `TriangleCmOneShot.runFrameLoopAndAwait` (full Host+Session teardown each press); threading: [`threading.en.md`](threading.en.md)
+- **Acceptance**: instrumented one-shot + `cmGuestRepeatTriangleReusesSession`; Demo pause→CM→resume ([`archive-demo-cm-stability-dod.en.md`](../scheme/archive-demo-cm-stability-dod.en.md)); device regression leftovers [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md) (ZH)
 - **Desktop**: without an Android Surface, `CpuWasiWebGpuHost` → Unsupported and related unit tests skip (same gating as CM compute)
 - **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)); P6 Demo stability closed (same archive)
 

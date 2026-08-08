@@ -81,11 +81,11 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 
 原症状与对策：
 
-| 症状 | 对策 |
+| 症状 | 对策（现行） |
 |------|------|
-| `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` | CM 前 `pauseSurfaceAndAwait`；结束后 `drop-triangle` + `resumeSurfaceAndAwait` |
-| 同进程二次 CM `invalid handle` | 复用 `WasmtimeCmTriangle.Session`（linker/instance） |
-| 每次 Host teardown / Scudo | Demo 复用单个 CM `DawnWasiWebGpuHost` |
+| `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` | L2/CM 两侧完整 Host teardown + `releaseSurfaces`（卸 Texture/View）；见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) D2/D3 |
+| 同进程二次 CM `invalid handle` / trap | 仪器可复用 Session；Demo 手点每次新 Session（D6 仍开放） |
+| Host.close / Scudo | `eventPoller.shutdown`+`awaitTermination` 后再关 instance（勿 `shutdownNow` 打断 processEvents） |
 | 连点 | 按钮整段 disable 至 pause→CM→resume 结束 |
 
 帧循环：`init-triangle` / `draw-frame` / `drop-triangle`；仪器重复：`cmGuestRepeatTriangleReusesSession`。
@@ -100,8 +100,9 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 ## 下一步
 
 ~~Demo 手点稳性（P6）~~ — 已完成（demo-cm-stability）  
+真机回归剩余项（D5 / D6 / D1）→ [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)  
 （可选）上游贡献 `ConcurrentCallCodec` unsigned-u64
 
 ## 一句话
 
-核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；P6 手动 Demo 稳性 + 帧循环已由 demo-cm-stability 收口。
+核心阻塞（P2 u64、P5 vivo Scenario）已修，**仪器单次上屏已绿**；P6 与 D2/D3 已收口；剩余真机项见 demo-cm-stability-blockers。

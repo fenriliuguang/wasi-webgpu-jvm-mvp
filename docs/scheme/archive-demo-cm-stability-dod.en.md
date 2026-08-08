@@ -7,6 +7,8 @@
 
 Archive covers work through: `b5e6212` (Host / L2 resume) → `654896a` (Session) → `110944d` (instrumented repeat) → `841b55c` (three-part frame loop) + this docs wrap-up (2026-08-07).
 
+> **Follow-up regression (DoD text unchanged)**: manual Demo path later hit `WINDOW_IN_USE` again; from 2026-08-08 Demo tears down Host+Session every CM press (`96d594f`). Current mitigations and remaining items: [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH). Instrumented “reuse Session” acceptance remains valid.
+
 ## DoD
 
 - [x] Manual Demo repeat CM triangle (pause → frame loop → resume; button disabled for the span) without must-hit `VK_ERROR_NATIVE_WINDOW_IN_USE` / `invalid handle` (rapid taps gated by disable)
@@ -18,7 +20,7 @@ Archive covers work through: `b5e6212` (Host / L2 resume) → `654896a` (Session
 
 ## Key deliverables
 
-- Demo: `TriangleRenderer.resumeSurfaceAndAwait`; `TriangleCmOneShot` reuses Host + Session + `runFrameLoopAndAwait`
+- Demo (at archive time): `TriangleRenderer.resumeSurfaceAndAwait`; `TriangleCmOneShot` + `runFrameLoopAndAwait` (Host/Session reuse; current Demo path in blockers)
 - L1: `WasmtimeCmTriangle.Session` (`runTriangle` / `initTriangle` / `drawFrame` / `dropTriangle` / `runFrameLoop`)
 - WIT / Guest: world `triangle` additive three-part exports; prebuilt `triangle_cm.wasm`
 - Instrumented: `WasmtimeCmTriangleInstrumentedTest.cmGuestRepeatTriangleReusesSession`

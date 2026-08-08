@@ -9,7 +9,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 - Fix Mali `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` after CM→L2: `DawnWasiWebGpuHost.close()` closes GPU objects (not `handles.clear()` only); `releaseSurfaces()` drops pinned per-frame Texture/View before Surface; each CM press full Host+Session teardown
 - L2: `gpuLock`, deferred first frame, `pausedForCm`, resume retries; swapchain Texture/View table-only drop
-- Docs: `docs/scheme/demo-cm-stability-blockers.md` — D2/D3 closed on vivo V2458A; D5/D6 still open
+- Docs: blockers D2/D3 closed on vivo V2458A; sync scheme/README, threading, render-subset, demo-cm-stability plan + archives (Demo per-press Host teardown); D5/D6/D1 still open
 
 ### Planning
 

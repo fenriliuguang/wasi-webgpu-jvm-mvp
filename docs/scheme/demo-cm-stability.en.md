@@ -4,7 +4,7 @@
 
 > **Status: complete (2026-08-07).** DoD archive: [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md).  
 > Continues P6: [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md).  
-> **Regression (locked priority)**: device Demo still hits SIGSEGV / `WINDOW_IN_USE` etc. → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH).
+> **Device regression (locked, in progress)**: D2/D3 (`WINDOW_IN_USE`) closed on V2458A; remaining D5 / D6 / D1 → [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH).
 
 ## One-liner
 
@@ -12,9 +12,9 @@ Close out P6: make the manual Demo "CM triangle" as green as the instrumented pa
 
 ```text
 MainActivity "CM triangle" button
-  → pauseSurfaceAndAwait (L2 stops frames + unconfigure)
-  → CM owns the Surface: init → draw-frame loop (reused Host + Session)
-  → finish: drop-triangle (unconfigure) → resume L2
+  → pauseSurfaceAndAwait (L2 stops frames + full Host teardown)
+  → CM owns the Surface: init → draw-frame loop (per-press Host + Session)
+  → finish: drop-triangle → tearDownCmGpu (releaseSurfaces + Host.close) → resume L2
 ```
 
 ## Locked decisions
@@ -22,10 +22,10 @@ MainActivity "CM triangle" button
 | Question | Decision |
 |----------|----------|
 | Main slice | Close out the four P6 symptom classes + host-driven frame loop; no WIT semantic-surface changes (no records), no wasi-gfx |
-| Surface ownership | L2 fully paused while CM runs (reuse `TriangleRenderer.pauseSurfaceAndAwait`); confirm unconfigure before resuming L2 |
-| Host | Reuse a single `DawnWasiWebGpuHost` per Demo process (aligns with the process-level CM host registry) |
+| Surface ownership | L2 fully paused while CM runs (`pauseSurfaceAndAwait` → `teardownGpu`); then `resumeSurfaceAndAwait` |
+| Host / Session (Demo) | **After regression**: create and tear down CM `DawnWasiWebGpuHost` + Session each press (else Mali `WINDOW_IN_USE`). Instrumented path may still reuse Session (`cmGuestRepeatTriangleReusesSession`) |
 | Frame-loop shape | Stay on WIT `@0.3.0`; append `init-triangle` / `draw-frame` / `drop-triangle` (additive, no bump); host `webgpu-triangle-cm` drives the loop. Keep `run-triangle` for instrumented one-shot |
-| Same-process repeat | Reuse `WasmtimeCmTriangle.Session` (no native registry rewrite) |
+| Same-process repeat | Instrumented: reuse Session; Demo taps: full teardown (see blockers D2/D3) |
 | Acceptance | Manual tap gating + instrumented repeat-trigger case |
 
 ## DoD
@@ -49,6 +49,7 @@ See archive [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-do
 ## Links
 
 - DoD archive: [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md)
+- Device regression blockers: [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH)
 - Root README: [`README.en.md`](../../README.en.md)
 - Previous slice archive: [`archive-guest-onscreen-cm-dod.en.md`](archive-guest-onscreen-cm-dod.en.md)
 - P6 details: [`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)

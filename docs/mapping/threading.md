@@ -20,8 +20,9 @@
 
 - CM 路径使用**单独** `DawnWasiWebGpuHost` + `HandlerThread`（`webgpu-triangle-cm`）；**不**与 L2 Host 跨线程共享。  
 - 宿主驱动帧循环：同线程 `init-triangle` → 循环 `draw-frame` → `drop-triangle`（见 `WasmtimeCmTriangle.Session.runFrameLoop`）。  
-- Demo：CM 前 `pauseSurfaceAndAwait`（L2 放 Surface）；CM 后 `drop-triangle`（Guest unconfigure）再 `resumeSurfaceAndAwait`。  
-- 同进程多次 CM：复用单个 CM Session（linker/instance），勿反复 recreate linker（进程级 host 注册表）。
+- Demo：CM 前 `pauseSurfaceAndAwait`（L2 `teardownGpu` = 完整 Host.close）；CM 后 `drop-triangle` → `tearDownCmGpu`（`releaseSurfaces` + Host.close）→ settle → `resumeSurfaceAndAwait`。  
+- **Demo 手点**：每次 CM **新建并拆掉** Host + Session（Guest WIT destructor 未接线；否则 Mali `WINDOW_IN_USE`）。详见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)。  
+- **仪器**：可复用单个 CM Session（`cmGuestRepeatTriangleReusesSession`）；背靠背 recreate linker 仍可能踩进程级 host 注册表（D6）。
 
 ## Instance / Device / Queue
 

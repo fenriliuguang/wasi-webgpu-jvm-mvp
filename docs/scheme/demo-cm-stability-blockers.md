@@ -157,7 +157,7 @@ WasmRuntimeException: wasm trap: cannot enter component instance
 
 1. 盯 D5（L2 长跑 `NO_BUFFER`）与多次 CM 压力（D6 / 注册表）  
 2. D1：在去掉首帧 delay / 收紧 gpuLock 范围下尝试复现 SIGSEGV  
-3. 绿灯范围扩大后：CHANGELOG Unreleased 记一笔 + 提交（勿把未复验项标成 DoD 完成）
+3. D7 仍走 `scripts/run-android-instrumented.ps1` 旁路；勿把未复验项标成阶段完成
 
 ---
 

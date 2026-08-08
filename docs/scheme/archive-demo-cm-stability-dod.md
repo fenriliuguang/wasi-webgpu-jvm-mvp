@@ -7,6 +7,8 @@
 
 归档对应提交约至：`b5e6212`（Host/L2 resume）→ `654896a`（Session）→ `110944d`（仪器重复）→ `841b55c`（三段式帧循环）+ 本文档收口（2026-08-07）。
 
+> **后续回归（不改写本 DoD）**：真机手点路径曾再现 `WINDOW_IN_USE`；2026-08-08 起 Demo 改为每次 CM 完整 Host+Session teardown（`96d594f`）。现行对策与剩余项见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)。仪器「复用 Session」验收仍有效。
+
 ## DoD
 
 - [x] 手动 Demo 重复触发 CM 三角（pause → 帧循环 → resume；按钮整段 disable）无必现 `VK_ERROR_NATIVE_WINDOW_IN_USE` / `invalid handle`（连点靠 disable 门控）
@@ -18,7 +20,7 @@
 
 ## 关键交付物
 
-- Demo：`TriangleRenderer.resumeSurfaceAndAwait`；`TriangleCmOneShot` 复用 Host + Session + `runFrameLoopAndAwait`
+- Demo（归档时）：`TriangleRenderer.resumeSurfaceAndAwait`；`TriangleCmOneShot` + `runFrameLoopAndAwait`（Host/Session 复用；现行见 blockers）
 - L1：`WasmtimeCmTriangle.Session`（`runTriangle` / `initTriangle` / `drawFrame` / `dropTriangle` / `runFrameLoop`）
 - WIT / Guest：world `triangle` 追加三段 export；预编译 `triangle_cm.wasm`
 - 仪器：`WasmtimeCmTriangleInstrumentedTest.cmGuestRepeatTriangleReusesSession`
