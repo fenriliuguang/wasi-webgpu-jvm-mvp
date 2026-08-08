@@ -115,8 +115,9 @@ WIT resources（`own`/`borrow` ↔ `U32(rep)`）编组与进程级 resource regi
 
 - `gradle.properties`：`android.injected.androidTest.leaveApksInstalledAfterRun=true`
 - `androidTestUtil(libs.androidx.test.services)` 让 AGP 安装 test-services
-- 可靠旁路：`./scripts/run-android-instrumented.ps1`（直接 `am instrument`）
+- **唯一推荐**：`./scripts/run-android-instrumented.ps1`（直接 `am instrument`；默认两波 + 波间 `force-stop`，避免同进程 CM linker 背靠背）
 - 不要同时开两个 Run / Gradle 任务往同一台机装 APK
+- CM triangle 仪器：勿 `ActivityScenario` / `startActivitySync`（vivo 易挂起）；保持亮屏，避免 Surface 长期未就绪
 
 ## 补丁落点（备忘）
 

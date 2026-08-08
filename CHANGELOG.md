@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening — device instrumented re-check + D7
+
+- V2458A：`scripts/run-android-instrumented.ps1` 两波全绿（compute → CM triangle；波间 force-stop）
+- Triangle 仪器：async `startActivity`（勿 `startActivitySync`）；类内共享 Host+Session + `releaseAllGpuObjects`（D2/D3/D6）
+- D7：脚本定为唯一推荐入口（Studio UTP 仍可能 Process crashed）
+
 ### Semantic hardening slice C — upstream gap notes (in-repo only)
 
 - Expanded [`patches/UPSTREAM.md`](patches/UPSTREAM.md) / EN: ConcurrentCallCodec unsigned-u64, Validation TBI, CM destructor→rep gap, native patch index, overlay strategy
@@ -20,7 +26,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 - `guest/triangle-cm`: upload float32x2 verts (`VERTEX|COPY_DST`), `create-render-pipeline-triangle-buffers` + `set-vertex-buffer`; shader `@location(0)` (same coords/color as L2)
 - Rebuilt `triangle_cm.wasm` (imports buffers path from `@0.4.0`)
-- Device instrumented / Demo hand-tap re-check still pending
+- Device instrumented re-check OK (V2458A); Demo hand-tap still nice-to-have
 
 ### Semantic hardening slice A (partial) — `experimental:webgpu-cm` 0.3.0 → 0.4.0
 

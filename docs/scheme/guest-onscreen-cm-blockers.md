@@ -22,7 +22,7 @@ P6（手动 Demo 稳性）已由新切片收口：[`demo-cm-stability.md`](demo-
 | ID | 问题 | 结论 |
 |----|------|------|
 | P2 | Host 回调 `NumberFormatException: For input string: "<u64>"` | **核心 / 已修**：`ConcurrentCallCodec.parseNumber` 对高位 u64 用了 `Long.parseLong`；android-demo 本地覆盖 + `parseUnsignedLong` |
-| P5 | 仪器断言 `Surface not ready` | **核心 / 已修**：vivo 用 launcher Intent 拉起 MainActivity，`ActivityScenario` Intent 不匹配 → `onActivity` 永不跑；改用 `ActivityLifecycleMonitorRegistry` + 轮询 Surface |
+| P5 | 仪器断言 `Surface not ready` | **核心 / 已修**：vivo 用 launcher Intent 拉起 MainActivity，`ActivityScenario` Intent 不匹配 → `onActivity` 永不跑；改用 `ActivityLifecycleMonitorRegistry` + 轮询 Surface。续：亦勿用 `startActivitySync`（同因挂起数十秒 → Process crashed） |
 | P1 | L2 `webgpu-triangle` + Mali SIGSEGV | **核心周边 / 已绕过**：仪器路径不启 L2（Instrumentation 检测 + `EXTRA_SKIP_L2`） |
 | P3 | `processEvents` / `close()` Scudo | **缓解已做**（`shutdown`+`awaitTermination`）；仪器绿灯下未再复现 |
 | P4 | APK UP-TO-DATE / USB 安装 / adb PATH | 流程噪音；`--rerun-tasks` 或 clean；脚本自带 adb 路径 |

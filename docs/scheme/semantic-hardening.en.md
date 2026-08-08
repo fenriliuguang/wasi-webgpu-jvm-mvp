@@ -39,14 +39,14 @@ A WIT records (render / pipeline, …)
 - [x] `experimental:webgpu-cm` **0.4.0**: `vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers` (follow buffer `0.2.0` precedent)
 - [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker wired; keep old `create-render-pipeline-triangle`
 - [x] `docs/mapping/render-subset` updated; Guest wasm rebuilt for `@0.4.0` (still uses old triangle helper)
-- [x] Guest switches to buffers API (**E** wired); instrumented device re-check still pending
+- [x] Guest switches to buffers API (**E** wired); instrumented device re-check OK (2026-08-08, V2458A, two-wave script)
 
 ### B — Guest resource destructor wiring
 
 - [x] Frame-equivalent drop: AbiCm tracks View↔Texture pairs; `tryDrop` on present / next acquire (Texture is not a WIT resource)
 - [x] Idempotent Host `tryDrop`; `HandleTable.tryDrop`
 - [x] Docs: paired release vs still-needed `releaseFrameResources` (encoder orphans) / Demo `releaseAllGpuObjects` (Surface/Device; true WIT dtor still blocked by wasmtime4j `resourceTable`)
-- [ ] Demo CM×N + L2 resume device re-check (blockers D2/D3/D5/D6)
+- [x] Instrumented CM triangle×N (shared Session + `releaseAllGpuObjects`) device re-check (D2/D3/D6); Demo hand-tap CM×N + L2 resume still nice-to-have
 - [x] (Optional note) wasmtime4j destructor miss → `host.drop(rep)` documented in UPSTREAM §4 (notes only; no upstream submit)
 
 ### C — Upstream gap notes (no upstream PRs)
@@ -56,14 +56,14 @@ A WIT records (render / pipeline, …)
 
 ### D — D7 instrumented peripheral
 
-- [ ] Studio `*InstrumentedTest` matches script behavior, **or** README / `docs/android-wasmtime` names one recommended entry with a known-failure link for Studio
-- [ ] Mark blockers D7 closed or “documented bypass formalized”
+- [x] **Single recommended entry**: `scripts/run-android-instrumented.ps1` (two `am instrument` waves + `force-stop` between; CM vector-add and CM triangle must not back-to-back in one process)
+- [x] Blockers D7 marked “documented bypass formalized”; Studio / `:connectedDebugAndroidTest` may still UTP `Process crashed` (see `docs/android-wasmtime` §7)
 
 ### E — Richer Guest demo (locked: vertex buffer)
 
 - [x] Guest uploads float32x2 vertices (`VERTEX \| COPY_DST`), `set-vertex-buffer(0, …)` then `draw(3)`; shader reads `@location(0)`
 - [x] Uses `create-render-pipeline-triangle-buffers` + records; Host still keeps old `create-render-pipeline-triangle` (contrast)
-- [ ] Demo / instrumented device re-check (needs device); desktop CpuHost still Unsupported / skip
+- [x] Instrumented device re-check (2026-08-08, V2458A); desktop CpuHost still Unsupported / skip; Demo hand-tap nice-to-have
 
 ## Out of scope (this phase)
 

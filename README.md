@@ -52,10 +52,10 @@ wasi-webgpu-jvm-mvp/
 ./gradlew :android-demo:assembleDebug
 ```
 
-仪器测试（设备 + WebGPU/Vulkan）：Studio 右键跑 `*InstrumentedTest.kt`，或：
+仪器测试（设备 + WebGPU/Vulkan）**唯一推荐**：
 
 ```powershell
-./scripts/run-android-instrumented.ps1
+./scripts/run-android-instrumented.ps1   # 两波 am instrument；勿依赖 Studio UTP
 ```
 
 Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmtime.md)、[`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md)、`scripts/build-*.ps1`。

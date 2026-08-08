@@ -45,9 +45,11 @@ object WasmtimeCmTriangleAndroid {
                 session.runTriangle(windowHandle, width, height)
             }
         } finally {
+            // D2/D3: drop Surface/Device even when WIT destructors miss (keep Instance for close).
+            runCatching { h.releaseAllGpuObjects() }
+            (h as? DawnWasiWebGpuHost)?.flushEvents()
             if (ownedHost) {
-                // Present/GPU settle before Host teardown (Session does not own [h] here).
-                Thread.sleep(100)
+                Thread.sleep(400)
                 h.close()
             }
         }

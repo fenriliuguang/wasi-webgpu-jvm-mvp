@@ -6,12 +6,15 @@ import android.os.SystemClock
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.WindowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
 import androidx.webgpu.helper.Util
 import io.github.fenriliuguang.wasi.webgpu.experimental.dawn.DawnWasiWebGpuHost
+import io.github.fenriliuguang.wasi.webgpu.experimental.runtime.cm.WasmtimeCmTriangle
+import org.junit.AfterClass
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,17 +25,24 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Android acceptance: CM Guest `run-triangle` → Wasmtime + abi-cm → Dawn present.
  *
- * Does **not** use [androidx.test.core.app.ActivityScenario]: on vivo, starting MainActivity
+ * Does **not** use [androidx.test.core.app.ActivityScenario] or
+ * [android.app.Instrumentation.startActivitySync]: on vivo, starting MainActivity
  * (even with an explicit Intent + extras) often resumes the launcher-task MainActivity whose
- * Intent lacks our extras. ActivityScenario then ignores all lifecycle events ("intent does not
- * match") and [scenario.onActivity] never runs — Surface callbacks are never attached.
+ * Intent lacks our extras. ActivityScenario then ignores lifecycle events ("intent does not
+ * match"); startActivitySync waits for the Intent-matching instance to idle and can hang tens
+ * of seconds → Surface never observed / instrumentation reports "Process crashed".
  *
- * Instead we start the activity best-effort, then pick whatever [MainActivity] is RESUMED via
- * [ActivityLifecycleMonitorRegistry]. L2 is skipped whenever androidx.test Instrumentation is
- * attached ([MainActivity.isUnderAndroidXTestInstrumentation]).
+ * Instead we [android.content.Context.startActivity] asynchronously, then pick whatever
+ * [MainActivity] is RESUMED via [ActivityLifecycleMonitorRegistry] and poll the SurfaceView.
+ * L2 is skipped whenever androidx.test Instrumentation is attached
+ * ([MainActivity.isUnderAndroidXTestInstrumentation]).
+ *
+ * D2/D3: [DawnWasiWebGpuHost.releaseAllGpuObjects] between presents (WIT dtors miss).
+ * D6: one Host + Session for the whole class — never [WasmtimeCmTriangle.Session.close]
+ * between tests (process-global CM registry traps / SIGSEGV on linker recreate).
  *
  * Requires device/emulator with WebGPU/Vulkan and CM-patched Bionic `libwasmtime4j.so`
- * (`scripts/build-wasmtime4j-android.ps1`).
+ * (`scripts/build-wasmtime4j-android.ps1`). Prefer `scripts/run-android-instrumented.ps1`.
  */
 @RunWith(AndroidJUnit4::class)
 class WasmtimeCmTriangleInstrumentedTest {
@@ -40,72 +50,32 @@ class WasmtimeCmTriangleInstrumentedTest {
     @Test
     fun cmGuestDrawsOneShotTriangle() {
         withReadySurface { ctx ->
-            val done = CountDownLatch(1)
-            val error = AtomicReference<Throwable?>(null)
-            Thread({
-                try {
-                    WasmtimeCmTriangleAndroid.runOnce(
-                        ctx.context,
-                        ctx.surface,
-                        ctx.width,
-                        ctx.height,
-                    )
-                } catch (t: Throwable) {
-                    error.set(t)
-                } finally {
-                    done.countDown()
-                }
-            }, "cm-triangle-instrumented").start()
-            assertTrue("CM runOnce timed out", done.await(60, TimeUnit.SECONDS))
-            val failure = error.get()
-            if (failure != null) {
-                throw AssertionError("CM Guest triangle failed: ${failure.message}", failure)
+            runOnCmThread("cm-triangle-instrumented", timeoutSec = 60) {
+                val (host, session) = ensureSharedSession(ctx.context)
+                val windowHandle = Util.windowFromSurface(ctx.surface)
+                session.runTriangle(windowHandle, ctx.width, ctx.height)
+                releaseGpuOwnership(host)
             }
         }
     }
 
     /**
-     * Same-process repeat: one Dawn Host + one CM Session, three [runTriangle] calls.
-     * Guards process-global registry traps (`invalid handle` / missing destructor) from
-     * back-to-back linker recreate (demo-cm-stability Phase 2/3).
+     * Same-process repeat: shared Dawn Host + CM Session, three [runTriangle] calls.
+     * Guards process-global registry traps from back-to-back linker recreate (D6).
      */
     @Test
     fun cmGuestRepeatTriangleReusesSession() {
         withReadySurface { ctx ->
-            val done = CountDownLatch(1)
-            val error = AtomicReference<Throwable?>(null)
-            Thread({
-                try {
-                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
-                    val host = DawnWasiWebGpuHost.create()
-                    try {
-                        WasmtimeCmTriangleAndroid.openSession(ctx.context, host).use { session ->
-                            val windowHandle = Util.windowFromSurface(ctx.surface)
-                            repeat(REPEAT_COUNT) { i ->
-                                session.runTriangle(windowHandle, ctx.width, ctx.height)
-                                // Brief settle between presents on the same Surface.
-                                if (i < REPEAT_COUNT - 1) {
-                                    Thread.sleep(150)
-                                }
-                            }
-                        }
-                    } finally {
-                        Thread.sleep(100)
-                        host.close()
+            runOnCmThread("cm-triangle-repeat-instrumented", timeoutSec = 120) {
+                val (host, session) = ensureSharedSession(ctx.context)
+                val windowHandle = Util.windowFromSurface(ctx.surface)
+                repeat(REPEAT_COUNT) { i ->
+                    session.runTriangle(windowHandle, ctx.width, ctx.height)
+                    releaseGpuOwnership(host)
+                    if (i < REPEAT_COUNT - 1) {
+                        Thread.sleep(SURFACE_RELEASE_SETTLE_MS)
                     }
-                } catch (t: Throwable) {
-                    error.set(t)
-                } finally {
-                    done.countDown()
                 }
-            }, "cm-triangle-repeat-instrumented").start()
-            assertTrue("CM repeat session timed out", done.await(120, TimeUnit.SECONDS))
-            val failure = error.get()
-            if (failure != null) {
-                throw AssertionError(
-                    "CM Guest repeat triangle failed: ${failure.message}",
-                    failure,
-                )
             }
         }
     }
@@ -118,6 +88,25 @@ class WasmtimeCmTriangleInstrumentedTest {
         val height: Int,
     )
 
+    private fun runOnCmThread(name: String, timeoutSec: Long, block: () -> Unit) {
+        val done = CountDownLatch(1)
+        val error = AtomicReference<Throwable?>(null)
+        Thread({
+            try {
+                block()
+            } catch (t: Throwable) {
+                error.set(t)
+            } finally {
+                done.countDown()
+            }
+        }, name).start()
+        assertTrue("$name timed out", done.await(timeoutSec, TimeUnit.SECONDS))
+        val failure = error.get()
+        if (failure != null) {
+            throw AssertionError("$name failed: ${failure.message}", failure)
+        }
+    }
+
     private fun withReadySurface(block: (ReadySurface) -> Unit) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val context = instrumentation.targetContext
@@ -126,10 +115,13 @@ class WasmtimeCmTriangleInstrumentedTest {
             putExtra(MainActivity.EXTRA_SKIP_L2_TRIANGLE, true)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
-        // Best-effort start; vivo may still show launcher-intent MainActivity — that is OK.
-        runCatching { instrumentation.startActivitySync(intent) }
+        // Async launch only — never startActivitySync (vivo Intent-mismatch hang).
+        context.startActivity(intent)
 
         val activity = waitForResumedMainActivity(timeoutMs = 20_000)
+        instrumentation.runOnMainSync {
+            activity.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
         val surfaceReady = CountDownLatch(1)
         val surfaceRef = AtomicReference<Surface?>(null)
         val widthRef = AtomicReference(0)
@@ -171,11 +163,11 @@ class WasmtimeCmTriangleInstrumentedTest {
             )
         }
 
-        // Poll as well: callback may have fired before we registered.
         val deadline = SystemClock.uptimeMillis() + 20_000
         while (surfaceReady.count > 0 && SystemClock.uptimeMillis() < deadline) {
             instrumentation.runOnMainSync {
                 if (surfaceReady.count == 0L) return@runOnMainSync
+                if (activity.isFinishing) return@runOnMainSync
                 val surfaceView = activity.findViewById<SurfaceView>(R.id.triangleSurface)
                 val holder = surfaceView.holder
                 val frame = holder.surfaceFrame
@@ -192,10 +184,11 @@ class WasmtimeCmTriangleInstrumentedTest {
             }
         }
         assertTrue(
-            "Surface not ready within timeout (activity=${activity.javaClass.simpleName})",
+            "Surface not ready within timeout (activity=${activity.javaClass.simpleName} " +
+                "finishing=${activity.isFinishing})",
             surfaceReady.await(1, TimeUnit.SECONDS),
         )
-        Thread.sleep(300)
+        Thread.sleep(SURFACE_READY_SETTLE_MS)
 
         try {
             block(
@@ -210,6 +203,7 @@ class WasmtimeCmTriangleInstrumentedTest {
         } finally {
             instrumentation.runOnMainSync { activity.finish() }
             instrumentation.waitForIdleSync()
+            Thread.sleep(ACTIVITY_TEARDOWN_SETTLE_MS)
         }
     }
 
@@ -232,5 +226,57 @@ class WasmtimeCmTriangleInstrumentedTest {
 
     companion object {
         private const val REPEAT_COUNT = 3
+        /** Match Demo [io.github.fenriliuguang.wasi.webgpu.demo.onscreen.TriangleCmOneShot] settle. */
+        private const val SURFACE_RELEASE_SETTLE_MS = 400L
+        private const val SURFACE_READY_SETTLE_MS = 300L
+        private const val ACTIVITY_TEARDOWN_SETTLE_MS = 500L
+
+        private val sessionLock = Any()
+        private var sharedHost: DawnWasiWebGpuHost? = null
+        private var sharedSession: WasmtimeCmTriangle.Session? = null
+
+        private fun ensureSharedSession(
+            context: android.content.Context,
+        ): Pair<DawnWasiWebGpuHost, WasmtimeCmTriangle.Session> {
+            synchronized(sessionLock) {
+                val host = sharedHost ?: DawnWasiWebGpuHost.create().also { sharedHost = it }
+                val session = sharedSession ?: run {
+                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
+                    // Drop leftovers from a prior draw before (re)binding the window.
+                    releaseGpuOwnership(host)
+                    WasmtimeCmTriangleAndroid.openSession(context, host).also { sharedSession = it }
+                }
+                return host to session
+            }
+        }
+
+        private fun releaseGpuOwnership(host: DawnWasiWebGpuHost) {
+            runCatching { host.releaseAllGpuObjects() }
+            host.flushEvents()
+            Thread.sleep(SURFACE_RELEASE_SETTLE_MS)
+        }
+
+        /**
+         * Close linker only after both triangle tests — keeps D6 reuse within the class,
+         * then frees the process-global CM registry for later CM classes (vector-add).
+         */
+        @JvmStatic
+        @AfterClass
+        fun tearDownSharedSession() {
+            synchronized(sessionLock) {
+                val session = sharedSession
+                sharedSession = null
+                val host = sharedHost
+                sharedHost = null
+                if (host != null) {
+                    releaseGpuOwnership(host)
+                }
+                runCatching { session?.close() }
+                if (host != null) {
+                    Thread.sleep(100)
+                    runCatching { host.close() }
+                }
+            }
+        }
     }
 }

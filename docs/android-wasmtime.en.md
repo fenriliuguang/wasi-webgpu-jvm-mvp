@@ -115,8 +115,9 @@ Mitigations:
 
 - `gradle.properties`: `android.injected.androidTest.leaveApksInstalledAfterRun=true`
 - `androidTestUtil(libs.androidx.test.services)` so AGP installs test-services
-- Reliable bypass: `./scripts/run-android-instrumented.ps1` (plain `am instrument`)
+- **Single recommended entry**: `./scripts/run-android-instrumented.ps1` (plain `am instrument`; default two waves + `force-stop` between — avoid back-to-back CM linker in one process)
 - Do not run two Studio/Gradle install sessions against the same device at once
+- CM triangle instrumented tests: do not use `ActivityScenario` / `startActivitySync` (vivo can hang); keep screen on so Surface becomes ready
 
 ## Patch landing spots (cheat sheet)
 

@@ -1,6 +1,10 @@
 # Reliable Android instrumented tests via adb (bypasses AGP UTP).
 # Use when Studio/Gradle :connectedDebugAndroidTest reports "Process crashed"
 # while `am instrument` is green — common on vivo when UTP reinstall races.
+#
+# Default run uses two am-instrument waves with force-stop between them:
+# wasmtime4j CM host callbacks are process-global (D6) — closing one ComponentLinker
+# (vector-add or triangle) can trap the next instantiate in the same process.
 param(
     [string]$Class = "",
     [switch]$SkipAssemble
@@ -52,13 +56,58 @@ if ($LASTEXITCODE -ne 0) { throw "failed to install app apk (accept USB install 
 & $adb install -r -t -g --force-queryable $testApk
 if ($LASTEXITCODE -ne 0) { throw "failed to install test apk" }
 
-$runner = "io.github.fenriliuguang.wasi.webgpu.demo.test/androidx.test.runner.AndroidJUnitRunner"
-$args = @("shell", "am", "instrument", "-w", "-r")
-if ($Class) {
-    $args += @("-e", "class", $Class)
-}
-$args += $runner
+# Keep screen on — vivo may background the activity and leave Surface invalid.
+& $adb shell input keyevent KEYCODE_WAKEUP 2>$null
+& $adb shell svc power stayon true 2>$null
 
-Write-Host "Running: adb $($args -join ' ')"
-& $adb @args
-exit $LASTEXITCODE
+$runner = "io.github.fenriliuguang.wasi.webgpu.demo.test/androidx.test.runner.AndroidJUnitRunner"
+$pkg = "io.github.fenriliuguang.wasi.webgpu.demo"
+$appId = "io.github.fenriliuguang.wasi.webgpu.demo"
+
+function Invoke-Instrument([string]$classFilter, [string]$label) {
+    & $adb shell am force-stop $appId 2>$null | Out-Null
+    Start-Sleep -Milliseconds 400
+    $argList = @("shell", "am", "instrument", "-w", "-r")
+    if ($classFilter) {
+        $argList += @("-e", "class", $classFilter)
+    }
+    $argList += $runner
+    Write-Host "=== $label ==="
+    Write-Host "Running: adb $($argList -join ' ')"
+    # Capture output: adb often exits 0 even when tests fail; parse the summary.
+    $output = & $adb @argList 2>&1 | ForEach-Object { "$_" }
+    $output | ForEach-Object { Write-Host $_ }
+    $adbCode = [int]$LASTEXITCODE
+    $text = $output -join "`n"
+    if ($text -match "FAILURES!!!") { return 1 }
+    if ($text -match "Process crashed") { return 1 }
+    if ($adbCode -ne 0) { return $adbCode }
+    if ($text -match "OK \(\d+ tests?\)") { return 0 }
+    return 1
+}
+
+if ($Class) {
+    exit (Invoke-Instrument $Class "custom class filter")
+}
+
+# Wave 1: compute paths (CM vector-add closes its linker at the end).
+$wave1 = @(
+    "$pkg.VectorAddInstrumentedTest",
+    "$pkg.WasmtimeCmVectorAddInstrumentedTest",
+    "$pkg.WasmtimeVectorAddInstrumentedTest"
+) -join ","
+# Wave 2: CM triangle (needs a fresh process after any prior CM linker.close).
+$wave2 = "$pkg.WasmtimeCmTriangleInstrumentedTest"
+
+$code1 = Invoke-Instrument $wave1 "wave1 compute"
+if ($code1 -ne 0) {
+    Write-Host "wave1 failed with exit code $code1"
+    exit $code1
+}
+$code2 = Invoke-Instrument $wave2 "wave2 CM triangle"
+if ($code2 -ne 0) {
+    Write-Host "wave2 failed with exit code $code2"
+} else {
+    Write-Host "All instrumented waves OK"
+}
+exit $code2

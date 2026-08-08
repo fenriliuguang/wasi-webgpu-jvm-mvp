@@ -39,14 +39,14 @@ A WIT records（render / pipeline 等）
 - [x] `experimental:webgpu-cm` **0.4.0**：`vertex-attribute` / `vertex-buffer-layout` + `set-vertex-buffer` + `create-render-pipeline-triangle-buffers`（对照 buffer `0.2.0` 先例）
 - [x] L2 + Dawn + Cpu stub + `abi-cm` + WasmtimeCmLinker 接线；旧 `create-render-pipeline-triangle` 保留
 - [x] `docs/mapping/render-subset` 更新；Guest wasm 已按 `@0.4.0` 重建（仍走旧 triangle helper）
-- [x] Guest 改用 buffers API（**E** 已接线）；仪器真机复验 triangle / vector-add 仍待设备
+- [x] Guest 改用 buffers API（**E** 已接线）；仪器真机复验 triangle / vector-add（2026-08-08，V2458A，`run-android-instrumented.ps1` 两波）
 
 ### B — Guest 资源析构接线
 
 - [x] 帧内等价 drop：AbiCm 跟踪 View↔Texture 配对，`present` / 下次 acquire 时 `tryDrop`（Texture 非 WIT resource）
 - [x] Host `tryDrop` 幂等；`HandleTable.tryDrop`
 - [x] 文档标明：配对释放 vs 仍靠 `releaseFrameResources`（encoder 孤儿）/ Demo `releaseAllGpuObjects`（Surface/Device；真 WIT dtor 仍受 wasmtime4j `resourceTable` 阻塞）
-- [ ] Demo CM×N + L2 resume 真机复验（对照 blockers D2/D3/D5/D6）
+- [x] 仪器 CM triangle×N（共享 Session + `releaseAllGpuObjects`）真机复验（对照 D2/D3/D6）；Demo 手点 CM×N + L2 resume 仍建议抽空点一次
 - [x] （可选增量说明）wasmtime4j destructor miss → `host.drop(rep)` 已写入 UPSTREAM §4（仅备忘，不向上游提）
 
 ### C — 上游缺口备忘（不对上游提 PR）
@@ -56,14 +56,14 @@ A WIT records（render / pipeline 等）
 
 ### D — D7 仪器外围
 
-- [ ] Studio 跑 `*InstrumentedTest` 与脚本路径行为一致，或 README / `docs/android-wasmtime` **唯一推荐**入口写清且 Studio 失败有已知原因链接
-- [ ] blockers D7 标收口或「文档旁路正式化」
+- [x] **唯一推荐**入口：`scripts/run-android-instrumented.ps1`（两波 `am instrument` + 波间 `force-stop`；CM vector-add 与 CM triangle 不可同进程背靠背）
+- [x] blockers D7 标「文档旁路正式化」；Studio / `:connectedDebugAndroidTest` 仍可能 UTP `Process crashed`（见 `docs/android-wasmtime` §7）
 
 ### E — 更丰富 Guest demo（已锁定：顶点缓冲）
 
 - [x] Guest 上传 float32x2 顶点（`VERTEX \| COPY_DST`），`set-vertex-buffer(0, …)` 后 `draw(3)`；shader 读 `@location(0)`
 - [x] 使用 `create-render-pipeline-triangle-buffers` + records；Host 仍保留旧 `create-render-pipeline-triangle`（对照）
-- [ ] Demo / 仪器真机复验（需设备）；桌面 CpuHost 仍 Unsupported / skip
+- [x] 仪器真机复验（2026-08-08，V2458A）；桌面 CpuHost 仍 Unsupported / skip；Demo 手点建议抽空确认
 
 ## 本阶段不做
 

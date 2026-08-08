@@ -6,7 +6,7 @@
 旧记录：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)（P1/P6）
 
 > 2026-08-07 整理；2026-08-08 同机收口 D2/D3，继而 D5/D6/D1。  
-> **剩余**：D7（Studio 仪器 vs 脚本）仍走 `scripts/run-android-instrumented.ps1` — 已纳入本阶段 [`semantic-hardening.md`](semantic-hardening.md) 子切片 D。
+> D7 已文档旁路正式化：唯一推荐 `scripts/run-android-instrumented.ps1`（两波）。
 
 ---
 
@@ -40,7 +40,7 @@
 | D4 | CM 期间 L2 `Resize FAILED` | 噪音 | **已缓解**（`pausedForCm`） |
 | D5 | `BLASTBufferQueue NO_BUFFER_AVAILABLE` | 帧循环不稳 | **已收口**（`releaseFrameResources` / AbiCm present 后释放） |
 | D6 | `cannot enter component instance` | 二次 CM | **已收口**（复用 Session；失败再 recreate；避免背靠背关死 linker） |
-| D7 | Studio 仪器 `Process crashed` vs 脚本 | 外围 | 脚本旁路 → **本阶段 D**（[`semantic-hardening.md`](semantic-hardening.md)） |
+| D7 | Studio 仪器 `Process crashed` vs 脚本 | 外围 | **文档旁路正式化**：唯一推荐 `scripts/run-android-instrumented.ps1`（两波 + force-stop；见下） |
 
 ---
 
@@ -125,9 +125,15 @@ wasmtime4j CM host 回调进程级注册；背靠背关掉 linker 再 instantiat
 
 ---
 
-## D7 — 仪器外围
+## D7 — 仪器外围（文档旁路正式化）
 
-沿用 `scripts/run-android-instrumented.ps1`。收口计划见本阶段 [`semantic-hardening.md`](semantic-hardening.md) 子切片 D。
+**唯一推荐**：`scripts/run-android-instrumented.ps1`
+
+- 绕过 Studio/Gradle UTP 重装竞态（vivo 上常见 `Process crashed`）
+- 默认两波 `am instrument`，波间 `force-stop`：compute（含 CM vector-add）→ CM triangle  
+  （D6：同进程关掉一个 ComponentLinker 后再 instantiate 易 trap）
+- 三角仪器：勿用 `ActivityScenario` / `startActivitySync`（vivo Intent 不匹配会挂起数十秒）；用 async `startActivity` + LifecycleMonitor + Surface 轮询（P5 续）
+- 三角重复 draw：类内共享 Host+Session，`releaseAllGpuObjects` 交还窗口（D2/D3）
 
 ---
 

@@ -52,10 +52,10 @@ Requires full **JDK** (not JRE) and Android SDK. If Gradle picks a JRE, set `org
 ./gradlew :android-demo:assembleDebug
 ```
 
-Instrumented tests (device + WebGPU/Vulkan): run `*InstrumentedTest.kt` in Studio, or:
+Instrumented tests (device + WebGPU/Vulkan) — **recommended entry**:
 
 ```powershell
-./scripts/run-android-instrumented.ps1
+./scripts/run-android-instrumented.ps1   # two-wave am instrument; do not rely on Studio UTP
 ```
 
 Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md), [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md), `scripts/build-*.ps1`.
