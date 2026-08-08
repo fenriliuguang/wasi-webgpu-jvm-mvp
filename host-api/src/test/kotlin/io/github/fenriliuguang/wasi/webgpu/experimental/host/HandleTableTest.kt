@@ -42,4 +42,13 @@ class HandleTableTest {
         table.drop(handle)
         table.drop(handle)
     }
+
+    @Test
+    fun handlesOfKindSnapshot() {
+        val table = HandleTable()
+        val s1 = table.insert(ResourceKind.Surface, "surf-1")
+        table.insert(ResourceKind.Device, "dev")
+        val s2 = table.insert(ResourceKind.Surface, "surf-2")
+        assertEquals(listOf(s1, s2), table.handlesOfKind(ResourceKind.Surface))
+    }
 }

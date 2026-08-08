@@ -19,8 +19,11 @@ import java.util.concurrent.TimeUnit
  *
  * Call [runFrameLoopAndAwait] after pausing any L2 [TriangleRenderer] that shares the same
  * Surface. All Host/CM work runs on `webgpu-triangle-cm`.
- * Reuses a single [DawnWasiWebGpuHost] and CM [WasmtimeCmTriangle.Session] across runs
- * (not shared with L2; avoids process-global linker recreate traps).
+ *
+ * Each press uses a fresh [DawnWasiWebGpuHost] + CM [WasmtimeCmTriangle.Session] (not shared
+ * with L2). After the loop, full Host close is required so VkSurface / ANativeWindow
+ * disconnect — [WasiWebGpuHost.releaseSurfaces] alone still left `WINDOW_IN_USE` on Mali when
+ * per-frame Texture handles pinned the swapchain (Guest WIT destructors are not wired).
  */
 class TriangleCmOneShot(
     private val appContext: Context,
@@ -52,19 +55,32 @@ class TriangleCmOneShot(
                 runCatching {
                     require(surface.isValid) { "Surface is not valid" }
                     require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-                    val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
-                    val s = session ?: run {
-                        WasmtimeVectorAddAndroid.ensureNativeLoaded()
-                        WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
-                    }
+                    tearDownCmGpu()
+                    val h = DawnWasiWebGpuHost.create().also { host = it }
+                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
+                    var s = WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
                     val windowHandle = Util.windowFromSurface(surface)
                     postStatus("CM Guest triangle frame loop ($frameCount frames)…")
-                    s.runFrameLoop(windowHandle, width, height, frameCount)
+                    try {
+                        s.runFrameLoop(windowHandle, width, height, frameCount)
+                    } catch (t: Throwable) {
+                        // Trap / "cannot enter component instance" → recreate Session once.
+                        Log.w(TAG, "CM frame loop failed; recreating Session", t)
+                        runCatching { session?.close() }
+                        session = null
+                        s = WasmtimeCmTriangleAndroid.openSession(appContext, h).also { session = it }
+                        s.runFrameLoop(windowHandle, width, height, frameCount)
+                    } finally {
+                        // Full Host teardown (same as L2 pause) so BufferQueue disconnects.
+                        tearDownCmGpu()
+                        Thread.sleep(SURFACE_RELEASE_SETTLE_MS)
+                    }
                 }.onSuccess {
-                    postStatus("CM Guest triangle OK (frame loop, host+session reused)")
+                    postStatus("CM Guest triangle OK (frame loop)")
                 }.onFailure {
                     Log.e(TAG, "CM triangle frame loop failed", it)
                     postStatus("CM triangle FAILED: ${it.message}")
+                    tearDownCmGpu()
                 }
             } finally {
                 latch.countDown()
@@ -79,10 +95,7 @@ class TriangleCmOneShot(
         handler.post {
             try {
                 closed = true
-                runCatching { session?.close() }
-                session = null
-                runCatching { host?.close() }
-                host = null
+                tearDownCmGpu()
             } finally {
                 latch.countDown()
             }
@@ -91,12 +104,26 @@ class TriangleCmOneShot(
         thread.quitSafely()
     }
 
+    /** Drop Session + releaseSurfaces + close Host (idempotent). */
+    private fun tearDownCmGpu() {
+        runCatching { session?.close() }
+        session = null
+        val h = host
+        host = null
+        if (h != null) {
+            runCatching { h.releaseSurfaces() }
+            (h as? DawnWasiWebGpuHost)?.flushEvents()
+            runCatching { h.close() }
+        }
+    }
+
     private fun postStatus(message: String) {
         onStatus(message)
     }
 
     companion object {
         private const val TAG = "TriangleCmOneShot"
-        private const val DEFAULT_FRAME_COUNT = 60
+        private const val DEFAULT_FRAME_COUNT = 30
+        private const val SURFACE_RELEASE_SETTLE_MS = 400L
     }
 }

@@ -102,12 +102,16 @@ class DawnWasiWebGpuHost private constructor(
     private val callbackExecutor: Executor = Executor(Runnable::run)
     private val eventPoller = Executors.newSingleThreadExecutor()
     private val pipelineLayouts = HashMap<Int, GPUPipelineLayout>()
+    /** Serializes Dawn GPU work with [GPUInstance.processEvents] (Mali SIGSEGV under races). */
+    private val gpuLock = Any()
     @Volatile private var closed = false
 
     init {
         eventPoller.execute {
             while (!closed) {
-                runCatching { instance.processEvents() }
+                synchronized(gpuLock) {
+                    runCatching { instance.processEvents() }
+                }
                 try {
                     Thread.sleep(POLL_MS)
                 } catch (_: InterruptedException) {
@@ -126,6 +130,8 @@ class DawnWasiWebGpuHost private constructor(
                 PowerPreference.HighPerformance -> DawnPowerPreference.HighPerformance
             },
             forceFallbackAdapter = options.forceFallbackAdapter,
+            // Android Surface path needs Vulkan; Undefined may pick GLES and leave the
+            // native window connected, so CM Vulkan createSurface hits WINDOW_IN_USE.
             backendType = BackendType.Vulkan,
         )
         val adapter = awaitRequest<GPUAdapter>("requestAdapter") { callback ->
@@ -276,13 +282,15 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle {
-        val surface = instance.createSurface(
-            GPUSurfaceDescriptor(
-                surfaceSourceAndroidNativeWindow =
-                    GPUSurfaceSourceAndroidNativeWindow(nativeWindowHandle),
-            ),
-        )
-        return handles.insert(ResourceKind.Surface, surface)
+        synchronized(gpuLock) {
+            val surface = instance.createSurface(
+                GPUSurfaceDescriptor(
+                    surfaceSourceAndroidNativeWindow =
+                        GPUSurfaceSourceAndroidNativeWindow(nativeWindowHandle),
+                ),
+            )
+            return handles.insert(ResourceKind.Surface, surface)
+        }
     }
 
     override fun surfaceConfigure(
@@ -293,60 +301,68 @@ class DawnWasiWebGpuHost private constructor(
         height: Int,
     ): Int {
         require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
-        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
-        val gpuAdapter = handles.get<GPUAdapter>(adapter, ResourceKind.Adapter)
-        val caps = gpuSurface.getCapabilities(gpuAdapter)
-        val format = caps.formats.firstOrNull()
-            ?: throw HostException.Backend("surface has no texture formats")
-        val presentMode = caps.presentModes.firstOrNull() ?: PresentMode.Fifo
-        val alphaMode = caps.alphaModes.firstOrNull() ?: CompositeAlphaMode.Opaque
-        gpuSurface.configure(
-            GPUSurfaceConfiguration(
-                device = gpuDevice,
-                width = width,
-                height = height,
-                format = format,
-                usage = TextureUsage.RenderAttachment,
-                viewFormats = intArrayOf(),
-                alphaMode = alphaMode,
-                presentMode = presentMode,
-            ),
-        )
-        return format
+        synchronized(gpuLock) {
+            val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+            val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+            val gpuAdapter = handles.get<GPUAdapter>(adapter, ResourceKind.Adapter)
+            val caps = gpuSurface.getCapabilities(gpuAdapter)
+            val format = caps.formats.firstOrNull()
+                ?: throw HostException.Backend("surface has no texture formats")
+            val presentMode = PresentMode.Fifo
+            val alphaMode = caps.alphaModes.firstOrNull() ?: CompositeAlphaMode.Opaque
+            gpuSurface.configure(
+                GPUSurfaceConfiguration(
+                    device = gpuDevice,
+                    width = width,
+                    height = height,
+                    format = format,
+                    usage = TextureUsage.RenderAttachment,
+                    viewFormats = intArrayOf(),
+                    alphaMode = alphaMode,
+                    presentMode = presentMode,
+                ),
+            )
+            return format
+        }
     }
 
     override fun surfaceUnconfigure(surface: GpuHandle) {
-        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
-        gpuSurface.unconfigure()
+        synchronized(gpuLock) {
+            val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+            gpuSurface.unconfigure()
+        }
     }
 
     override fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult {
-        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
-        val surfaceTexture = gpuSurface.getCurrentTexture()
-        val status = when (surfaceTexture.status) {
-            SurfaceGetCurrentTextureStatus.SuccessOptimal -> SurfaceTextureStatus.SuccessOptimal
-            SurfaceGetCurrentTextureStatus.SuccessSuboptimal -> SurfaceTextureStatus.SuccessSuboptimal
-            SurfaceGetCurrentTextureStatus.Timeout -> SurfaceTextureStatus.Timeout
-            SurfaceGetCurrentTextureStatus.Outdated -> SurfaceTextureStatus.Outdated
-            SurfaceGetCurrentTextureStatus.Lost -> SurfaceTextureStatus.Lost
-            else -> SurfaceTextureStatus.Error
-        }
-        val texture = surfaceTexture.texture
-        return if (
-            texture != null &&
-            (status == SurfaceTextureStatus.SuccessOptimal ||
-                status == SurfaceTextureStatus.SuccessSuboptimal)
-        ) {
-            SurfaceTextureResult(status, handles.insert(ResourceKind.Texture, texture))
-        } else {
-            SurfaceTextureResult(status, null)
+        synchronized(gpuLock) {
+            val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+            val surfaceTexture = gpuSurface.getCurrentTexture()
+            val status = when (surfaceTexture.status) {
+                SurfaceGetCurrentTextureStatus.SuccessOptimal -> SurfaceTextureStatus.SuccessOptimal
+                SurfaceGetCurrentTextureStatus.SuccessSuboptimal -> SurfaceTextureStatus.SuccessSuboptimal
+                SurfaceGetCurrentTextureStatus.Timeout -> SurfaceTextureStatus.Timeout
+                SurfaceGetCurrentTextureStatus.Outdated -> SurfaceTextureStatus.Outdated
+                SurfaceGetCurrentTextureStatus.Lost -> SurfaceTextureStatus.Lost
+                else -> SurfaceTextureStatus.Error
+            }
+            val texture = surfaceTexture.texture
+            return if (
+                texture != null &&
+                (status == SurfaceTextureStatus.SuccessOptimal ||
+                    status == SurfaceTextureStatus.SuccessSuboptimal)
+            ) {
+                SurfaceTextureResult(status, handles.insert(ResourceKind.Texture, texture))
+            } else {
+                SurfaceTextureResult(status, null)
+            }
         }
     }
 
     override fun surfacePresent(surface: GpuHandle) {
-        val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
-        gpuSurface.present()
+        synchronized(gpuLock) {
+            val gpuSurface = handles.get<GPUSurface>(surface, ResourceKind.Surface)
+            gpuSurface.present()
+        }
     }
 
     override fun deviceCreateRenderPipelineTriangle(
@@ -514,11 +530,13 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     override fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>) {
-        val gpuQueue = handles.get<GPUQueue>(queue, ResourceKind.Queue)
-        val buffers = commandBuffers.map {
-            handles.get<GPUCommandBuffer>(it, ResourceKind.CommandBuffer)
-        }.toTypedArray()
-        gpuQueue.submit(buffers)
+        synchronized(gpuLock) {
+            val gpuQueue = handles.get<GPUQueue>(queue, ResourceKind.Queue)
+            val buffers = commandBuffers.map {
+                handles.get<GPUCommandBuffer>(it, ResourceKind.CommandBuffer)
+            }.toTypedArray()
+            gpuQueue.submit(buffers)
+        }
     }
 
     override fun bufferMapAsync(buffer: GpuHandle, mode: Int, offset: Long, size: Long) {
@@ -543,13 +561,78 @@ class DawnWasiWebGpuHost private constructor(
     }
 
     override fun drop(handle: GpuHandle) {
+        drop(handle, closeResource = true)
+    }
+
+    /**
+     * @param closeResource when false, only remove the handle table entry (use for swapchain
+     * textures/views from [surfaceGetCurrentTexture] — closing them races Mali/Dawn).
+     */
+    fun drop(handle: GpuHandle, closeResource: Boolean) {
+        synchronized(gpuLock) {
+            dropLocked(handle, closeResource)
+        }
+    }
+
+    /** Caller must hold [gpuLock]. */
+    private fun dropLocked(handle: GpuHandle, closeResource: Boolean) {
         val entry = handles.drop(handle)
         pipelineLayouts.remove(handle.raw)?.let { layout ->
             runCatching { layout.close() }
         }
-        val resource = entry.resource
-        if (resource is AutoCloseable) {
-            runCatching { resource.close() }
+        if (closeResource) {
+            closeGpuResource(entry.resource)
+        }
+    }
+
+    private fun closeGpuResource(resource: Any) {
+        when (resource) {
+            is GPUDevice -> {
+                runCatching { resource.destroy() }
+                runCatching { resource.close() }
+            }
+            is AutoCloseable -> runCatching { resource.close() }
+        }
+    }
+
+    override fun releaseSurfaces() {
+        synchronized(gpuLock) {
+            // Guest WIT destructors are not wired — per-frame Texture/View stay in the table
+            // and can pin the Android swapchain so GPUSurface.close() never api_disconnects
+            // (VK_ERROR_NATIVE_WINDOW_IN_USE_KHR for the next owner).
+            for (handle in handles.handlesOfKind(ResourceKind.TextureView)) {
+                runCatching { dropLocked(handle, closeResource = true) }
+            }
+            for (handle in handles.handlesOfKind(ResourceKind.Texture)) {
+                // Swapchain textures: table-only drop (native close races Mali/Dawn).
+                runCatching { dropLocked(handle, closeResource = false) }
+            }
+            for (
+                kind in listOf(
+                    ResourceKind.CommandBuffer,
+                    ResourceKind.RenderPassEncoder,
+                    ResourceKind.ComputePassEncoder,
+                    ResourceKind.CommandEncoder,
+                )
+            ) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    runCatching { dropLocked(handle, closeResource = true) }
+                }
+            }
+            for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
+                runCatching {
+                    handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()
+                }
+                runCatching { dropLocked(handle, closeResource = true) }
+            }
+            runCatching { instance.processEvents() }
+        }
+    }
+
+    /** Pump Dawn events once (call after surface teardown before another API connects). */
+    fun flushEvents() {
+        synchronized(gpuLock) {
+            runCatching { instance.processEvents() }
         }
     }
 
@@ -568,10 +651,50 @@ class DawnWasiWebGpuHost private constructor(
             eventPoller.shutdownNow()
             Thread.currentThread().interrupt()
         }
-        handles.clear()
-        pipelineLayouts.values.forEach { runCatching { it.close() } }
-        pipelineLayouts.clear()
-        runCatching { instance.close() }
+        synchronized(gpuLock) {
+            // Must close GPU objects (esp. GPUSurface) — clear() alone leaks the ANativeWindow
+            // connection and causes VK_ERROR_NATIVE_WINDOW_IN_USE_KHR for the next owner.
+            // Reentrant note: use dropLocked (not drop) while holding gpuLock.
+            for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
+                runCatching {
+                    handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()
+                }
+            }
+            val closeOrder = listOf(
+                ResourceKind.TextureView,
+                ResourceKind.Texture,
+                ResourceKind.CommandBuffer,
+                ResourceKind.RenderPassEncoder,
+                ResourceKind.ComputePassEncoder,
+                ResourceKind.CommandEncoder,
+                ResourceKind.RenderPipeline,
+                ResourceKind.ComputePipeline,
+                ResourceKind.BindGroup,
+                ResourceKind.BindGroupLayout,
+                ResourceKind.ShaderModule,
+                ResourceKind.Buffer,
+                ResourceKind.Queue,
+                ResourceKind.Surface,
+                ResourceKind.Device,
+                ResourceKind.Adapter,
+            )
+            for (kind in closeOrder) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    runCatching { dropLocked(handle, closeResource = true) }
+                }
+            }
+            // Any leftover kinds / failed drops: still close natives before abandoning the table.
+            for (kind in ResourceKind.entries) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    runCatching { dropLocked(handle, closeResource = true) }
+                }
+            }
+            handles.clear()
+            pipelineLayouts.values.forEach { runCatching { it.close() } }
+            pipelineLayouts.clear()
+            runCatching { instance.processEvents() }
+            runCatching { instance.close() }
+        }
     }
 
     private fun <T> awaitRequest(op: String, block: (GPURequestCallback<T>) -> Unit): T {

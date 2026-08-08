@@ -305,6 +305,12 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         handles.drop(handle)
     }
 
+    override fun releaseSurfaces() {
+        for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
+            runCatching { drop(handle) }
+        }
+    }
+
     override fun close() {
         handles.clear()
     }

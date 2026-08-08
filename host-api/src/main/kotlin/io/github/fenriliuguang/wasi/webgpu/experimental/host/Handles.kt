@@ -76,6 +76,12 @@ class HandleTable {
             ?: throw HostException.InvalidHandle(handle, "already dropped or unknown")
     }
 
+    /** Snapshot of live handles with [kind] (safe to drop while iterating the returned list). */
+    fun handlesOfKind(kind: ResourceKind): List<GpuHandle> =
+        entries.mapNotNull { (id, entry) ->
+            if (entry.kind == kind) GpuHandle(id) else null
+        }
+
     fun size(): Int = entries.size
 
     fun clear() {

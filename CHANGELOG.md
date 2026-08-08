@@ -5,9 +5,15 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Demo CM device stability regression (D2/D3)
+
+- Fix Mali `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` after CM→L2: `DawnWasiWebGpuHost.close()` closes GPU objects (not `handles.clear()` only); `releaseSurfaces()` drops pinned per-frame Texture/View before Surface; each CM press full Host+Session teardown
+- L2: `gpuLock`, deferred first frame, `pausedForCm`, resume retries; swapchain Texture/View table-only drop
+- Docs: `docs/scheme/demo-cm-stability-blockers.md` — D2/D3 closed on vivo V2458A; D5/D6 still open
+
 ### Planning
 
-- Locked next slice: Demo CM device stability regression (`docs/scheme/demo-cm-stability-blockers.md` — D2/D3 first); prior Demo CM stability DoD remains archived
+- Locked next slice: Demo CM device stability regression (`docs/scheme/demo-cm-stability-blockers.md` — D5/D6 / D1 root-cause); prior Demo CM stability DoD remains archived
 - Locked next slice: Demo CM stability + frame loop (`docs/scheme/demo-cm-stability.md`); Guest CM on-screen DoD archived to `docs/scheme/archive-guest-onscreen-cm-dod.md`; root README slimmed to basic info + status
 - Locked next slice: Guest CM on-screen (`docs/scheme/guest-onscreen-cm.md`); baseline DoD archived from root README
 

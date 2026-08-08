@@ -160,5 +160,14 @@ interface WasiWebGpuHost : AutoCloseable {
 
     fun drop(handle: GpuHandle)
 
+    /**
+     * Unconfigure + drop every live [ResourceKind.Surface] on this host.
+     *
+     * Needed after CM Guest `drop-triangle`: wasmtime4j resource destructors are not wired,
+     * so Guest drop does not release Dawn [GPUSurface] / ANativeWindow. Call before L2
+     * re-attaches the same Android Surface.
+     */
+    fun releaseSurfaces()
+
     override fun close()
 }

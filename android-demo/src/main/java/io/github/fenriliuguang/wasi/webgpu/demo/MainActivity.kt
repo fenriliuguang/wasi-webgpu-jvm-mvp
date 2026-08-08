@@ -139,6 +139,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 } finally {
+                    // Let Dawn disconnect ANativeWindow after CM releaseSurfaces + processEvents.
+                    Thread.sleep(POST_CM_SETTLE_MS)
                     val resumeSurface = latestSurface
                     val rw = surfaceWidth
                     val rh = surfaceHeight
@@ -178,6 +180,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
         /** When true, do not start L2 [TriangleRenderer] (CM instrumented tests). */
         const val EXTRA_SKIP_L2_TRIANGLE: String = "skip_l2_triangle"
+
+        /** Extra settle after CM before L2 recreateSurface (BufferQueue disconnect latency). */
+        private const val POST_CM_SETTLE_MS = 300L
 
         /** True when this process is running under androidx.test Instrumentation. */
         fun isUnderAndroidXTestInstrumentation(): Boolean {
