@@ -50,4 +50,17 @@ class WasiResultCodecTest {
         )
         assertEquals(13, AbiWasiResults.BY_FUNC.size)
     }
+
+    @Test
+    fun okUnitAndPayloadAreResultOk() {
+        val unit = WasiResultCodec.ok()
+        assertTrue(unit.isResult)
+        assertTrue(unit.asResult().isOk)
+
+        val payload = WasiResultCodec.ok(ai.tegmentum.wasmtime4j.component.ComponentVal.u32(7))
+        assertTrue(payload.isResult)
+        val ok = payload.asResult()
+        assertTrue(ok.isOk)
+        assertEquals(7L, ok.ok.orElseThrow().asU32())
+    }
 }

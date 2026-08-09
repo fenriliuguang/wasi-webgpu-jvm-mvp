@@ -2,7 +2,7 @@
 
 **中文** | [English](compliant-world-gap.en.md)
 
-> **状态：** 切片 G 关门（2026-08-09）；DoD [`archive-compliant-world-dod.md`](../scheme/archive-compliant-world-dod.md)。  
+> **状态：** 切片 G 关门（2026-08-09）；guest-descriptor-cube **C** 抬升主路径子集（2026-08-10）。DoD [`archive-compliant-world-dod.md`](../scheme/archive-compliant-world-dod.md)。  
 > **钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（tag `v0.3.0-rc.2`）  
 > **现状包：** `experimental:webgpu-cm@0.8.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
 > **阶段计划：** [`docs/scheme/compliant-world.md`](../scheme/compliant-world.md)  
@@ -30,7 +30,7 @@
 
 | ✅ | ⚠️ | ❌ | 合计 |
 |----|----|----|------|
-| 16 | 17 | 191 | 224 |
+| 19 | 16 | 189 | 224 |
 
 ## 已知特化 API（Host 已提供标准替代；Guest 真机待 `.so` 后迁完）
 
@@ -63,7 +63,7 @@
 | `gpu-adapter.features` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-adapter.limits` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-adapter.info` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
-| `gpu-adapter.request-device` `async` | ⚠️ | C/F | 无完整 device descriptor；async→sync；wasi result Err 已抬升（stub） |
+| `gpu-adapter.request-device` `async` | ⚠️ | C/F | wasi 已接线 → result Ok(device)；无完整 device descriptor；async→sync |
 
 ## `gpu-adapter-info`
 
@@ -98,9 +98,9 @@
 | `gpu-buffer.size` | ❌ | C/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-buffer.usage` | ❌ | C/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-buffer.map-state` | ❌ | C/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
-| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync 等待；wasi result Err 已抬升（stub）；experimental 仍 trap |
-| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray 拷贝；wasi result Err 已抬升（stub） |
-| `gpu-buffer.unmap` | ✅ | C |  |
+| `gpu-buffer.map-async` `async` | ⚠️ | C/F | wasi 已接线 → result Ok；L2 sync 等待；experimental 仍 trap |
+| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | wasi 已接线 → result Ok(list\<u8\>)；experimental get-mapped-range → ByteArray 拷贝 |
+| `gpu-buffer.unmap` | ✅ | C | wasi 已接线 → result Ok |
 | `gpu-buffer.destroy` | ❌ | C/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-buffer.label` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-buffer.set-label` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
@@ -170,7 +170,7 @@
 | `gpu-compute-pass-encoder.push-debug-group` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-compute-pass-encoder.pop-debug-group` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-compute-pass-encoder.insert-debug-marker` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
-| `gpu-compute-pass-encoder.set-bind-group` | ✅ | C |  |
+| `gpu-compute-pass-encoder.set-bind-group` | ✅ | C | wasi 已接线 → result Ok；option bind-group；忽略 dynamic-offsets |
 | `gpu-compute-pass-encoder.set-immediates` | ❌ | C/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 
 ## `gpu-compute-pipeline`
@@ -196,7 +196,7 @@
 | `gpu-device.create-pipeline-layout` | ✅ | D | experimental + L2/Dawn/Cpu |
 | `gpu-device.create-bind-group-layout` | ✅ | C/D | 标准 descriptor；含 sampler/texture 条目（D） |
 | `gpu-device.create-bind-group` | ✅ | C/D | 标准 descriptor；含 sampler/texture-view（D）；嵌套 borrow 仍受 .so 限制 |
-| `gpu-device.create-shader-module` | ⚠️ | C | 仅 WGSL code 字符串，非完整 descriptor |
+| `gpu-device.create-shader-module` | ⚠️ | C | wasi 已接线；从 descriptor 取 `code`（忽略 compilation-hints） |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout 为 pipeline-layout（D）；deprecated BGL helper 仍在 |
 | `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor；`*-triangle*` helpers deprecated |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat；wasi stub → create-pipeline-error result Err |
@@ -245,10 +245,10 @@
 
 | 上游方法 | 现状 | 切片 | 备注 |
 |----------|------|------|------|
-| `gpu-queue.submit` | ⚠️ | C | 特化 submit1 |
+| `gpu-queue.submit` | ✅ | C | wasi list submit 已接线（experimental 仍保留 deprecated submit1） |
 | `gpu-queue.on-submitted-work-done` `async` | ❌ | D/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
-| `gpu-queue.write-buffer-with-copy` | ✅ | C | experimental write-buffer |
-| `gpu-queue.write-texture-with-copy` | ❌ | D/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
+| `gpu-queue.write-buffer-with-copy` | ✅ | C | wasi 已接线 → result Ok；data-offset/size 子集切片 |
+| `gpu-queue.write-texture-with-copy` | ✅ | C | wasi 已接线；texel-copy → texture+bytesPerRow+width/height 扁平子集 |
 | `gpu-queue.label` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-queue.set-label` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 
@@ -296,7 +296,7 @@
 | `gpu-render-pass-encoder.push-debug-group` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-render-pass-encoder.pop-debug-group` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-render-pass-encoder.insert-debug-marker` | ❌ | G | G 关门：显式 Unsupported（wasi stub / 长尾） |
-| `gpu-render-pass-encoder.set-bind-group` | ❌ | E/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
+| `gpu-render-pass-encoder.set-bind-group` | ✅ | C | wasi 已接线 → result Ok；option bind-group；忽略 dynamic-offsets |
 | `gpu-render-pass-encoder.set-immediates` | ❌ | E/G | G 关门：显式 Unsupported（wasi stub / 长尾） |
 | `gpu-render-pass-encoder.set-pipeline` | ✅ | E |  |
 | `gpu-render-pass-encoder.set-index-buffer` | ❌ | E/G | G 关门：显式 Unsupported（wasi stub / 长尾） |

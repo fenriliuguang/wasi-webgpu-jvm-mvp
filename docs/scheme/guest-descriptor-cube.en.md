@@ -2,7 +2,7 @@
 
 [中文](guest-descriptor-cube.md) | **English**
 
-> **Status: in progress (2026-08-09).** Slices **A ✅ / B ✅**; C–D not started.  
+> **Status: in progress (2026-08-10).** Slices **A ✅ / B ✅ / C ✅**; D not started.  
 > Continues from: compliant-world A–G archive ([`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md)).  
 > Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B ✅) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
 
@@ -17,7 +17,7 @@ A Rebuild Android CM natives (nested borrow)
   → D Resource-lifetime hardening (true dtor or documented gap + safety nets)
 ```
 
-Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (16 ✅ / 17 ⚠️ / 191 ❌) · [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md).
+Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (19 ✅ / 16 ⚠️ / 189 ❌) · [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md).
 
 ## Decisions
 
@@ -56,10 +56,10 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (16 �
 
 ### C — wasi primary-path subset wiring
 
-- [ ] On `WasmtimeCmLinker`, wire **existing** experimental/L2 primary-chain methods to `wasi:webgpu/webgpu@0.3.0-rc.2` (adapter/device/queue/buffer/compute+render subset); leave the rest Unsupported / result stubs
-- [ ] Update [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) + matching gap rows (this subset only); **primary acceptance Guest stays experimental**
-- [ ] Document: wiring ≠ compliance product; no obligation for a wasi-track cube Guest
-- [ ] Regression: experimental Guests / instrumented tests must not break due to wasi registration
+- [x] On `WasmtimeCmLinker`, wire **existing** experimental/L2 primary-chain methods to `wasi:webgpu/webgpu@0.3.0-rc.2` (adapter/device/queue/buffer/compute+render+texture subset; `PRIMARY_PATH` ~33); leave the rest Unsupported / result stubs
+- [x] Update [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) + matching gap rows (this subset only); **primary acceptance Guest stays experimental**
+- [x] Document: wiring ≠ compliance product; no obligation for a wasi-track cube Guest
+- [x] Regression: experimental Guests / instrumented tests must not break due to wasi registration
 
 ### D — Resource-lifetime hardening
 

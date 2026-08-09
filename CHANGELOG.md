@@ -5,6 +5,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### guest-descriptor-cube slice C — wasi primary-path subset wiring
+
+- `WasmtimeCmLinker`: after experimental imports, `registerWasiImports` wires ~33 `PRIMARY_PATH` wasi:webgpu methods onto the same `AbiCmHostBindings` / GpuHandle space; stubs skip wired names
+- Shared `CmDescriptorParsers` for experimental + wasi descriptor parsing; `WasiResultCodec.ok()` / `ok(ComponentVal)` for result-returning success paths
+- Unit: `WasiResultCodecTest` ok paths + `WasiPrimaryPathWiringTest` (no wasi Guest); primary acceptance remains experimental `cube-cm`
+- Docs: dual-track + gap rows (`write-texture-with-copy` / render `set-bind-group` / `queue.submit` etc.); guest-descriptor-cube C checked
+- Wiring ≠ compliance product; no wasi-track cube Guest obligation
+
 ### Cube-only acceptance baseline
 
 - Remove vector-add / triangle Guest demos (`guest/vector-add*`, `guest/triangle-cm`), Demo UI buttons, L1 runtime entrypoints, and instrumented tests
@@ -28,7 +36,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A ✅ / B ✅** (see above)
+- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A ✅ / B ✅ / C ✅** (see above)
 
 ### Docs sync
 

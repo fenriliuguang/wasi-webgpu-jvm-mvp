@@ -2,7 +2,7 @@
 
 **中文** | [English](guest-descriptor-cube.en.md)
 
-> **状态：进行中（2026-08-09）。** 切片 **A ✅ / B ✅**；C–D 未开始。  
+> **状态：进行中（2026-08-10）。** 切片 **A ✅ / B ✅ / C ✅**；D 未开始。  
 > 承接：合规 World A–G 归档（[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)）。  
 > 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B ✅）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
 
@@ -17,7 +17,7 @@ A 重编 Android CM natives（嵌套 borrow）
   → D 资源生命周期加固（真 dtor 或文档化偏差 + 保险）
 ```
 
-对照：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)（16 ✅ / 17 ⚠️ / 191 ❌）· [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)。
+对照：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)（19 ✅ / 16 ⚠️ / 189 ❌）· [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)。
 
 ## 已定决策
 
@@ -56,10 +56,10 @@ A 重编 Android CM natives（嵌套 borrow）
 
 ### C — wasi 主路径子集接线
 
-- [ ] 在 `WasmtimeCmLinker` 上将 **已有** experimental/L2 主链方法接到 `wasi:webgpu/webgpu@0.3.0-rc.2`（adapter/device/queue/buffer/compute+render 子集）；未接线者保持 Unsupported / result stub
-- [ ] 更新 [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) + 缺口矩阵对应行（仅本子集）；**主验收 Guest 仍 experimental**
-- [ ] 文档写明：接线 ≠ 合规产品；无 wasi 轨立方体 Guest 义务
-- [ ] 回归：experimental Guest / 仪器不因 wasi 注册变化而破坏
+- [x] 在 `WasmtimeCmLinker` 上将 **已有** experimental/L2 主链方法接到 `wasi:webgpu/webgpu@0.3.0-rc.2`（adapter/device/queue/buffer/compute+render+texture 子集；`PRIMARY_PATH` ~33）；未接线者保持 Unsupported / result stub
+- [x] 更新 [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) + 缺口矩阵对应行（仅本子集）；**主验收 Guest 仍 experimental**
+- [x] 文档写明：接线 ≠ 合规产品；无 wasi 轨立方体 Guest 义务
+- [x] 回归：experimental Guest / 仪器不因 wasi 注册变化而破坏
 
 ### D — 资源生命周期加固
 

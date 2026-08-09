@@ -2,7 +2,7 @@
 
 [中文](compliant-world-gap.md) | **English**
 
-> **Status:** slice G close-out (2026-08-09); DoD [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md).  
+> **Status:** slice G close-out (2026-08-09); guest-descriptor-cube **C** lifts primary-path subset (2026-08-10). DoD [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md).  
 > **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  
 > **Current package:** `experimental:webgpu-cm@0.8.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
 > **Phase plan:** [`docs/scheme/compliant-world.en.md`](../scheme/compliant-world.en.md)  
@@ -30,7 +30,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 
 | ✅ | ⚠️ | ❌ | Total |
 |----|----|----|-------|
-| 16 | 17 | 191 | 224 |
+| 19 | 16 | 189 | 224 |
 
 ## Known specialized APIs (Host has standard replacements; device Guests migrate after `.so` rebuild)
 
@@ -63,7 +63,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-adapter.features` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-adapter.limits` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-adapter.info` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
-| `gpu-adapter.request-device` `async` | ⚠️ | C/F | no full device descriptor; async→sync; wasi result Err lifted (stub) |
+| `gpu-adapter.request-device` `async` | ⚠️ | C/F | wasi wired → result Ok(device); no full device descriptor; async→sync |
 
 ## `gpu-adapter-info`
 
@@ -98,9 +98,9 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-buffer.size` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-buffer.usage` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-buffer.map-state` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
-| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync wait; wasi result Err lifted (stub); experimental still traps |
-| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray copy; wasi result Err lifted (stub) |
-| `gpu-buffer.unmap` | ✅ | C |  |
+| `gpu-buffer.map-async` `async` | ⚠️ | C/F | wasi wired → result Ok; L2 sync wait; experimental still traps |
+| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | wasi wired → result Ok(list\<u8\>); experimental get-mapped-range → ByteArray copy |
+| `gpu-buffer.unmap` | ✅ | C | wasi wired → result Ok |
 | `gpu-buffer.destroy` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-buffer.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-buffer.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
@@ -170,7 +170,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-compute-pass-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-compute-pass-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-compute-pass-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
-| `gpu-compute-pass-encoder.set-bind-group` | ✅ | C |  |
+| `gpu-compute-pass-encoder.set-bind-group` | ✅ | C | wasi wired → result Ok; option bind-group; ignore dynamic-offsets |
 | `gpu-compute-pass-encoder.set-immediates` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-compute-pipeline`
@@ -196,7 +196,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-device.create-bind-group-layout` | ✅ | C/D | standard descriptor; sampler/texture entries (D) |
 | `gpu-device.create-pipeline-layout` | ✅ | D | experimental + L2/Dawn/Cpu |
 | `gpu-device.create-bind-group` | ✅ | C/D | standard descriptor; sampler/texture-view (D); nested borrow still .so-limited |
-| `gpu-device.create-shader-module` | ⚠️ | C | WGSL code string only, not full descriptor |
+| `gpu-device.create-shader-module` | ⚠️ | C | wasi wired; extract `code` from descriptor (ignore compilation-hints) |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout is pipeline-layout (D); deprecated BGL helper kept |
 | `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor; `*-triangle*` helpers deprecated |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat; wasi stub → create-pipeline-error result Err |
@@ -245,10 +245,10 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-queue.submit` | ⚠️ | C | specialized submit1 |
+| `gpu-queue.submit` | ✅ | C | wasi list submit wired (experimental keeps deprecated submit1) |
 | `gpu-queue.on-submitted-work-done` `async` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
-| `gpu-queue.write-buffer-with-copy` | ✅ | C | experimental write-buffer |
-| `gpu-queue.write-texture-with-copy` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-queue.write-buffer-with-copy` | ✅ | C | wasi wired → result Ok; data-offset/size subset slice |
+| `gpu-queue.write-texture-with-copy` | ✅ | C | wasi wired; texel-copy → texture+bytesPerRow+width/height flat subset |
 | `gpu-queue.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-queue.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
@@ -296,7 +296,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-render-pass-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
-| `gpu-render-pass-encoder.set-bind-group` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-bind-group` | ✅ | C | wasi wired → result Ok; option bind-group; ignore dynamic-offsets |
 | `gpu-render-pass-encoder.set-immediates` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.set-pipeline` | ✅ | E |  |
 | `gpu-render-pass-encoder.set-index-buffer` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |

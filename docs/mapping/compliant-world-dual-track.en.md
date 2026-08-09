@@ -2,19 +2,19 @@
 
 [中文](compliant-world-dual-track.md) | **English**
 
-> **Status:** post B–G close-out dual-track (2026-08-09) — Linker coexistence; standard package mostly stubs; **primary acceptance / Guests remain experimental**.  
-> Plan: [`compliant-world.en.md`](../scheme/compliant-world.en.md) · PIN: [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md) · Archive: [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md)
+> **Status:** guest-descriptor-cube slice C (2026-08-10) — Linker coexistence; standard-package **primary-path subset wired**, long-tail still stubs; **primary acceptance / Guests remain experimental**.  
+> Plan: [`compliant-world.en.md`](../scheme/compliant-world.en.md) · Next: [`guest-descriptor-cube.en.md`](../scheme/guest-descriptor-cube.en.md) · PIN: [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md) · Archive: [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md)
 
 ## One-liner
 
-Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** (current Guests and primary acceptance) and **wasi:webgpu** (standard skeleton / stubs). Dual-track is transitional; matrix close-out means method-level coverage is complete — **not** that Guests moved to the standard package, and **not** that compliance may be advertised.
+Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** (current Guests and primary acceptance) and **wasi:webgpu** (standard package; slice C wires existing L2 primary path onto Host, rest stubs). Dual-track is transitional; wiring ≠ Guest migration, and **not** compliance-product marketing.
 
 ## Package identity
 
 | Track | Import interface | Module | Guest status |
 |-------|------------------|--------|--------------|
-| experimental (primary) | `experimental:webgpu-cm/host@0.8.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm / cube-cm **stay here** (standard descriptors; guest-descriptor-cube B) |
-| Standard (dual-track stub) | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **result methods** stub → `ComponentVal.err` (slice F); other funcs throw **Unsupported**; **not yet** the primary acceptance path |
+| experimental (primary) | `experimental:webgpu-cm/host@0.8.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | **cube-cm** stays here (standard descriptors; guest-descriptor-cube B) |
+| Standard (dual-track) | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **PRIMARY_PATH** (~33) → `AbiCmHostBindings`; unwired results → `ComponentVal.err`; others **Unsupported**; **not** the primary acceptance path |
 
 ## Linker behavior
 
@@ -23,9 +23,10 @@ Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** 
 1. `registerExperimentalResources` (`AbiCm.Resource.ALL`)
 2. `registerWasiResources` (`AbiWasi.Resource.ALL`, 33)
 3. `registerExperimentalImports` (existing L2 wiring)
-4. `registerWasiImportStubs` (result methods → `ComponentVal.err`; others → `HostException.Unsupported`)
+4. `registerWasiImports` (slice C: adapter/device/queue/buffer/compute+render+texture primary path → same `AbiCmHostBindings`)
+5. `registerWasiImportStubs` (**skips** already-wired names; other results → `ComponentVal.err`; non-results → `HostException.Unsupported`)
 
-Old Guests only resolve experimental paths and are unaffected by wasi stubs.
+Old Guests only resolve experimental paths and are unaffected by wasi registration. Wiring ≠ compliance product; **no** obligation for a wasi-track cube Guest.
 
 ## Resource name map (excerpt)
 

@@ -32,21 +32,26 @@ def classify(res: str, method: str, is_async: bool):
         return (
             "skew",
             "C/F",
-            "无完整 device descriptor；async→sync",
-            "no full device descriptor; async→sync",
+            "wasi 已接线 → result Ok(device)；无完整 device descriptor；async→sync",
+            "wasi wired → result Ok(device); no full device descriptor; async→sync",
         )
     if key in ("gpu-adapter.features", "gpu-adapter.limits", "gpu-adapter.info"):
         return ("missing", "G", "可 Unsupported", "Unsupported OK")
     if res == "gpu-adapter-info":
         return ("missing", "G", "可 Unsupported", "Unsupported OK")
     if key == "gpu-buffer.map-async":
-        return ("skew", "C/F", "L2 sync 等待；result 未抬升", "L2 sync wait; result not lifted")
+        return (
+            "skew",
+            "C/F",
+            "wasi 已接线 → result Ok；L2 sync 等待",
+            "wasi wired → result Ok; L2 sync wait",
+        )
     if key == "gpu-buffer.get-mapped-range-get-with-copy":
         return (
             "skew",
             "C/F",
-            "experimental get-mapped-range → ByteArray 拷贝",
-            "experimental get-mapped-range → ByteArray copy",
+            "wasi 已接线 → result Ok(list<u8>)；ByteArray 拷贝",
+            "wasi wired → result Ok(list<u8>); ByteArray copy",
         )
     if key == "gpu-buffer.get-mapped-range-set-with-copy":
         return ("missing", "C/G", "可 Unsupported", "Unsupported OK")
@@ -67,8 +72,8 @@ def classify(res: str, method: str, is_async: bool):
         return (
             "skew",
             "C",
-            "仅 WGSL code 字符串，非完整 descriptor",
-            "WGSL code string only, not full descriptor",
+            "wasi 已接线；从 descriptor 取 code（忽略 compilation-hints）",
+            "wasi wired; extract code from descriptor (ignore compilation-hints)",
         )
     if key == "gpu-device.create-bind-group-layout":
         return (
@@ -113,10 +118,17 @@ def classify(res: str, method: str, is_async: bool):
     ):
         return ("missing", "G", "可 Unsupported", "Unsupported OK")
     if key == "gpu-queue.submit":
-        return ("skew", "C", "特化 submit1", "specialized submit1")
+        return ("ok", "C", "wasi list submit 已接线", "wasi list submit wired")
     if key == "gpu-queue.write-buffer-with-copy":
-        return ("ok", "C", "experimental write-buffer", "experimental write-buffer")
-    if key in ("gpu-queue.write-texture-with-copy", "gpu-queue.on-submitted-work-done"):
+        return ("ok", "C", "wasi 已接线 → result Ok", "wasi wired → result Ok")
+    if key == "gpu-queue.write-texture-with-copy":
+        return (
+            "ok",
+            "C",
+            "wasi 已接线；texel-copy 扁平子集",
+            "wasi wired; texel-copy flat subset",
+        )
+    if key == "gpu-queue.on-submitted-work-done":
         return ("missing", "D/G", "可 Unsupported", "Unsupported OK")
     if key == "gpu-command-encoder.begin-compute-pass":
         return ("ok", "C", "", "")
@@ -176,8 +188,14 @@ def classify(res: str, method: str, is_async: bool):
             "形参子集（仅 vertex-count）",
             "arity subset (vertex-count only)",
         )
+    if key == "gpu-render-pass-encoder.set-bind-group":
+        return (
+            "ok",
+            "C",
+            "wasi 已接线 → result Ok；忽略 dynamic-offsets",
+            "wasi wired → result Ok; ignore dynamic-offsets",
+        )
     if key in (
-        "gpu-render-pass-encoder.set-bind-group",
         "gpu-render-pass-encoder.set-index-buffer",
         "gpu-render-pass-encoder.draw-indexed",
         "gpu-render-pass-encoder.draw-indirect",

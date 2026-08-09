@@ -16,46 +16,17 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCm
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCmHostBindings
 import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasi
 import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasiResults
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupEntry
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutEntry
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindingResource
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBinding
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingLayout
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.ColorTargetState
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.DepthStencilState
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.Extent3D
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.FragmentState
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.PrimitiveState
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDepthStencilAttachment
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureBindingLayout
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
-import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
  * L1 Wasmtime Component Model adapter: registers experimental CM host imports → [WasiWebGpuHost],
- * and dual-track wasi:webgpu@0.3.0-rc.2 resources/stubs (compliant-world slice B).
+ * and dual-track wasi:webgpu@0.3.0-rc.2 (primary-path wiring + stubs).
  *
  * WIT resources are registered via [ComponentLinker.defineResource]. Host callbacks exchange
- * resource reps as u32 (L2 [GpuHandle.raw]); a patched wasmtime4j native maps those to
- * ResourceAny for the Component Model ABI, and replays resources when instantiation rebuilds
- * a fresh linker from the process-global host registry.
+ * resource reps as u32 (L2 [io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle.raw]);
+ * a patched wasmtime4j native maps those to ResourceAny for the Component Model ABI.
  *
  * Note: wasmtime4j 47.0.2-1.5.0 `createComponentEngine()` does not attach the runtime to
  * [ComponentEngine.getEngine]; we create a CM-enabled [Engine] separately for linker/store.
@@ -80,6 +51,7 @@ class WasmtimeCmLinker(
         registerExperimentalResources(linker)
         registerWasiResources(linker)
         registerExperimentalImports(linker, bindings)
+        registerWasiImports(linker, bindings)
         registerWasiImportStubs(linker)
         val component: Component = componentEngine.compileComponent(componentBytes)
         return linker.instantiate(store, component)
@@ -93,24 +65,14 @@ class WasmtimeCmLinker(
     }
 
     private fun registerExperimentalResources(linker: ComponentLinker<Any>) {
-        // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.6.0" that yields
-        // "experimental:webgpu-cm/host@0.6.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
-            // Type registration only: wasmtime4j's Java destructor path keys a private
-            // resourceTable filled by constructors, but constructors are not wired in native.
-            // L2 handles are released when the host is closed after the CM run.
             val definition = ComponentResourceDefinition.builder<Any>(name).build()
             linker.defineResource(ns, iface, name, definition)
         }
     }
 
-    /**
-     * Dual-track (slice B): register standard-package resources on the same linker so
-     * `wasi:webgpu/webgpu@0.3.0-rc.2` coexists with experimental. Function wiring is C+.
-     */
     private fun registerWasiResources(linker: ComponentLinker<Any>) {
         val ns = AbiWasi.PACKAGE
         val iface = "${AbiWasi.INTERFACE}@${AbiWasi.VERSION}"
@@ -121,9 +83,9 @@ class WasmtimeCmLinker(
     }
 
     /**
-     * Stub wasi:webgpu imports. Non-result methods throw [HostException.Unsupported];
-     * result-returning methods return `ComponentVal.err` with a mapped error record (slice F)
-     * so Guests get WIT `result` Err instead of a trap.
+     * Stub remaining wasi:webgpu imports. Skips [PRIMARY_PATH] (already wired).
+     * Non-result methods throw [HostException.Unsupported]; result methods return
+     * `ComponentVal.err` with a mapped error record.
      */
     private fun registerWasiImportStubs(linker: ComponentLinker<Any>) {
         val throwStub = ComponentHostFunction.singleValue { _ ->
@@ -133,6 +95,7 @@ class WasmtimeCmLinker(
             )
         }
         for (func in AbiWasi.Func.ALL) {
+            if (func in PRIMARY_PATH) continue
             val shape = AbiWasiResults.BY_FUNC[func]
             val stub = if (shape != null) {
                 ComponentHostFunction.singleValue { _ ->
@@ -143,6 +106,371 @@ class WasmtimeCmLinker(
             }
             linker.defineFunction("${AbiWasi.IMPORT_INTERFACE}#$func", stub)
         }
+    }
+
+    /**
+     * guest-descriptor-cube slice C: wire existing L2 primary path onto wasi:webgpu.
+     * Same [AbiCmHostBindings] / GpuHandle space as experimental.
+     */
+    private fun registerWasiImports(linker: ComponentLinker<Any>, bindings: AbiCmHostBindings) {
+        fun path(func: String): String = "${AbiWasi.IMPORT_INTERFACE}#$func"
+
+        fun define(name: String, impl: ComponentHostFunction) {
+            linker.defineFunction(path(name), impl)
+        }
+
+        fun u32(v: Int): ComponentVal = ComponentVal.u32(Integer.toUnsignedLong(v))
+
+        fun paramU32(params: List<ComponentVal>, i: Int): Int =
+            CmDescriptorParsers.asU32Compat(params[i])
+
+        fun paramU64(params: List<ComponentVal>, i: Int): Long = params[i].asU64()
+
+        fun resultOk(): ComponentVal = WasiResultCodec.ok()
+
+        fun resultOkU32(v: Int): ComponentVal = WasiResultCodec.ok(u32(v))
+
+        fun resultOkBytes(data: ByteArray): ComponentVal =
+            WasiResultCodec.ok(ComponentVal.listU8(data))
+
+        fun catchResult(
+            func: String,
+            shape: AbiWasiResults.ErrorShape,
+            block: () -> ComponentVal,
+        ): ComponentVal =
+            try {
+                block()
+            } catch (ex: HostException) {
+                WasiResultCodec.errFromHostException(func, shape, ex)
+            }
+
+        define(AbiWasi.Func.GPU_REQUEST_ADAPTER, ComponentHostFunction.singleValue {
+            ComponentVal.some(u32(bindings.requestAdapter()))
+        })
+        define(AbiWasi.Func.GPU_ADAPTER_REQUEST_DEVICE, ComponentHostFunction.singleValue { params ->
+            catchResult(
+                AbiWasi.Func.GPU_ADAPTER_REQUEST_DEVICE,
+                AbiWasiResults.ErrorShape.RequestDevice,
+            ) {
+                resultOkU32(bindings.adapterRequestDevice(paramU32(params, 0)))
+            }
+        })
+        define(AbiWasi.Func.GPU_DEVICE_QUEUE, ComponentHostFunction.singleValue { params ->
+            u32(bindings.deviceGetQueue(paramU32(params, 0)))
+        })
+        define(AbiWasi.Func.GPU_DEVICE_CREATE_BUFFER, ComponentHostFunction.singleValue { params ->
+            val desc = CmDescriptorParsers.parseBufferDescriptor(params[1])
+            u32(
+                bindings.deviceCreateBuffer(
+                    paramU32(params, 0),
+                    desc.size,
+                    desc.usage,
+                    desc.mappedAtCreation,
+                    desc.label,
+                ),
+            )
+        })
+        define(AbiWasi.Func.GPU_DEVICE_CREATE_SHADER_MODULE, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.deviceCreateShaderModule(
+                    paramU32(params, 0),
+                    CmDescriptorParsers.parseShaderModuleCode(params[1]),
+                ),
+            )
+        })
+        define(
+            AbiWasi.Func.GPU_DEVICE_CREATE_BIND_GROUP_LAYOUT,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateBindGroupLayout(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.parseBindGroupLayoutDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(AbiWasi.Func.GPU_DEVICE_CREATE_BIND_GROUP, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.deviceCreateBindGroup(
+                    paramU32(params, 0),
+                    CmDescriptorParsers.parseBindGroupDescriptor(params[1]),
+                ),
+            )
+        })
+        define(
+            AbiWasi.Func.GPU_DEVICE_CREATE_PIPELINE_LAYOUT,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreatePipelineLayout(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.parsePipelineLayoutDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_DEVICE_CREATE_COMPUTE_PIPELINE,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateComputePipeline(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.parseComputePipelineDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_DEVICE_CREATE_RENDER_PIPELINE,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateRenderPipeline(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.parseRenderPipelineDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(AbiWasi.Func.GPU_DEVICE_CREATE_TEXTURE, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.deviceCreateTexture(
+                    paramU32(params, 0),
+                    CmDescriptorParsers.parseTextureDescriptor(params[1]),
+                ),
+            )
+        })
+        define(AbiWasi.Func.GPU_DEVICE_CREATE_SAMPLER, ComponentHostFunction.singleValue { params ->
+            val descVal = params[1]
+            val desc = if (descVal.isOption) {
+                descVal.asSome().map { CmDescriptorParsers.parseSamplerDescriptor(it) }
+                    .orElse(SamplerDescriptor())
+            } else {
+                CmDescriptorParsers.parseSamplerDescriptor(descVal)
+            }
+            u32(bindings.deviceCreateSampler(paramU32(params, 0), desc))
+        })
+        define(
+            AbiWasi.Func.GPU_DEVICE_CREATE_COMMAND_ENCODER,
+            ComponentHostFunction.singleValue { params ->
+                u32(bindings.deviceCreateCommandEncoder(paramU32(params, 0)))
+            },
+        )
+        define(AbiWasi.Func.GPU_TEXTURE_CREATE_VIEW, ComponentHostFunction.singleValue { params ->
+            u32(bindings.textureCreateView(paramU32(params, 0)))
+        })
+        define(
+            AbiWasi.Func.GPU_QUEUE_SUBMIT,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.queueSubmit(
+                    paramU32(params, 0),
+                    CmDescriptorParsers.parseCommandBufferList(params[1]),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_QUEUE_WRITE_BUFFER_WITH_COPY,
+            ComponentHostFunction.singleValue { params ->
+                catchResult(
+                    AbiWasi.Func.GPU_QUEUE_WRITE_BUFFER_WITH_COPY,
+                    AbiWasiResults.ErrorShape.WriteBuffer,
+                ) {
+                    val raw = params[3].asByteArray()
+                    val dataOffset = CmDescriptorParsers.optionalU64(params[4], 0L)
+                    val size = CmDescriptorParsers.optionalU64(
+                        params[5],
+                        (raw.size - dataOffset.toInt()).toLong().coerceAtLeast(0L),
+                    )
+                    bindings.queueWriteBuffer(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        paramU64(params, 2),
+                        CmDescriptorParsers.sliceBytes(raw, dataOffset, size),
+                    )
+                    resultOk()
+                }
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_QUEUE_WRITE_TEXTURE_WITH_COPY,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                val fields = CmDescriptorParsers.parseWriteTexture(
+                    params[1],
+                    params[2],
+                    params[3],
+                    params[4],
+                )
+                bindings.queueWriteTexture(
+                    paramU32(params, 0),
+                    fields.texture,
+                    fields.data,
+                    fields.width,
+                    fields.height,
+                    fields.bytesPerRow,
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMMAND_ENCODER_BEGIN_COMPUTE_PASS,
+            ComponentHostFunction.singleValue { params ->
+                u32(bindings.commandEncoderBeginComputePass(paramU32(params, 0)))
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMMAND_ENCODER_BEGIN_RENDER_PASS,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.commandEncoderBeginRenderPass(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.parseRenderPassDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMMAND_ENCODER_COPY_BUFFER_TO_BUFFER,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.commandEncoderCopyBufferToBuffer(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    CmDescriptorParsers.optionalU64(params[2], 0L),
+                    paramU32(params, 3),
+                    CmDescriptorParsers.optionalU64(params[4], 0L),
+                    CmDescriptorParsers.optionalU64(params[5], 0L),
+                )
+            },
+        )
+        define(AbiWasi.Func.GPU_COMMAND_ENCODER_FINISH, ComponentHostFunction.singleValue { params ->
+            u32(bindings.commandEncoderFinish(paramU32(params, 0)))
+        })
+        define(
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_SET_PIPELINE,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.computePassSetPipeline(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_SET_BIND_GROUP,
+            ComponentHostFunction.singleValue { params ->
+                catchResult(
+                    AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_SET_BIND_GROUP,
+                    AbiWasiResults.ErrorShape.SetBindGroup,
+                ) {
+                    val bindGroup = CmDescriptorParsers.optionalHandle(params[2])
+                        ?: throw HostException.Validation("set-bind-group: bind-group is none")
+                    bindings.computePassSetBindGroup(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        bindGroup,
+                    )
+                    resultOk()
+                }
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_DISPATCH_WORKGROUPS,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.computePassDispatchWorkgroups(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    CmDescriptorParsers.optionalU32(params[2], 1),
+                    CmDescriptorParsers.optionalU32(params[3], 1),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_END,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.computePassEnd(paramU32(params, 0))
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_PIPELINE,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassSetPipeline(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_BIND_GROUP,
+            ComponentHostFunction.singleValue { params ->
+                catchResult(
+                    AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_BIND_GROUP,
+                    AbiWasiResults.ErrorShape.SetBindGroup,
+                ) {
+                    val bindGroup = CmDescriptorParsers.optionalHandle(params[2])
+                        ?: throw HostException.Validation("set-bind-group: bind-group is none")
+                    bindings.renderPassSetBindGroup(
+                        paramU32(params, 0),
+                        paramU32(params, 1),
+                        bindGroup,
+                    )
+                    resultOk()
+                }
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_VERTEX_BUFFER,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                val buffer = CmDescriptorParsers.optionalHandle(params[2])
+                    ?: throw HostException.Validation("set-vertex-buffer: buffer is none")
+                bindings.renderPassSetVertexBuffer(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    buffer,
+                    CmDescriptorParsers.optionalU64(params[3], 0L),
+                    CmDescriptorParsers.optionalU64(params[4], 0L),
+                )
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_DRAW,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassDraw(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_END,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassEnd(paramU32(params, 0))
+            },
+        )
+        define(AbiWasi.Func.GPU_BUFFER_MAP_ASYNC, ComponentHostFunction.singleValue { params ->
+            catchResult(
+                AbiWasi.Func.GPU_BUFFER_MAP_ASYNC,
+                AbiWasiResults.ErrorShape.MapAsync,
+            ) {
+                bindings.bufferMapAsync(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    CmDescriptorParsers.optionalU64(params[2], 0L),
+                    CmDescriptorParsers.optionalU64(params[3], 0L),
+                )
+                resultOk()
+            }
+        })
+        define(
+            AbiWasi.Func.GPU_BUFFER_GET_MAPPED_RANGE_GET_WITH_COPY,
+            ComponentHostFunction.singleValue { params ->
+                catchResult(
+                    AbiWasi.Func.GPU_BUFFER_GET_MAPPED_RANGE_GET_WITH_COPY,
+                    AbiWasiResults.ErrorShape.GetMappedRange,
+                ) {
+                    val data = bindings.bufferGetMappedRange(
+                        paramU32(params, 0),
+                        CmDescriptorParsers.optionalU64(params[1], 0L),
+                        CmDescriptorParsers.optionalU64(params[2], 0L),
+                    )
+                    resultOkBytes(data)
+                }
+            },
+        )
+        define(AbiWasi.Func.GPU_BUFFER_UNMAP, ComponentHostFunction.singleValue { params ->
+            catchResult(
+                AbiWasi.Func.GPU_BUFFER_UNMAP,
+                AbiWasiResults.ErrorShape.Unmap,
+            ) {
+                bindings.bufferUnmap(paramU32(params, 0))
+                resultOk()
+            }
+        })
     }
 
     private fun registerExperimentalImports(linker: ComponentLinker<Any>, bindings: AbiCmHostBindings) {
@@ -158,366 +486,6 @@ class WasmtimeCmLinker(
 
         fun paramU64(params: List<ComponentVal>, i: Int): Long = params[i].asU64()
 
-        fun parseBufferDescriptor(val_: ComponentVal): BufferDescriptorFields {
-            require(val_.isRecord) { "expected buffer-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val size = fields.getValue("size").asU64()
-            val usage = fields.getValue("usage").asU32().toInt()
-            val mapped = fields.getValue("mapped-at-creation").asBool()
-            val labelVal = fields.getValue("label")
-            val label = if (labelVal.isOption) {
-                labelVal.asSome().map { it.asString() }.orElse(null)
-            } else if (labelVal.isString) {
-                labelVal.asString()
-            } else {
-                null
-            }
-            return BufferDescriptorFields(size, usage, mapped, label)
-        }
-
-        fun parseVertexAttribute(val_: ComponentVal): VertexAttribute {
-            require(val_.isRecord) { "expected vertex-attribute record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return VertexAttribute(
-                format = fields.getValue("format").asU32().toInt(),
-                offset = fields.getValue("offset").asU64(),
-                shaderLocation = fields.getValue("shader-location").asU32().toInt(),
-            )
-        }
-
-        fun parseVertexBufferLayout(val_: ComponentVal): VertexBufferLayout {
-            require(val_.isRecord) { "expected vertex-buffer-layout record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val attrsVal = fields.getValue("attributes")
-            require(attrsVal.isList) { "expected attributes list, got ${attrsVal.type}" }
-            val attributes = attrsVal.asList().map { el ->
-                val attr = el as? ComponentVal
-                    ?: error("expected ComponentVal attribute, got ${el?.javaClass}")
-                parseVertexAttribute(attr)
-            }
-            return VertexBufferLayout(
-                arrayStride = fields.getValue("array-stride").asU64(),
-                stepMode = fields.getValue("step-mode").asU32().toInt(),
-                attributes = attributes,
-            )
-        }
-
-        fun parseVertexBufferLayouts(val_: ComponentVal): List<VertexBufferLayout> {
-            require(val_.isList) { "expected list<vertex-buffer-layout>, got ${val_.type}" }
-            return val_.asList().map { el ->
-                val layout = el as? ComponentVal
-                    ?: error("expected ComponentVal layout, got ${el?.javaClass}")
-                parseVertexBufferLayout(layout)
-            }
-        }
-
-        fun parseOptionalString(val_: ComponentVal): String? = when {
-            val_.isOption -> val_.asSome().map { it.asString() }.orElse(null)
-            val_.isString -> val_.asString()
-            else -> null
-        }
-
-        fun parseBufferBindingType(val_: ComponentVal): BufferBindingType {
-            val ordinal = val_.asU32().toInt()
-            return BufferBindingType.entries.getOrNull(ordinal)
-                ?: error("unknown buffer-binding-type ordinal: $ordinal")
-        }
-
-        fun parseBufferBindingLayout(val_: ComponentVal): BufferBindingLayout {
-            require(val_.isRecord) { "expected buffer-binding-layout record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return BufferBindingLayout(
-                type = parseBufferBindingType(fields.getValue("type")),
-                hasDynamicOffset = fields.getValue("has-dynamic-offset").asBool(),
-                minBindingSize = fields.getValue("min-binding-size").asU64(),
-            )
-        }
-
-        fun parseOptionalRecord(val_: ComponentVal): ComponentVal? =
-            if (val_.isOption) {
-                val_.asSome().orElse(null)
-            } else if (val_.isRecord) {
-                val_
-            } else {
-                null
-            }
-
-        fun parseSamplerBindingLayout(val_: ComponentVal): SamplerBindingLayout {
-            require(val_.isRecord) { "expected sampler-binding-layout record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return SamplerBindingLayout(type = fields.getValue("type").asU32().toInt())
-        }
-
-        fun parseTextureBindingLayout(val_: ComponentVal): TextureBindingLayout {
-            require(val_.isRecord) { "expected texture-binding-layout record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return TextureBindingLayout(
-                sampleType = fields.getValue("sample-type").asU32().toInt(),
-                viewDimension = fields.getValue("view-dimension").asU32().toInt(),
-                multisampled = fields.getValue("multisampled").asBool(),
-            )
-        }
-
-        fun parseBindGroupLayoutEntry(val_: ComponentVal): BindGroupLayoutEntry {
-            require(val_.isRecord) { "expected bind-group-layout-entry record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val buffer = parseOptionalRecord(fields.getValue("buffer"))?.let { parseBufferBindingLayout(it) }
-            val sampler = parseOptionalRecord(fields.getValue("sampler"))?.let { parseSamplerBindingLayout(it) }
-            val texture = parseOptionalRecord(fields.getValue("texture"))?.let { parseTextureBindingLayout(it) }
-            return BindGroupLayoutEntry(
-                binding = fields.getValue("binding").asU32().toInt(),
-                visibility = fields.getValue("visibility").asU32().toInt(),
-                buffer = buffer,
-                sampler = sampler,
-                texture = texture,
-            )
-        }
-
-        fun parseBindGroupLayoutDescriptor(val_: ComponentVal): BindGroupLayoutDescriptor {
-            require(val_.isRecord) { "expected bind-group-layout-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val entriesVal = fields.getValue("entries")
-            require(entriesVal.isList) { "expected entries list, got ${entriesVal.type}" }
-            val entries = entriesVal.asList().map { el ->
-                val entry = el as? ComponentVal
-                    ?: error("expected ComponentVal entry, got ${el?.javaClass}")
-                parseBindGroupLayoutEntry(entry)
-            }
-            return BindGroupLayoutDescriptor(
-                entries = entries,
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseBufferBinding(val_: ComponentVal): BufferBinding {
-            require(val_.isRecord) { "expected buffer-binding record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val sizeVal = fields.getValue("size")
-            val size = if (sizeVal.isOption) {
-                sizeVal.asSome().map { it.asU64() }.orElse(null)
-            } else {
-                runCatching { sizeVal.asU64() }.getOrNull()
-            }
-            return BufferBinding(
-                buffer = GpuHandle(fields.getValue("buffer").asU32().toInt()),
-                offset = fields.getValue("offset").asU64(),
-                size = size,
-            )
-        }
-
-        fun parseBindGroupEntry(val_: ComponentVal): BindGroupEntry {
-            require(val_.isRecord) { "expected bind-group-entry record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val binding = fields.getValue("binding").asU32().toInt()
-            val bufferOpt = parseOptionalRecord(fields.getValue("buffer"))
-            val samplerVal = fields.getValue("sampler")
-            val viewVal = fields.getValue("texture-view")
-            val sampler = if (samplerVal.isOption) {
-                samplerVal.asSome().map { GpuHandle(it.asU32().toInt()) }.orElse(null)
-            } else {
-                null
-            }
-            val textureView = if (viewVal.isOption) {
-                viewVal.asSome().map { GpuHandle(it.asU32().toInt()) }.orElse(null)
-            } else {
-                null
-            }
-            val resource = when {
-                bufferOpt != null -> BindingResource.Buffer(parseBufferBinding(bufferOpt))
-                sampler != null -> BindingResource.Sampler(sampler)
-                textureView != null -> BindingResource.TextureView(textureView)
-                else -> error("bind-group-entry needs buffer, sampler, or texture-view")
-            }
-            return BindGroupEntry(binding = binding, resource = resource)
-        }
-
-        fun parseBindGroupDescriptor(val_: ComponentVal): BindGroupDescriptor {
-            require(val_.isRecord) { "expected bind-group-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val entriesVal = fields.getValue("entries")
-            require(entriesVal.isList) { "expected entries list, got ${entriesVal.type}" }
-            val entries = entriesVal.asList().map { el ->
-                val entry = el as? ComponentVal
-                    ?: error("expected ComponentVal entry, got ${el?.javaClass}")
-                parseBindGroupEntry(entry)
-            }
-            return BindGroupDescriptor(
-                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
-                entries = entries,
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseTextureDescriptor(val_: ComponentVal): TextureDescriptor {
-            require(val_.isRecord) { "expected texture-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val sizeVal = fields.getValue("size")
-            require(sizeVal.isRecord) { "expected extent3-d record, got ${sizeVal.type}" }
-            val sizeFields = sizeVal.asRecord()
-            return TextureDescriptor(
-                size = Extent3D(
-                    width = sizeFields.getValue("width").asU32().toInt(),
-                    height = sizeFields.getValue("height").asU32().toInt(),
-                    depthOrArrayLayers = sizeFields.getValue("depth-or-array-layers").asU32().toInt(),
-                ),
-                format = fields.getValue("format").asU32().toInt(),
-                usage = fields.getValue("usage").asU32().toInt(),
-                mipLevelCount = fields.getValue("mip-level-count").asU32().toInt(),
-                sampleCount = fields.getValue("sample-count").asU32().toInt(),
-                dimension = fields.getValue("dimension").asU32().toInt(),
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseSamplerDescriptor(val_: ComponentVal): SamplerDescriptor {
-            require(val_.isRecord) { "expected sampler-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return SamplerDescriptor(label = parseOptionalString(fields.getValue("label")))
-        }
-
-        fun parsePipelineLayoutDescriptor(val_: ComponentVal): PipelineLayoutDescriptor {
-            require(val_.isRecord) { "expected pipeline-layout-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val layoutsVal = fields.getValue("bind-group-layouts")
-            require(layoutsVal.isList) { "expected bind-group-layouts list, got ${layoutsVal.type}" }
-            val layouts = layoutsVal.asList().map { el ->
-                val item = el as? ComponentVal
-                    ?: error("expected ComponentVal layout, got ${el?.javaClass}")
-                GpuHandle(item.asU32().toInt())
-            }
-            return PipelineLayoutDescriptor(
-                bindGroupLayouts = layouts,
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseComputePipelineDescriptor(val_: ComponentVal): ComputePipelineDescriptor {
-            require(val_.isRecord) { "expected compute-pipeline-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val computeVal = fields.getValue("compute")
-            require(computeVal.isRecord) { "expected programmable-stage record, got ${computeVal.type}" }
-            val computeFields = computeVal.asRecord()
-            val entry = parseOptionalString(computeFields.getValue("entry-point"))
-            return ComputePipelineDescriptor(
-                compute = ProgrammableStage(
-                    module = GpuHandle(computeFields.getValue("module").asU32().toInt()),
-                    entryPoint = entry,
-                ),
-                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseColor(val_: ComponentVal): Color {
-            require(val_.isRecord) { "expected color record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            return Color(
-                r = fields.getValue("r").asF64(),
-                g = fields.getValue("g").asF64(),
-                b = fields.getValue("b").asF64(),
-                a = fields.getValue("a").asF64(),
-            )
-        }
-
-        fun parseRenderPipelineDescriptor(val_: ComponentVal): RenderPipelineDescriptor {
-            require(val_.isRecord) { "expected render-pipeline-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val vertexVal = fields.getValue("vertex")
-            require(vertexVal.isRecord) { "expected vertex-state record, got ${vertexVal.type}" }
-            val vertexFields = vertexVal.asRecord()
-            val fragmentVal = fields.getValue("fragment")
-            require(fragmentVal.isRecord) { "expected fragment-state record, got ${fragmentVal.type}" }
-            val fragmentFields = fragmentVal.asRecord()
-            val targetsVal = fragmentFields.getValue("targets")
-            require(targetsVal.isList) { "expected targets list, got ${targetsVal.type}" }
-            val targets = targetsVal.asList().map { el ->
-                val target = el as? ComponentVal
-                    ?: error("expected ComponentVal target, got ${el?.javaClass}")
-                require(target.isRecord) { "expected color-target-state record" }
-                ColorTargetState(format = target.asRecord().getValue("format").asU32().toInt())
-            }
-            val primitive = parseOptionalRecord(fields.getValue("primitive"))?.let { prim ->
-                require(prim.isRecord) { "expected primitive-state record" }
-                PrimitiveState(topology = prim.asRecord().getValue("topology").asU32().toInt())
-            }
-            val depthStencil = parseOptionalRecord(fields.getValue("depth-stencil"))?.let { ds ->
-                require(ds.isRecord) { "expected depth-stencil-state record" }
-                val dsFields = ds.asRecord()
-                DepthStencilState(
-                    format = dsFields.getValue("format").asU32().toInt(),
-                    depthWriteEnabled = dsFields.getValue("depth-write-enabled").asBool(),
-                    depthCompare = dsFields.getValue("depth-compare").asU32().toInt(),
-                )
-            }
-            return RenderPipelineDescriptor(
-                vertex = VertexState(
-                    module = GpuHandle(vertexFields.getValue("module").asU32().toInt()),
-                    entryPoint = parseOptionalString(vertexFields.getValue("entry-point")),
-                    buffers = parseVertexBufferLayouts(vertexFields.getValue("buffers")),
-                ),
-                fragment = FragmentState(
-                    module = GpuHandle(fragmentFields.getValue("module").asU32().toInt()),
-                    entryPoint = parseOptionalString(fragmentFields.getValue("entry-point")),
-                    targets = targets,
-                ),
-                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
-                primitive = primitive,
-                depthStencil = depthStencil,
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseRenderPassDescriptor(val_: ComponentVal): RenderPassDescriptor {
-            require(val_.isRecord) { "expected render-pass-descriptor record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val attachmentsVal = fields.getValue("color-attachments")
-            require(attachmentsVal.isList) { "expected color-attachments list, got ${attachmentsVal.type}" }
-            val attachments = attachmentsVal.asList().map { el ->
-                val att = el as? ComponentVal
-                    ?: error("expected ComponentVal attachment, got ${el?.javaClass}")
-                require(att.isRecord) { "expected render-pass-color-attachment record" }
-                val attFields = att.asRecord()
-                val clearVal = attFields.getValue("clear-value")
-                val clear = if (clearVal.isOption) {
-                    clearVal.asSome().map { parseColor(it) }.orElse(null)
-                } else if (clearVal.isRecord) {
-                    parseColor(clearVal)
-                } else {
-                    null
-                }
-                RenderPassColorAttachment(
-                    view = GpuHandle(attFields.getValue("view").asU32().toInt()),
-                    clearValue = clear,
-                    loadOp = attFields.getValue("load-op").asU32().toInt(),
-                    storeOp = attFields.getValue("store-op").asU32().toInt(),
-                )
-            }
-            val depthAttachment = parseOptionalRecord(fields.getValue("depth-stencil-attachment"))?.let { depth ->
-                require(depth.isRecord) { "expected render-pass-depth-stencil-attachment record" }
-                val depthFields = depth.asRecord()
-                RenderPassDepthStencilAttachment(
-                    view = GpuHandle(depthFields.getValue("view").asU32().toInt()),
-                    depthClearValue = depthFields.getValue("depth-clear-value").asF32(),
-                    depthLoadOp = depthFields.getValue("depth-load-op").asU32().toInt(),
-                    depthStoreOp = depthFields.getValue("depth-store-op").asU32().toInt(),
-                )
-            }
-            return RenderPassDescriptor(
-                colorAttachments = attachments,
-                depthStencilAttachment = depthAttachment,
-                label = parseOptionalString(fields.getValue("label")),
-            )
-        }
-
-        fun parseCommandBufferList(val_: ComponentVal): List<Int> {
-            require(val_.isList) { "expected list<command-buffer>, got ${val_.type}" }
-            return val_.asList().map { el ->
-                val item = el as? ComponentVal
-                    ?: error("expected ComponentVal command-buffer, got ${el?.javaClass}")
-                item.asU32().toInt()
-            }
-        }
-
         define(AbiCm.Func.REQUEST_ADAPTER, ComponentHostFunction.singleValue {
             u32(bindings.requestAdapter())
         })
@@ -527,7 +495,6 @@ class WasmtimeCmLinker(
                 require(params.isNotEmpty()) { "create-surface-from-native-window: missing window-handle" }
                 val handleVal = params[0]
                 val windowHandle = paramU64(params, 0)
-                // Diagnose u64 marshalling (Android TBI/PAC pointers often set the high bit).
                 System.err.println(
                     "CREATE_SURFACE_FROM_NATIVE_WINDOW params=${params.size} " +
                         "type=${handleVal.type} handle=0x${java.lang.Long.toUnsignedString(windowHandle, 16)} " +
@@ -543,7 +510,7 @@ class WasmtimeCmLinker(
             u32(bindings.deviceGetQueue(paramU32(params, 0)))
         })
         define(AbiCm.Func.DEVICE_CREATE_BUFFER, ComponentHostFunction.singleValue { params ->
-            val desc = parseBufferDescriptor(params[1])
+            val desc = CmDescriptorParsers.parseBufferDescriptor(params[1])
             u32(
                 bindings.deviceCreateBuffer(
                     paramU32(params, 0),
@@ -587,7 +554,7 @@ class WasmtimeCmLinker(
                 u32(
                     bindings.deviceCreateBindGroupLayout(
                         paramU32(params, 0),
-                        parseBindGroupLayoutDescriptor(params[1]),
+                        CmDescriptorParsers.parseBindGroupLayoutDescriptor(params[1]),
                     ),
                 )
             },
@@ -596,7 +563,7 @@ class WasmtimeCmLinker(
             u32(
                 bindings.deviceCreateBindGroup(
                     paramU32(params, 0),
-                    parseBindGroupDescriptor(params[1]),
+                    CmDescriptorParsers.parseBindGroupDescriptor(params[1]),
                 ),
             )
         })
@@ -604,16 +571,17 @@ class WasmtimeCmLinker(
             u32(
                 bindings.deviceCreateTexture(
                     paramU32(params, 0),
-                    parseTextureDescriptor(params[1]),
+                    CmDescriptorParsers.parseTextureDescriptor(params[1]),
                 ),
             )
         })
         define(AbiCm.Func.DEVICE_CREATE_SAMPLER, ComponentHostFunction.singleValue { params ->
             val descVal = params[1]
             val desc = if (descVal.isOption) {
-                descVal.asSome().map { parseSamplerDescriptor(it) }.orElse(SamplerDescriptor())
+                descVal.asSome().map { CmDescriptorParsers.parseSamplerDescriptor(it) }
+                    .orElse(SamplerDescriptor())
             } else {
-                parseSamplerDescriptor(descVal)
+                CmDescriptorParsers.parseSamplerDescriptor(descVal)
             }
             u32(bindings.deviceCreateSampler(paramU32(params, 0), desc))
         })
@@ -623,7 +591,7 @@ class WasmtimeCmLinker(
                 u32(
                     bindings.deviceCreatePipelineLayout(
                         paramU32(params, 0),
-                        parsePipelineLayoutDescriptor(params[1]),
+                        CmDescriptorParsers.parsePipelineLayoutDescriptor(params[1]),
                     ),
                 )
             },
@@ -634,7 +602,7 @@ class WasmtimeCmLinker(
                 u32(
                     bindings.deviceCreateComputePipeline(
                         paramU32(params, 0),
-                        parseComputePipelineDescriptor(params[1]),
+                        CmDescriptorParsers.parseComputePipelineDescriptor(params[1]),
                     ),
                 )
             },
@@ -675,7 +643,7 @@ class WasmtimeCmLinker(
                 u32(
                     bindings.deviceCreateRenderPipeline(
                         paramU32(params, 0),
-                        parseRenderPipelineDescriptor(params[1]),
+                        CmDescriptorParsers.parseRenderPipelineDescriptor(params[1]),
                     ),
                 )
             },
@@ -700,7 +668,7 @@ class WasmtimeCmLinker(
                         paramU32(params, 0),
                         paramU32(params, 1),
                         paramU32(params, 2),
-                        parseVertexBufferLayouts(params[3]),
+                        CmDescriptorParsers.parseVertexBufferLayouts(params[3]),
                     ),
                 )
             },
@@ -755,7 +723,7 @@ class WasmtimeCmLinker(
                 u32(
                     bindings.commandEncoderBeginRenderPass(
                         paramU32(params, 0),
-                        parseRenderPassDescriptor(params[1]),
+                        CmDescriptorParsers.parseRenderPassDescriptor(params[1]),
                     ),
                 )
             },
@@ -867,7 +835,10 @@ class WasmtimeCmLinker(
         define(
             AbiCm.Func.QUEUE_SUBMIT,
             ComponentHostFunction.voidFunctionWithParams { params ->
-                bindings.queueSubmit(paramU32(params, 0), parseCommandBufferList(params[1]))
+                bindings.queueSubmit(
+                    paramU32(params, 0),
+                    CmDescriptorParsers.parseCommandBufferList(params[1]),
+                )
             },
         )
         define(
@@ -903,10 +874,45 @@ class WasmtimeCmLinker(
         )
     }
 
-    private data class BufferDescriptorFields(
-        val size: Long,
-        val usage: Int,
-        val mappedAtCreation: Boolean,
-        val label: String?,
-    )
+    companion object {
+        /**
+         * wasi:webgpu primary-path funcs wired in guest-descriptor-cube slice C.
+         * [registerWasiImportStubs] skips these names.
+         */
+        val PRIMARY_PATH: Set<String> = setOf(
+            AbiWasi.Func.GPU_REQUEST_ADAPTER,
+            AbiWasi.Func.GPU_ADAPTER_REQUEST_DEVICE,
+            AbiWasi.Func.GPU_DEVICE_QUEUE,
+            AbiWasi.Func.GPU_DEVICE_CREATE_BUFFER,
+            AbiWasi.Func.GPU_DEVICE_CREATE_SHADER_MODULE,
+            AbiWasi.Func.GPU_DEVICE_CREATE_BIND_GROUP_LAYOUT,
+            AbiWasi.Func.GPU_DEVICE_CREATE_BIND_GROUP,
+            AbiWasi.Func.GPU_DEVICE_CREATE_PIPELINE_LAYOUT,
+            AbiWasi.Func.GPU_DEVICE_CREATE_COMPUTE_PIPELINE,
+            AbiWasi.Func.GPU_DEVICE_CREATE_RENDER_PIPELINE,
+            AbiWasi.Func.GPU_DEVICE_CREATE_TEXTURE,
+            AbiWasi.Func.GPU_DEVICE_CREATE_SAMPLER,
+            AbiWasi.Func.GPU_DEVICE_CREATE_COMMAND_ENCODER,
+            AbiWasi.Func.GPU_TEXTURE_CREATE_VIEW,
+            AbiWasi.Func.GPU_QUEUE_SUBMIT,
+            AbiWasi.Func.GPU_QUEUE_WRITE_BUFFER_WITH_COPY,
+            AbiWasi.Func.GPU_QUEUE_WRITE_TEXTURE_WITH_COPY,
+            AbiWasi.Func.GPU_COMMAND_ENCODER_BEGIN_COMPUTE_PASS,
+            AbiWasi.Func.GPU_COMMAND_ENCODER_BEGIN_RENDER_PASS,
+            AbiWasi.Func.GPU_COMMAND_ENCODER_COPY_BUFFER_TO_BUFFER,
+            AbiWasi.Func.GPU_COMMAND_ENCODER_FINISH,
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_SET_PIPELINE,
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_SET_BIND_GROUP,
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_DISPATCH_WORKGROUPS,
+            AbiWasi.Func.GPU_COMPUTE_PASS_ENCODER_END,
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_PIPELINE,
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_BIND_GROUP,
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_SET_VERTEX_BUFFER,
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_DRAW,
+            AbiWasi.Func.GPU_RENDER_PASS_ENCODER_END,
+            AbiWasi.Func.GPU_BUFFER_MAP_ASYNC,
+            AbiWasi.Func.GPU_BUFFER_GET_MAPPED_RANGE_GET_WITH_COPY,
+            AbiWasi.Func.GPU_BUFFER_UNMAP,
+        )
+    }
 }

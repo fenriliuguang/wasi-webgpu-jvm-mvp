@@ -11,6 +11,12 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
  */
 object WasiResultCodec {
 
+    /** Successful `result` with no Ok payload (`result<_, E>`). */
+    fun ok(): ComponentVal = ComponentVal.ok()
+
+    /** Successful `result` carrying an Ok payload. */
+    fun ok(value: ComponentVal): ComponentVal = ComponentVal.ok(value)
+
     fun errFromHostException(func: String, shape: AbiWasiResults.ErrorShape, ex: HostException): ComponentVal {
         val message = HostErrorMapping.messageOf(ex)
         val kind = when (shape) {
