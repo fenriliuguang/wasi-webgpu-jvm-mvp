@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)
-- **下一阶段**：未锁定（候选：wasi-gfx / 合规全量 world；Maven Central；`abi-mvp` 扁平 render；可选 perf）
+- **下一阶段（已锁定）**：**合规 wasi:webgpu World（无 gfx）** — [计划](docs/scheme/compliant-world.md) · [缺口矩阵](docs/mapping/compliant-world-gap.md)；不做 wasi-gfx；Maven / `abi-mvp` render / perf 移交
 
 ## 参考
 
@@ -79,11 +79,14 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | Demo CM 真机稳性回归 blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) | （仅中文） |
 | 语义加固与工程清债 DoD 归档 | [docs/scheme/archive-semantic-hardening-dod.md](docs/scheme/archive-semantic-hardening-dod.md) | [docs/scheme/archive-semantic-hardening-dod.en.md](docs/scheme/archive-semantic-hardening-dod.en.md) |
 | 语义加固计划（已完成） | [docs/scheme/semantic-hardening.md](docs/scheme/semantic-hardening.md) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
+| 合规 World 计划（进行中，无 gfx） | [docs/scheme/compliant-world.md](docs/scheme/compliant-world.md) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
+| 合规 World 缺口矩阵 | [docs/mapping/compliant-world-gap.md](docs/mapping/compliant-world-gap.md) | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
 | 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | Compute / Render 映射 | [compute-subset](docs/mapping/compute-subset.md) · [render-subset](docs/mapping/render-subset.md) | [EN](docs/mapping/compute-subset.en.md) · [EN](docs/mapping/render-subset.en.md) |
+| 合规缺口矩阵 | [compliant-world-gap](docs/mapping/compliant-world-gap.md) | [EN](docs/mapping/compliant-world-gap.en.md) |
 | 线程 / 错误与 Async | [threading](docs/mapping/threading.md) · [errors-async](docs/mapping/errors-async.md) | [EN](docs/mapping/threading.en.md) · [EN](docs/mapping/errors-async.en.md) |
 | WIT / 补丁 / natives / Guest | [wit/](wit/README.md) · [patches/](patches/README.md) · [android-natives](runtime-wasmtime/android-natives/README.md) · [guest](guest/vector-add/README.md) | 见各目录 EN |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) | 同上 |

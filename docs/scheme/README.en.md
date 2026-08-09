@@ -17,7 +17,7 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **Demo CM stability + frame loop** | **Done** (2026-08-07) — see [`archive-demo-cm-stability-dod.en.md`](archive-demo-cm-stability-dod.en.md) |
 | **Demo CM device stability regression** | **Done** (2026-08-08, V2458A, D1–D6) — see [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH) |
 | **Semantic hardening & engineering debt** | **Done** (2026-08-09) — see [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md); plan [`semantic-hardening.en.md`](semantic-hardening.en.md) |
-| **Next phase** | **Unlocked** — candidates: wasi-gfx / full compliant world; Maven Central; `abi-mvp` flat render; optional perf |
+| **Compliant wasi:webgpu world (no gfx)** | **In progress (locked 2026-08-09, docs lock)** — plan [`compliant-world.en.md`](compliant-world.en.md); gap [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md). **No** wasi-gfx; Maven / `abi-mvp` render / perf deferred |
 
 ## Hard rules (excerpt)
 

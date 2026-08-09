@@ -5,10 +5,16 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Planning
+
+- **Compliant wasi:webgpu world (no gfx) locked** (2026-08-09, docs only): [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); gap skeleton [`docs/mapping/compliant-world-gap.md`](docs/mapping/compliant-world-gap.md); slices A–G; **no** wasi-gfx / Maven / `abi-mvp` render / perf; no Host/ABI/Guest code in this lock
+- **Semantic hardening complete** (2026-08-09): A–E archived; see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
+- Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
+
 ### Semantic hardening — DoD complete 2026-08-09
 
 - Archived A–E DoD: [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
-- Root README / scheme: phase marked done; next phase unlocked (no new lock)
+- Root README / scheme: phase marked done; next phase later docs-locked as compliant-world (see ### Planning above)
 
 ### Semantic hardening — device instrumented re-check + D7
 
@@ -48,11 +54,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 - D1: render-path `gpuLock` (encode/submit/present/drop vs `processEvents`); deferred first frame; Vulkan + Fifo
 - Docs: blockers D1–D6 closed; README / scheme stage unlocked for later work
 
-### Planning
+### Planning (historical)
 
-- **Semantic hardening complete** (2026-08-09): A–E archived; next phase unlocked — see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
+- Semantic hardening complete unlocked the next phase; **compliant-world (no gfx) was later docs-locked** — see Unreleased ### Planning above
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
-- Explicitly unlocked candidates: wasi-gfx / full compliant world / Maven Central / `abi-mvp` flat render / optional perf
 
 ### Demo CM stability + frame loop — DoD complete 2026-08-07
 
