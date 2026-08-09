@@ -4,7 +4,7 @@
 
 > **Status:** slice A method-level fill (2026-08-09); pin [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md).  
 > **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  
-> **Current package:** `experimental:webgpu-cm@0.6.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
+> **Current package:** `experimental:webgpu-cm@0.7.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
 > **Phase plan:** [`docs/scheme/compliant-world.en.md`](../scheme/compliant-world.en.md)  
 > **Methods:** 224 (resource × method; see [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json))
 
@@ -126,7 +126,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-command-encoder.begin-render-pass` | ⚠️ | E | specialized begin-render-pass-clear |
+| `gpu-command-encoder.begin-render-pass` | ✅ | E | experimental descriptor; helper `begin-render-pass-clear` deprecated |
 | `gpu-command-encoder.begin-compute-pass` | ✅ | C |  |
 | `gpu-command-encoder.copy-buffer-to-buffer` | ✅ | C |  |
 | `gpu-command-encoder.copy-buffer-to-texture` | ❌ | D/G | Unsupported OK |
@@ -198,7 +198,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-device.create-bind-group` | ✅ | C/D | standard descriptor; sampler/texture-view (D); nested borrow still .so-limited |
 | `gpu-device.create-shader-module` | ⚠️ | C | WGSL code string only, not full descriptor |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout is pipeline-layout (D); deprecated BGL helper kept |
-| `gpu-device.create-render-pipeline` | ⚠️ | E | specialized *-triangle* helpers |
+| `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor; `*-triangle*` helpers deprecated |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
 | `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
 | `gpu-device.create-command-encoder` | ✅ | C |  |

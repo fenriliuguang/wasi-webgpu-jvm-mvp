@@ -4,7 +4,7 @@
 
 > **状态：** 切片 A 方法级补全（2026-08-09）；钉定 [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)。  
 > **钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（tag `v0.3.0-rc.2`）  
-> **现状包：** `experimental:webgpu-cm@0.6.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
+> **现状包：** `experimental:webgpu-cm@0.7.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
 > **阶段计划：** [`docs/scheme/compliant-world.md`](../scheme/compliant-world.md)  
 > **方法数：** 224（resource × method；见 [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json)）
 
@@ -126,7 +126,7 @@
 
 | 上游方法 | 现状 | 切片 | 备注 |
 |----------|------|------|------|
-| `gpu-command-encoder.begin-render-pass` | ⚠️ | E | 特化 begin-render-pass-clear |
+| `gpu-command-encoder.begin-render-pass` | ✅ | E | experimental descriptor；helper `begin-render-pass-clear` deprecated |
 | `gpu-command-encoder.begin-compute-pass` | ✅ | C |  |
 | `gpu-command-encoder.copy-buffer-to-buffer` | ✅ | C |  |
 | `gpu-command-encoder.copy-buffer-to-texture` | ❌ | D/G | 可 Unsupported |
@@ -198,7 +198,7 @@
 | `gpu-device.create-bind-group` | ✅ | C/D | 标准 descriptor；含 sampler/texture-view（D）；嵌套 borrow 仍受 .so 限制 |
 | `gpu-device.create-shader-module` | ⚠️ | C | 仅 WGSL code 字符串，非完整 descriptor |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout 为 pipeline-layout（D）；deprecated BGL helper 仍在 |
-| `gpu-device.create-render-pipeline` | ⚠️ | E | 特化 *-triangle* helpers |
+| `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor；`*-triangle*` helpers deprecated |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
 | `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
 | `gpu-device.create-command-encoder` | ✅ | C |  |

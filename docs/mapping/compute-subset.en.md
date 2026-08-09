@@ -61,7 +61,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 | Texture / sampler / query set | ⚠️ Swapchain texture/view only (render-subset); no sampler/query |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌ (explicit layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.6.0` (still not compliant wasi:webgpu; slice D adds texture/sampler/pipeline-layout) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.7.0` (still not compliant wasi:webgpu; slice D adds texture/sampler/pipeline-layout) |
 | Full `result` error lifting | ⚠️ currently Kotlin exceptions; see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)

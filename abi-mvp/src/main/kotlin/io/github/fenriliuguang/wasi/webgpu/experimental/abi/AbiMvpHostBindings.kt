@@ -12,6 +12,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDesc
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuMapMode
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
@@ -76,6 +77,10 @@ class AbiMvpHostBindings(
             ),
         ).raw
 
+    /**
+     * Flat abi-mvp still passes a **BindGroupLayout** handle as [layout] (vector-add Guest).
+     * L2 [ComputePipelineDescriptor.layout] is a PipelineLayout (slice D), so wrap BGL → PL here.
+     */
     fun deviceCreateComputePipeline(
         device: Int,
         layout: Int,
@@ -84,10 +89,14 @@ class AbiMvpHostBindings(
         entryLen: Int,
     ): Int {
         val entry = memory().readUtf8(entryPtr, entryLen)
+        val pipelineLayout = host.deviceCreatePipelineLayout(
+            GpuHandle(device),
+            PipelineLayoutDescriptor(bindGroupLayouts = listOf(GpuHandle(layout))),
+        )
         return host.deviceCreateComputePipeline(
             GpuHandle(device),
             ComputePipelineDescriptor(
-                layout = GpuHandle(layout),
+                layout = pipelineLayout,
                 compute = ProgrammableStage(module = GpuHandle(shader), entryPoint = entry),
             ),
         ).raw

@@ -10,7 +10,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 object AbiCm {
     const val PACKAGE: String = "experimental:webgpu-cm"
     const val INTERFACE: String = "host"
-    const val VERSION: String = "0.6.0"
+    const val VERSION: String = "0.7.0"
 
     /** Full import interface id as emitted by wit-bindgen / wasm-tools. */
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
@@ -77,6 +77,7 @@ object AbiCm {
         const val DEVICE_CREATE_SAMPLER = "[method]device.create-sampler"
         const val DEVICE_CREATE_PIPELINE_LAYOUT = "[method]device.create-pipeline-layout"
         const val DEVICE_CREATE_COMPUTE_PIPELINE = "[method]device.create-compute-pipeline"
+        const val DEVICE_CREATE_RENDER_PIPELINE = "[method]device.create-render-pipeline"
         const val DEVICE_CREATE_BIND_GROUP_LAYOUT_STORAGE3 =
             "[method]device.create-bind-group-layout-storage3"
         const val DEVICE_CREATE_BIND_GROUP3 = "[method]device.create-bind-group3"
@@ -94,6 +95,8 @@ object AbiCm {
         const val SURFACE_UNCONFIGURE = "[method]surface.unconfigure"
         const val COMMAND_ENCODER_BEGIN_COMPUTE_PASS =
             "[method]command-encoder.begin-compute-pass"
+        const val COMMAND_ENCODER_BEGIN_RENDER_PASS =
+            "[method]command-encoder.begin-render-pass"
         const val COMMAND_ENCODER_BEGIN_RENDER_PASS_CLEAR =
             "[method]command-encoder.begin-render-pass-clear"
         const val COMPUTE_PASS_SET_PIPELINE = "[method]compute-pass-encoder.set-pipeline"

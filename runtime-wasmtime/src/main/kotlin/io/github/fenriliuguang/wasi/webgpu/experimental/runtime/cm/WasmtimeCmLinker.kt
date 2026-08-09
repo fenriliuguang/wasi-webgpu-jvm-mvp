@@ -23,18 +23,26 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindingResource
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBinding
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ColorTargetState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.Extent3D
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.FragmentState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PrimitiveState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
@@ -388,6 +396,86 @@ class WasmtimeCmLinker(
             )
         }
 
+        fun parseColor(val_: ComponentVal): Color {
+            require(val_.isRecord) { "expected color record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return Color(
+                r = fields.getValue("r").asF64(),
+                g = fields.getValue("g").asF64(),
+                b = fields.getValue("b").asF64(),
+                a = fields.getValue("a").asF64(),
+            )
+        }
+
+        fun parseRenderPipelineDescriptor(val_: ComponentVal): RenderPipelineDescriptor {
+            require(val_.isRecord) { "expected render-pipeline-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val vertexVal = fields.getValue("vertex")
+            require(vertexVal.isRecord) { "expected vertex-state record, got ${vertexVal.type}" }
+            val vertexFields = vertexVal.asRecord()
+            val fragmentVal = fields.getValue("fragment")
+            require(fragmentVal.isRecord) { "expected fragment-state record, got ${fragmentVal.type}" }
+            val fragmentFields = fragmentVal.asRecord()
+            val targetsVal = fragmentFields.getValue("targets")
+            require(targetsVal.isList) { "expected targets list, got ${targetsVal.type}" }
+            val targets = targetsVal.asList().map { el ->
+                val target = el as? ComponentVal
+                    ?: error("expected ComponentVal target, got ${el?.javaClass}")
+                require(target.isRecord) { "expected color-target-state record" }
+                ColorTargetState(format = target.asRecord().getValue("format").asU32().toInt())
+            }
+            val primitive = parseOptionalRecord(fields.getValue("primitive"))?.let { prim ->
+                require(prim.isRecord) { "expected primitive-state record" }
+                PrimitiveState(topology = prim.asRecord().getValue("topology").asU32().toInt())
+            }
+            return RenderPipelineDescriptor(
+                vertex = VertexState(
+                    module = GpuHandle(vertexFields.getValue("module").asU32().toInt()),
+                    entryPoint = parseOptionalString(vertexFields.getValue("entry-point")),
+                    buffers = parseVertexBufferLayouts(vertexFields.getValue("buffers")),
+                ),
+                fragment = FragmentState(
+                    module = GpuHandle(fragmentFields.getValue("module").asU32().toInt()),
+                    entryPoint = parseOptionalString(fragmentFields.getValue("entry-point")),
+                    targets = targets,
+                ),
+                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
+                primitive = primitive,
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseRenderPassDescriptor(val_: ComponentVal): RenderPassDescriptor {
+            require(val_.isRecord) { "expected render-pass-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val attachmentsVal = fields.getValue("color-attachments")
+            require(attachmentsVal.isList) { "expected color-attachments list, got ${attachmentsVal.type}" }
+            val attachments = attachmentsVal.asList().map { el ->
+                val att = el as? ComponentVal
+                    ?: error("expected ComponentVal attachment, got ${el?.javaClass}")
+                require(att.isRecord) { "expected render-pass-color-attachment record" }
+                val attFields = att.asRecord()
+                val clearVal = attFields.getValue("clear-value")
+                val clear = if (clearVal.isOption) {
+                    clearVal.asSome().map { parseColor(it) }.orElse(null)
+                } else if (clearVal.isRecord) {
+                    parseColor(clearVal)
+                } else {
+                    null
+                }
+                RenderPassColorAttachment(
+                    view = GpuHandle(attFields.getValue("view").asU32().toInt()),
+                    clearValue = clear,
+                    loadOp = attFields.getValue("load-op").asU32().toInt(),
+                    storeOp = attFields.getValue("store-op").asU32().toInt(),
+                )
+            }
+            return RenderPassDescriptor(
+                colorAttachments = attachments,
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
         fun parseCommandBufferList(val_: ComponentVal): List<Int> {
             require(val_.isList) { "expected list<command-buffer>, got ${val_.type}" }
             return val_.asList().map { el ->
@@ -536,6 +624,17 @@ class WasmtimeCmLinker(
             },
         )
         define(
+            AbiCm.Func.DEVICE_CREATE_RENDER_PIPELINE,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateRenderPipeline(
+                        paramU32(params, 0),
+                        parseRenderPipelineDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(
             AbiCm.Func.DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE,
             ComponentHostFunction.singleValue { params ->
                 u32(
@@ -602,6 +701,17 @@ class WasmtimeCmLinker(
             AbiCm.Func.COMMAND_ENCODER_BEGIN_COMPUTE_PASS,
             ComponentHostFunction.singleValue { params ->
                 u32(bindings.commandEncoderBeginComputePass(paramU32(params, 0)))
+            },
+        )
+        define(
+            AbiCm.Func.COMMAND_ENCODER_BEGIN_RENDER_PASS,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.commandEncoderBeginRenderPass(
+                        paramU32(params, 0),
+                        parseRenderPassDescriptor(params[1]),
+                    ),
+                )
             },
         )
         define(

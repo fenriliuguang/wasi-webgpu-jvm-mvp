@@ -14,9 +14,11 @@ Guest 上屏：[`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCmTr
 | `surface.get-current-texture-view` | `surfaceGetCurrentTexture` + `textureCreateView` | `getCurrentTexture` + `createView` | L2 暴露 status；CM 封装且非 Success 时抛 Validation |
 | `surface.present` | `surfacePresent` | `present` | |
 | `surface.unconfigure` | `surfaceUnconfigure` | `unconfigure` | |
-| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | 无 vertex buffer + TriangleList | `vertex_index` 路径；要求 `vs_main` / `fs_main` |
-| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | `@0.4.0`；`list<vertex-buffer-layout>` |
-| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | 单 color attachment |
+| `device.create-render-pipeline` | `deviceCreateRenderPipeline` | 标准 descriptor（vertex/fragment/layout/primitive） | `@0.7.0` slice E；layout 为 pipeline-layout |
+| `command-encoder.begin-render-pass` | `commandEncoderBeginRenderPass` | color-attachments descriptor | `@0.7.0` slice E |
+| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | 无 vertex buffer + TriangleList | **deprecated**（E）；`vertex_index` 路径 |
+| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | **deprecated**（E）；真机 Guest 暂用（嵌套 borrow） |
+| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated**（E）；真机 Guest 暂用 |
 | `render-pass-encoder.set-pipeline` | `renderPassSetPipeline` | `setPipeline` | |
 | `render-pass-encoder.set-vertex-buffer` | `renderPassSetVertexBuffer` | `setVertexBuffer` | `@0.4.0`；slot + buffer + offset/size |
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
@@ -36,7 +38,7 @@ guest/triangle-cm（triangle_cm.wasm，world triangle）
 
 - **Window**：Host 侧注入 native window（`Surface` → ANativeWindow 指针，按 u64 传）；Guest 只持 `surface` resource，不创建 window
 - **One-shot**（`run-triangle`）：configure → draw → present → unconfigure；仪器默认路径
-- **顶点缓冲（本阶段 E）**：Guest `create-buffer` + `write-buffer` → `create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`；shader `@location(0)`
+- **顶点缓冲（slice E）：** Guest `create-buffer` + `write-buffer` →（真机）`create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`；Host 已接线标准 `create-render-pipeline` / `begin-render-pass`（待 `.so` 重编后 Guest 迁完）
 - **帧循环**（宿主驱动）：`init-triangle` → 循环 `draw-frame` → `drop-triangle`；Demo `TriangleCmOneShot.runFrameLoopAndAwait`（复用 Session + `releaseAllGpuObjects`）；线程约定见 [`threading.md`](threading.md)
 - **验收**：仪器 one-shot + `cmGuestRepeatTriangleReusesSession`；Demo pause→CM→resume；真机回归 D1–D6 见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)
 - **桌面**：无 Android Surface 时 `CpuWasiWebGpuHost` → Unsupported，相关单测 skip（与 CM compute 门控一致）

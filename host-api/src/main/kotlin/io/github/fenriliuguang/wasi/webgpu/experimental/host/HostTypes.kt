@@ -263,3 +263,75 @@ data class SurfaceTextureResult(
     val status: SurfaceTextureStatus,
     val texture: GpuHandle?,
 )
+
+/** Dawn LoadOp pass-through. */
+object GpuLoadOp {
+    const val UNDEFINED: Int = 0
+    const val LOAD: Int = 1
+    const val CLEAR: Int = 2
+}
+
+/** Dawn StoreOp pass-through. */
+object GpuStoreOp {
+    const val UNDEFINED: Int = 0
+    const val STORE: Int = 1
+    const val DISCARD: Int = 2
+}
+
+/** Dawn PrimitiveTopology pass-through. */
+object GpuPrimitiveTopology {
+    const val UNDEFINED: Int = 0
+    const val POINT_LIST: Int = 1
+    const val LINE_LIST: Int = 2
+    const val LINE_STRIP: Int = 3
+    const val TRIANGLE_LIST: Int = 4
+    const val TRIANGLE_STRIP: Int = 5
+}
+
+data class Color(
+    val r: Double,
+    val g: Double,
+    val b: Double,
+    val a: Double,
+)
+
+data class ColorTargetState(
+    val format: Int,
+)
+
+data class VertexState(
+    val module: GpuHandle,
+    val entryPoint: String? = null,
+    val buffers: List<VertexBufferLayout> = emptyList(),
+)
+
+data class FragmentState(
+    val module: GpuHandle,
+    val entryPoint: String? = null,
+    val targets: List<ColorTargetState>,
+)
+
+data class PrimitiveState(
+    val topology: Int = GpuPrimitiveTopology.TRIANGLE_LIST,
+)
+
+data class RenderPipelineDescriptor(
+    val vertex: VertexState,
+    val fragment: FragmentState,
+    /** [ResourceKind.PipelineLayout] handle. */
+    val layout: GpuHandle,
+    val primitive: PrimitiveState? = PrimitiveState(),
+    val label: String? = null,
+)
+
+data class RenderPassColorAttachment(
+    val view: GpuHandle,
+    val clearValue: Color? = null,
+    val loadOp: Int = GpuLoadOp.CLEAR,
+    val storeOp: Int = GpuStoreOp.STORE,
+)
+
+data class RenderPassDescriptor(
+    val colorAttachments: List<RenderPassColorAttachment>,
+    val label: String? = null,
+)

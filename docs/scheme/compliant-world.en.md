@@ -2,9 +2,9 @@
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09).** Slices **A–D complete** (vendor + dual-track Linker + compute de-specialize + texture/sampler/pipeline-layout).  
+> **Status: in progress (locked 2026-08-09).** Slices **A–E complete** (through generic render descriptors; Guest nested-borrow waits on `.so` rebuild).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E ✅) → error lift (F) → long-tail close (G).
 
 ## One-liner
 
@@ -65,10 +65,10 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### E — Generic Render (no gfx)
 
-- [ ] Generic `create-render-pipeline` / render-pass descriptors; retire Guest dependence on `*-triangle*` helpers
-- [ ] Surface still Host-injected native window (keep experimental-equivalent or standard surface subset); **no** wasi-gfx
-- [ ] `triangle-cm` on standard descriptors; instrumented no regress vs D1–D6
-- [ ] Update [`render-subset.en.md`](../mapping/render-subset.en.md)
+- [x] Generic `create-render-pipeline` / `begin-render-pass` descriptors (`experimental:webgpu-cm@0.7.0` → L2/Dawn); `*-triangle*` / `begin-render-pass-clear` kept deprecated
+- [x] Surface still Host-injected native window; **no** wasi-gfx
+- [x] `triangle-cm` package bump; standard-descriptor Guest path waits on Android `.so` rebuild (nested borrow; device still uses top-level helpers)
+- [x] Update [`render-subset.en.md`](../mapping/render-subset.en.md) / gap / CHANGELOG
 
 ### F — result / error-kind lift
 

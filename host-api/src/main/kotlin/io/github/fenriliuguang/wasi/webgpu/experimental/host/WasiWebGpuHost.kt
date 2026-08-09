@@ -86,6 +86,7 @@ interface WasiWebGpuHost : AutoCloseable {
     /**
      * Empty vertex-buffer TriangleList; shader must export `vs_main` / `fs_main`
      * (typically `@builtin(vertex_index)`).
+     * @deprecated Prefer [deviceCreateRenderPipeline] (slice E).
      */
     fun deviceCreateRenderPipelineTriangle(
         device: GpuHandle,
@@ -95,6 +96,7 @@ interface WasiWebGpuHost : AutoCloseable {
 
     /**
      * TriangleList with explicit [vertexBuffers] layouts (CM `@location` / set-vertex-buffer path).
+     * @deprecated Prefer [deviceCreateRenderPipeline] (slice E).
      */
     fun deviceCreateRenderPipelineTriangleBuffers(
         device: GpuHandle,
@@ -103,8 +105,14 @@ interface WasiWebGpuHost : AutoCloseable {
         vertexBuffers: List<VertexBufferLayout>,
     ): GpuHandle
 
+    fun deviceCreateRenderPipeline(
+        device: GpuHandle,
+        descriptor: RenderPipelineDescriptor,
+    ): GpuHandle
+
     fun textureCreateView(texture: GpuHandle): GpuHandle
 
+    /** @deprecated Prefer [commandEncoderBeginRenderPass] (slice E). */
     fun commandEncoderBeginRenderPassClear(
         encoder: GpuHandle,
         view: GpuHandle,
@@ -112,6 +120,11 @@ interface WasiWebGpuHost : AutoCloseable {
         clearG: Float,
         clearB: Float,
         clearA: Float,
+    ): GpuHandle
+
+    fun commandEncoderBeginRenderPass(
+        encoder: GpuHandle,
+        descriptor: RenderPassDescriptor,
     ): GpuHandle
 
     fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle)

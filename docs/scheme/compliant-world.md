@@ -2,9 +2,9 @@
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–D 已完成**（vendor + 双轨 Linker + compute 去特化 + texture/sampler/pipeline-layout）。  
+> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–E 已完成**（至通用 Render descriptor；Guest 嵌套 borrow 待 `.so` 重编）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E ✅）→ 错误抬升（F）→ 长尾关门（G）。
 
 ## 一句话
 
@@ -66,10 +66,10 @@ A 上游钉定说明 + 缺口矩阵
 
 ### E — 通用 Render（无 gfx）
 
-- [ ] 通用 `create-render-pipeline` / render-pass descriptor；淘汰 Guest 对 `*-triangle*` helpers 的依赖
-- [ ] Surface 仍 Host 注入 native window（保留 experimental 等价语义或标准 surface 子集）；**不**引入 wasi-gfx
-- [ ] `triangle-cm` 改走标准 descriptor；仪器不回归 D1–D6
-- [ ] 更新 [`render-subset.md`](../mapping/render-subset.md)
+- [x] 通用 `create-render-pipeline` / `begin-render-pass` descriptor（`experimental:webgpu-cm@0.7.0` → L2/Dawn）；`*-triangle*` / `begin-render-pass-clear` 标 deprecated 保留
+- [x] Surface 仍 Host 注入 native window；**不**引入 wasi-gfx
+- [x] `triangle-cm` 包版本 bump；标准 descriptor Guest 路径待 Android `.so` 重编（嵌套 borrow；真机仍用顶层 helpers）
+- [x] 更新 [`render-subset.md`](../mapping/render-subset.md) / gap / CHANGELOG
 
 ### F — result / error-kind 抬升
 

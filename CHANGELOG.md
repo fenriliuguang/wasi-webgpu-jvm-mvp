@@ -5,6 +5,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice E — generic render (no gfx)
+
+- `experimental:webgpu-cm` **0.6.0 → 0.7.0**: `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`; deprecate `*-triangle*` / `begin-render-pass-clear`
+- L2 + Dawn (+ Cpu Unsupported); AbiCm / WasmtimeCmLinker parsers; helpers delegate to generic path
+- `abi-mvp` flat `device_create_compute_pipeline`: wrap guest BGL → PipelineLayout (slice D layout change; keeps old vector-add wasm)
+- `triangle-cm` package bump; device Guest still uses top-level helpers until Android `.so` rebuild (nested borrow)
+- Docs: render-subset + gap; plan DoD E checked; instrumented two waves OK (vivo)
+
 ### Compliant-world slice D — texture / sampler / pipeline-layout
 
 - `experimental:webgpu-cm` **0.5.0 → 0.6.0**: `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG sampler·texture entries; `compute-pipeline.layout` → pipeline-layout

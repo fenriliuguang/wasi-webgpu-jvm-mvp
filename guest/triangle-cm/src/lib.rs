@@ -5,8 +5,10 @@
 //! - `run-triangle`: one-shot configure → draw → present → unconfigure
 //! - `init-triangle` / `draw-frame` / `drop-triangle`: host-driven frame loop
 //!
-//! Slice E: vertices live in a GPU buffer (`set-vertex-buffer` + `@location(0)`),
-//! not in a WGSL `vertex_index` constant array.
+//! Slice E: Host/WIT expose create-render-pipeline / begin-render-pass.
+//! Nested borrow-in-record still needs rebuilt Android .so (cm-resources recursive
+//! patch); until then Guest keeps *-triangle-buffers / begin-render-pass-clear /
+//! submit1 (top-level resources only).
 
 #![no_main]
 
@@ -169,6 +171,7 @@ fn create_pipeline_and_vertices(
             shader_location: 0,
         }],
     }];
+    // Nested borrow-in-record (create-render-pipeline) needs rebuilt .so; helper is top-level only.
     let pipeline = device.create_render_pipeline_triangle_buffers(&shader, format, &layouts);
 
     let vertex_buffer = device.create_buffer(&BufferDescriptor {

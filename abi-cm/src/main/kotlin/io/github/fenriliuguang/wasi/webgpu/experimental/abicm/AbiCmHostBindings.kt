@@ -14,6 +14,8 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
@@ -91,6 +93,9 @@ class AbiCmHostBindings(
 
     fun deviceCreateComputePipeline(device: Int, descriptor: ComputePipelineDescriptor): Int =
         host.deviceCreateComputePipeline(GpuHandle(device), descriptor).raw
+
+    fun deviceCreateRenderPipeline(device: Int, descriptor: RenderPipelineDescriptor): Int =
+        host.deviceCreateRenderPipeline(GpuHandle(device), descriptor).raw
 
     /** @deprecated Prefer [deviceCreateBindGroupLayout] with a descriptor (slice C). */
     fun deviceCreateBindGroupLayoutStorage3(device: Int): Int {
@@ -235,6 +240,9 @@ class AbiCmHostBindings(
             b,
             a,
         ).raw
+
+    fun commandEncoderBeginRenderPass(encoder: Int, descriptor: RenderPassDescriptor): Int =
+        host.commandEncoderBeginRenderPass(GpuHandle(encoder), descriptor).raw
 
     fun computePassSetPipeline(pass: Int, pipeline: Int) {
         host.computePassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))

@@ -14,9 +14,11 @@ Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCm
 | `surface.get-current-texture-view` | `surfaceGetCurrentTexture` + `textureCreateView` | `getCurrentTexture` + `createView` | L2 exposes status; CM wraps and throws Validation if not Success |
 | `surface.present` | `surfacePresent` | `present` | |
 | `surface.unconfigure` | `surfaceUnconfigure` | `unconfigure` | |
-| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | `vertex_index` path; requires `vs_main` / `fs_main` |
-| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | `@0.4.0`; `list<vertex-buffer-layout>` |
-| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | Single color attachment |
+| `device.create-render-pipeline` | `deviceCreateRenderPipeline` | standard descriptor (vertex/fragment/layout/primitive) | `@0.7.0` slice E; layout is pipeline-layout |
+| `command-encoder.begin-render-pass` | `commandEncoderBeginRenderPass` | color-attachments descriptor | `@0.7.0` slice E |
+| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | **deprecated** (E); `vertex_index` path |
+| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | **deprecated** (E); device Guest interim (nested borrow) |
+| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated** (E); device Guest interim |
 | `render-pass-encoder.set-pipeline` | `renderPassSetPipeline` | `setPipeline` | |
 | `render-pass-encoder.set-vertex-buffer` | `renderPassSetVertexBuffer` | `setVertexBuffer` | `@0.4.0`; slot + buffer + offset/size |
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |

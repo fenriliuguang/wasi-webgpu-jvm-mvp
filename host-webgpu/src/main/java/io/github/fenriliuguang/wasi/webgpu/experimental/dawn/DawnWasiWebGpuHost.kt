@@ -90,6 +90,10 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.HandleTable
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PowerPreference
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PrimitiveState
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RequestAdapterOptions
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
@@ -97,7 +101,14 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescrip
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureResult
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ColorTargetState
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.FragmentState
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuLoadOp
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuPrimitiveTopology
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuStoreOp
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -501,19 +512,25 @@ class DawnWasiWebGpuHost private constructor(
         vertexBuffers: List<VertexBufferLayout>,
     ): GpuHandle = createRenderPipelineTriangle(device, shader, format, vertexBuffers)
 
-    private fun createRenderPipelineTriangle(
+    override fun deviceCreateRenderPipeline(
         device: GpuHandle,
-        shader: GpuHandle,
-        format: Int,
-        vertexBuffers: List<VertexBufferLayout>,
+        descriptor: RenderPipelineDescriptor,
     ): GpuHandle {
         synchronized(gpuLock) {
             val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
-            val module = handles.get<GPUShaderModule>(shader, ResourceKind.ShaderModule)
-            val pipelineLayout = gpuDevice.createPipelineLayout(
-                GPUPipelineLayoutDescriptor(bindGroupLayouts = emptyArray()),
+            val vertexModule = handles.get<GPUShaderModule>(
+                descriptor.vertex.module,
+                ResourceKind.ShaderModule,
             )
-            val dawnBuffers = vertexBuffers.map { layout ->
+            val fragmentModule = handles.get<GPUShaderModule>(
+                descriptor.fragment.module,
+                ResourceKind.ShaderModule,
+            )
+            val pipelineLayout = handles.get<GPUPipelineLayout>(
+                descriptor.layout,
+                ResourceKind.PipelineLayout,
+            )
+            val dawnBuffers = descriptor.vertex.buffers.map { layout ->
                 GPUVertexBufferLayout(
                     arrayStride = layout.arrayStride,
                     stepMode = layout.stepMode,
@@ -526,26 +543,57 @@ class DawnWasiWebGpuHost private constructor(
                     }.toTypedArray(),
                 )
             }.toTypedArray()
+            val topology = descriptor.primitive?.topology ?: GpuPrimitiveTopology.TRIANGLE_LIST
             val pipeline = gpuDevice.createRenderPipeline(
                 GPURenderPipelineDescriptor(
                     vertex = GPUVertexState(
-                        module = module,
-                        entryPoint = "vs_main",
+                        module = vertexModule,
+                        entryPoint = descriptor.vertex.entryPoint ?: "vs_main",
                         buffers = dawnBuffers,
                     ),
                     layout = pipelineLayout,
-                    primitive = GPUPrimitiveState(topology = PrimitiveTopology.TriangleList),
+                    primitive = GPUPrimitiveState(topology = topology),
                     fragment = GPUFragmentState(
-                        module = module,
-                        entryPoint = "fs_main",
-                        targets = arrayOf(GPUColorTargetState(format = format)),
+                        module = fragmentModule,
+                        entryPoint = descriptor.fragment.entryPoint ?: "fs_main",
+                        targets = descriptor.fragment.targets.map { target ->
+                            GPUColorTargetState(format = target.format)
+                        }.toTypedArray(),
                     ),
+                    label = descriptor.label,
                 ),
             )
-            val handle = handles.insert(ResourceKind.RenderPipeline, pipeline)
-            pipelineLayouts[handle.raw] = pipelineLayout
-            return handle
+            return handles.insert(ResourceKind.RenderPipeline, pipeline)
         }
+    }
+
+    private fun createRenderPipelineTriangle(
+        device: GpuHandle,
+        shader: GpuHandle,
+        format: Int,
+        vertexBuffers: List<VertexBufferLayout>,
+    ): GpuHandle {
+        val pipelineLayout = deviceCreatePipelineLayout(
+            device,
+            PipelineLayoutDescriptor(bindGroupLayouts = emptyList()),
+        )
+        return deviceCreateRenderPipeline(
+            device,
+            RenderPipelineDescriptor(
+                vertex = VertexState(
+                    module = shader,
+                    entryPoint = "vs_main",
+                    buffers = vertexBuffers,
+                ),
+                fragment = FragmentState(
+                    module = shader,
+                    entryPoint = "fs_main",
+                    targets = listOf(ColorTargetState(format = format)),
+                ),
+                layout = pipelineLayout,
+                primitive = PrimitiveState(topology = GpuPrimitiveTopology.TRIANGLE_LIST),
+            ),
+        )
     }
 
     override fun textureCreateView(texture: GpuHandle): GpuHandle {
@@ -562,25 +610,46 @@ class DawnWasiWebGpuHost private constructor(
         clearG: Float,
         clearB: Float,
         clearA: Float,
+    ): GpuHandle =
+        commandEncoderBeginRenderPass(
+            encoder,
+            RenderPassDescriptor(
+                colorAttachments = listOf(
+                    RenderPassColorAttachment(
+                        view = view,
+                        clearValue = Color(
+                            clearR.toDouble(),
+                            clearG.toDouble(),
+                            clearB.toDouble(),
+                            clearA.toDouble(),
+                        ),
+                        loadOp = GpuLoadOp.CLEAR,
+                        storeOp = GpuStoreOp.STORE,
+                    ),
+                ),
+            ),
+        )
+
+    override fun commandEncoderBeginRenderPass(
+        encoder: GpuHandle,
+        descriptor: RenderPassDescriptor,
     ): GpuHandle {
         synchronized(gpuLock) {
             val commandEncoder = handles.get<GPUCommandEncoder>(encoder, ResourceKind.CommandEncoder)
-            val textureView = handles.get<GPUTextureView>(view, ResourceKind.TextureView)
+            val attachments = descriptor.colorAttachments.map { attachment ->
+                val textureView = handles.get<GPUTextureView>(attachment.view, ResourceKind.TextureView)
+                val clear = attachment.clearValue ?: Color(0.0, 0.0, 0.0, 1.0)
+                GPURenderPassColorAttachment(
+                    clearValue = GPUColor(clear.r, clear.g, clear.b, clear.a),
+                    view = textureView,
+                    loadOp = attachment.loadOp,
+                    storeOp = attachment.storeOp,
+                )
+            }.toTypedArray()
             val pass = commandEncoder.beginRenderPass(
                 GPURenderPassDescriptor(
-                    colorAttachments = arrayOf(
-                        GPURenderPassColorAttachment(
-                            clearValue = GPUColor(
-                                clearR.toDouble(),
-                                clearG.toDouble(),
-                                clearB.toDouble(),
-                                clearA.toDouble(),
-                            ),
-                            view = textureView,
-                            loadOp = LoadOp.Clear,
-                            storeOp = StoreOp.Store,
-                        ),
-                    ),
+                    colorAttachments = attachments,
+                    label = descriptor.label,
                 ),
             )
             return handles.insert(ResourceKind.RenderPassEncoder, pass)

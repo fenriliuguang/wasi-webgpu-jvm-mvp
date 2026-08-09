@@ -327,6 +327,11 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         vertexBuffers: List<VertexBufferLayout>,
     ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
 
+    override fun deviceCreateRenderPipeline(
+        device: GpuHandle,
+        descriptor: RenderPipelineDescriptor,
+    ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
+
     override fun textureCreateView(texture: GpuHandle): GpuHandle {
         handles.get<Texture>(texture, ResourceKind.Texture)
         return handles.insert(ResourceKind.TextureView, TextureView())
@@ -339,6 +344,11 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         clearG: Float,
         clearB: Float,
         clearA: Float,
+    ): GpuHandle = throw HostException.Unsupported("render pass (Cpu host)")
+
+    override fun commandEncoderBeginRenderPass(
+        encoder: GpuHandle,
+        descriptor: RenderPassDescriptor,
     ): GpuHandle = throw HostException.Unsupported("render pass (Cpu host)")
 
     override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) =
