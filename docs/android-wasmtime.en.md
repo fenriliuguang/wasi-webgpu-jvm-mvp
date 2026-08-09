@@ -101,6 +101,8 @@ Fix: build script rewrites to `(memory_ptr as u64) < 0x1000` (`table_ptr` likewi
 WIT resource (`own`/`borrow` ↔ `U32(rep)`) marshalling and the process-wide resource registry live in native code.  
 An android-only-patched `.so` cannot run the CM Guest; `build-wasmtime4j-android.ps1` also applies [`cm-resources.patch`](../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) by default.
 
+**Nested resources:** older patch only mapped **top-level** `Val::Resource` to `U32(rep)`; borrow-inside-record/list via `val_to_component_value` becomes opaque `Own`/`Borrow` handles, while Java `asU32()` expects host table reps → trap. Patch now **recurses**; rebuild with `build-wasmtime4j-android.ps1` and replace `jniLibs` before Guest can safely call `create-bind-group(descriptor)` / `queue.submit(list)`. Until then `vector-add-cm` uses `create-bind-group3` / `create-compute-pipeline-bgl` / `submit1` for nested paths.
+
 ### 7. Studio / Gradle UTP: `Process crashed` / `No UID for androidx.test.services` · **Peripheral**
 
 **Far** from wasi-webgpu / Wasmtime / Dawn: an acceptance-harness issue, not Guest→Host semantics or native ABI.  

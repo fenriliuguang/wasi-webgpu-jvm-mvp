@@ -70,4 +70,4 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 2. **Mapped range:** WIT `get-with-copy` ↔ Host returns a copied `ByteArray`.  
 3. **Auto layout:** Not implemented; `deviceCreateComputePipeline` requires a layout handle.  
 4. **Dawn ≠ wgpu:** Validation failure messages/timing may differ from `wasi-webgpu-wasmtime`; this table + unit tests are authoritative.  
-5. **Slice C:** CM Guests use standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit`; `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` remain but deprecated. `compute-pipeline.layout` is still a **bind-group-layout** (not wasi `pipeline-layout` — slice D).
+5. **Slice C:** Host/WIT standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` wired; Guest on device: layout descriptor + nested-borrow helpers `*3` / `*-bgl` / `submit1` until `cm-resources` recursive patch rebuilds `.so`. `compute-pipeline.layout` is still a **bind-group-layout** (not wasi `pipeline-layout` — slice D).

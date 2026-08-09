@@ -28,7 +28,7 @@ Rely on in-repo **overlay / filtered-jar / local patches** for the long term; dr
 |-------|---------|---------------------------|
 | [`wasmtime4j-v47.0.2-1.5.0-android.patch`](wasmtime4j-v47.0.2-1.5.0-android.patch) | ART rejects `JNI_VERSION_1_8` from `JNI_OnLoad` | Return `JNI_VERSION_1_6` (or detect Android / max supported) |
 | same android patch | Signed `jlong` compare treats MTE/TBI-tagged pointers as corrupt | Compare handles as `u64` (`memory_ptr as u64 < 0x1000`, same for tables) |
-| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | CM host callbacks need `Resource` ↔ `U32(rep)`; multi-resource registration; fresh linker on instantiate | Resource marshalling helpers; `allow_shadowing` / batch re-define; process-level registry replay for `nativeInstantiateWithLinker` |
+| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | CM host callbacks need `Resource` ↔ `U32(rep)` (including **nested** list/record); multi-resource registration; fresh linker on instantiate | Resource marshalling helpers (recursive); `allow_shadowing` / batch re-define; process-level registry replay for `nativeInstantiateWithLinker` |
 
 ### Reproduce
 

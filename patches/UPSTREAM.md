@@ -28,7 +28,7 @@
 |-------|---------|---------------------------|
 | [`wasmtime4j-v47.0.2-1.5.0-android.patch`](wasmtime4j-v47.0.2-1.5.0-android.patch) | ART rejects `JNI_VERSION_1_8` from `JNI_OnLoad` | Return `JNI_VERSION_1_6`（或 detect Android / max supported） |
 | same android patch | Signed `jlong` compare treats MTE/TBI-tagged pointers as corrupt | Compare handles as `u64`（`memory_ptr as u64 < 0x1000`，tables 同理） |
-| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | CM host callbacks need `Resource` ↔ `U32(rep)`；多 resource 注册；instantiate 时 fresh linker | Resource marshalling helpers；`allow_shadowing` / batch re-define；process-level registry replay for `nativeInstantiateWithLinker` |
+| [`wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) | CM host callbacks need `Resource` ↔ `U32(rep)`（含 **嵌套** list/record）；多 resource 注册；instantiate 时 fresh linker | Resource marshalling helpers（递归）；`allow_shadowing` / batch re-define；process-level registry replay for `nativeInstantiateWithLinker` |
 
 ### Reproduce
 

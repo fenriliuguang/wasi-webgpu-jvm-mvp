@@ -8,7 +8,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 ### Compliant-world slice C — compute de-specialize
 
 - `experimental:webgpu-cm` **0.4.0 → 0.5.0**: standard `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`; keep deprecated `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`
-- `vector-add-cm` Guest migrated to descriptors; triangle Guest rebuilt for package bump; AbiCm + WasmtimeCmLinker parsers wired
+- Host + Linker parsers wired; `vector-add-cm` uses layout descriptor + top-level resource helpers (nested borrow-in-record/list needs rebuilt `.so`)
+- `cm-resources` patch: recursive `Resource`→`U32(rep)` inside list/record/option/… (apply + rebuild natives to unlock full descriptor Guest)
+- Device: `run-android-instrumented.ps1` two waves OK (vivo); triangle Guest package bump only
 - Docs: compute-subset + wit/compute-cm READMEs; plan DoD C checked
 
 ### Compliant-world slice B — dual-track Linker

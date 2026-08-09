@@ -14,7 +14,7 @@ Component Model compute + minimal surface/render slice.
 - **0.5.0 (slice C):** standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`; keep `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` (deprecated). `compute-pipeline.layout` remains bind-group-layout (L2; wasi pipeline-layout → D)
 - World exports: `vector-add` → `run-vector-add`; `triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle` (Host injects native window)
 
-Guests: `guest/vector-add-cm/` (migrated to standard descriptors), `guest/triangle-cm/`  
+Guests: `guest/vector-add-cm/` (layout via standard descriptor; nested-borrow paths still use deprecated helpers until Android `.so` rebuild), `guest/triangle-cm/`  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  
 Wiring: `runtime-wasmtime` `runtime.cm` (`ComponentLinker` + `defineResource`)
 

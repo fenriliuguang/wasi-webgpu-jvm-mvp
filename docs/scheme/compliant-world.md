@@ -53,9 +53,10 @@ A 上游钉定说明 + 缺口矩阵
 ### C — Compute 去特化
 
 - [x] 标准 `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor 路径接线（`experimental:webgpu-cm@0.5.0` → L2）
-- [x] 淘汰 Guest 对 `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` 等特化依赖（Host 便捷保留并标 deprecated；旧三参 pipeline 改名为 `create-compute-pipeline-bgl`）
-- [x] `vector-add-cm` 改走标准 descriptor；桌面 `:runtime-wasmtime:test` 绿灯（仪器建议抽空复验）
-- [x] 更新 [`compute-subset.md`](../mapping/compute-subset.md) / EN；triangle Guest 仅 bump 包版本重建
+- [x] Host 便捷 API 标 deprecated（`*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`）
+- [x] `vector-add-cm`：`create-bind-group-layout(descriptor)` 已上真机；含嵌套 borrow 的 `create-bind-group` / `create-compute-pipeline` / `queue.submit(list)` 仍用顶层 helper，直至重编 Android `.so`（`cm-resources` 补丁已改为 **递归** Resource→U32，见 [`android-wasmtime.md`](../android-wasmtime.md) §6）
+- [x] 真机 `run-android-instrumented.ps1` 两波绿灯（vivo）；triangle 仅 bump 包版本
+- [x] 更新 [`compute-subset.md`](../mapping/compute-subset.md) / EN
 
 ### D — Texture / Sampler / PipelineLayout
 

@@ -14,7 +14,7 @@ Component Model compute + 最小 surface/render 切片。
 - **0.5.0（slice C）：** 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`；保留 `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`（deprecated）。`compute-pipeline.layout` 仍为 bind-group-layout（L2；wasi pipeline-layout → D）
 - World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`（Host 注入 native window）
 
-Guest：`guest/vector-add-cm/`（已迁标准 descriptor）、`guest/triangle-cm/`  
+Guest：`guest/vector-add-cm/`（layout 走标准 descriptor；嵌套 borrow 路径暂用 deprecated helpers，待 Android `.so` 重编）、`guest/triangle-cm/`  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 

@@ -70,4 +70,4 @@
 2. **Mapped range：** WIT `get-with-copy` ↔ Host 返回拷贝后的 `ByteArray`。  
 3. **Auto layout：** 未实现；`deviceCreateComputePipeline` 要求 layout handle。  
 4. **Dawn ≠ wgpu：** 校验失败消息/时机可能与 `wasi-webgpu-wasmtime` 不同，以本表 + 单测为准。  
-5. **Slice C：** CM Guest 走标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit`；`*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` 仍保留但 deprecated。`compute-pipeline.layout` 仍是 **bind-group-layout**（非 wasi `pipeline-layout`，见切片 D）。
+5. **Slice C：** Host/WIT 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` 已接线；Guest 真机路径：layout descriptor + 嵌套 borrow 暂用 `*3` / `*-bgl` / `submit1`（待 `cm-resources` 递归补丁重编 `.so`）。`compute-pipeline.layout` 仍是 **bind-group-layout**（非 wasi `pipeline-layout`，见切片 D）。

@@ -53,10 +53,10 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 ### C — Compute de-specialize
 
 - [x] Standard `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor paths wired (`experimental:webgpu-cm@0.5.0` → L2)
-- [x] Retire Guest dependence on `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` (Host helpers kept, deprecated; old 3-arg pipeline renamed `create-compute-pipeline-bgl`)
-- [x] `vector-add-cm` on standard descriptors; desktop `:runtime-wasmtime:test` green (instrumented re-check nice-to-have)
-- [x] Update [`compute-subset.en.md`](../mapping/compute-subset.en.md); triangle Guest rebuilt for package bump only
-
+- [x] Host helpers marked deprecated (`*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`)
+- [x] `vector-add-cm`: `create-bind-group-layout(descriptor)` on device; nested-borrow `create-bind-group` / `create-compute-pipeline` / `queue.submit(list)` still use top-level helpers until Android `.so` rebuild (`cm-resources` patch now **recurses** Resource→U32 — see [`android-wasmtime.en.md`](../android-wasmtime.en.md) §6)
+- [x] Device `run-android-instrumented.ps1` two waves OK (vivo); triangle package bump only
+- [x] Update [`compute-subset.en.md`](../mapping/compute-subset.en.md)
 ### D — Texture / Sampler / PipelineLayout
 
 - [ ] L2 + Dawn (and Cpu stubs) cover texture / sampler / pipeline-layout main paths (off-screen OK)
