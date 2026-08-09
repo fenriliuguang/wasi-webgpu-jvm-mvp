@@ -5,6 +5,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Planning
+
+- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Implementation not started; primary acceptance remains experimental
+
 ### Docs sync
 
 - Cross-doc consistency pass: primary acceptance remains experimental `@0.7.0`; matrix close-out ≠ compliance marketing; Guest/dual-track versions; android-wasmtime / compute+render subset tables; archive-demo Session footnote vs D6 reuse; scheme/CHANGELOG unlocked status
@@ -52,7 +56,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning (historical)
 
-- **Compliant wasi:webgpu world (no gfx) was docs-locked** (2026-08-09) then **completed A–G** the same day: [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); archive [`archive-compliant-world-dod.md`](docs/scheme/archive-compliant-world-dod.md). **Current status:** next phase **unlocked** (root README); **no** wasi-gfx / Maven / `abi-mvp` render / perf; still **no** compliance-product marketing; primary acceptance remains `experimental:webgpu-cm@0.7.0`
+- **Compliant wasi:webgpu world (no gfx) was docs-locked** (2026-08-09) then **completed A–G** the same day: [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); archive [`archive-compliant-world-dod.md`](docs/scheme/archive-compliant-world-dod.md). **Current status:** next phase **docs-locked** as guest-descriptor-cube (see ### Planning above); **no** wasi-gfx / Maven / `abi-mvp` render / perf; still **no** compliance-product marketing; primary acceptance remains `experimental:webgpu-cm@0.7.0`
 - **Semantic hardening complete** (2026-08-09): A–E archived; see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
 
