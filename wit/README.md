@@ -15,6 +15,7 @@
 | 本仓 L2 范围 | 仍以 **compute + 最小 surface/render 子集** 为主（见映射表）；全量覆盖见缺口矩阵 |
 | P1 Guest ABI | **abi-mvp**（`wasi-webgpu-mvp` core imports，**非** CM / 非合规） |
 | CM 切片（双轨） | [`compute-cm/`](compute-cm/) — `experimental:webgpu-cm@0.4.0`（**仍非**合规）；与标准包并存直至 Guest 迁完 |
+| 标准包 ABI（切片 B） | [`abi-wasi`](../abi-wasi/) `AbiWasi` — import `wasi:webgpu/webgpu@0.3.0-rc.2`；Linker 已注册资源 + Unsupported stub；见 [`compliant-world-dual-track.md`](../docs/mapping/compliant-world-dual-track.md) |
 | 阶段计划 | [`docs/scheme/compliant-world.md`](../docs/scheme/compliant-world.md) · 缺口 [`docs/mapping/compliant-world-gap.md`](../docs/mapping/compliant-world-gap.md) |
 
 ## 双轨说明

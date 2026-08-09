@@ -2,9 +2,9 @@
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09）。** 切片 **A 已完成**（vendor + 方法级缺口矩阵）。  
+> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–B 已完成**（vendor + 双轨 Linker stub）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B）→ Compute 去特化（C）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
 
 ## 一句话
 
@@ -46,9 +46,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### B — 双轨包身份 / Linker
 
-- [ ] 标准包 import 路径（`wasi:webgpu/webgpu@0.3.0-rc.2`）与 `experimental:webgpu-cm@0.4.0` 可并存于 Linker
-- [ ] ABI 常量 / 资源名映射文档化；旧 Guest 仍可走 experimental 直至 C/E 迁移完成
-- [ ] 文档标明：双轨是迁移手段，关门后以标准包为主验收路径
+- [x] 标准包 import 路径（`wasi:webgpu/webgpu@0.3.0-rc.2`）与 `experimental:webgpu-cm@0.4.0` 可并存于 Linker（[`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt)）
+- [x] ABI 常量 / 资源名映射文档化：[`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)；旧 Guest 仍走 experimental 直至 C/E
+- [x] 文档标明：双轨是迁移手段，关门后以标准包为主验收路径；标准包函数暂 **Unsupported stub**（C+ 接线）
 
 ### C — Compute 去特化
 
@@ -109,6 +109,7 @@ A 上游钉定说明 + 缺口矩阵
 - 方案索引：[`docs/scheme/README.md`](README.md)  
 - 上阶段归档：[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)  
 - 缺口矩阵：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
+- 双轨：[`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) · [`abi-wasi`](../../abi-wasi/)  
 - Compute / Render 子集：[`compute-subset.md`](../mapping/compute-subset.md) · [`render-subset.md`](../mapping/render-subset.md)  
 - 错误与 Async：[`errors-async.md`](../mapping/errors-async.md)  
 - WIT：[`wit/README.md`](../../wit/README.md) · [`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)  

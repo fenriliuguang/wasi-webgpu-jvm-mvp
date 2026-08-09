@@ -81,6 +81,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 语义加固计划（已完成） | [docs/scheme/semantic-hardening.md](docs/scheme/semantic-hardening.md) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
 | 合规 World 计划（进行中，无 gfx） | [docs/scheme/compliant-world.md](docs/scheme/compliant-world.md) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
 | 合规 World 缺口矩阵 | [docs/mapping/compliant-world-gap.md](docs/mapping/compliant-world-gap.md) | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
+| 合规 World 双轨 | [docs/mapping/compliant-world-dual-track.md](docs/mapping/compliant-world-dual-track.md) | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
 | 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

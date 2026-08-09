@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice B — dual-track Linker
+
+- New `:abi-wasi` module: `AbiWasi` constants for `wasi:webgpu/webgpu@0.3.0-rc.2` (33 resources / 224 funcs; `scripts/gen-abi-wasi-constants.py`)
+- `WasmtimeCmLinker`: register experimental + wasi resources; wasi funcs → `HostException.Unsupported` stubs; old Guests unchanged
+- Docs: [`docs/mapping/compliant-world-dual-track.md`](docs/mapping/compliant-world-dual-track.md); plan DoD B checked
+
 ### Compliant-world slice A — upstream pin + gap matrix
 
 - Vendored `wasi:webgpu@0.3.0-rc.2` at [`wit/deps/wasi-webgpu/`](wit/deps/wasi-webgpu/) ([`PIN.md`](wit/deps/wasi-webgpu/PIN.md), `webgpu.wit`, `imports.wit`, `_inventory.json`)

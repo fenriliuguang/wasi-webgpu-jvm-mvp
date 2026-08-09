@@ -14,12 +14,15 @@ import ai.tegmentum.wasmtime4j.component.ComponentVal
 import ai.tegmentum.wasmtime4j.factory.WasmRuntimeFactory
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCm
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCmHostBindings
+import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasi
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
- * L1 Wasmtime Component Model adapter: registers experimental CM host imports → [WasiWebGpuHost].
+ * L1 Wasmtime Component Model adapter: registers experimental CM host imports → [WasiWebGpuHost],
+ * and dual-track wasi:webgpu@0.3.0-rc.2 resources/stubs (compliant-world slice B).
  *
  * WIT resources are registered via [ComponentLinker.defineResource]. Host callbacks exchange
  * resource reps as u32 (L2 [GpuHandle.raw]); a patched wasmtime4j native maps those to
@@ -46,8 +49,10 @@ class WasmtimeCmLinker(
         }
         val bindings = AbiCmHostBindings(host)
         val linker: ComponentLinker<Any> = runtime.createComponentLinker(engine)
-        registerResources(linker)
-        registerImports(linker, bindings)
+        registerExperimentalResources(linker)
+        registerWasiResources(linker)
+        registerExperimentalImports(linker, bindings)
+        registerWasiImportStubs(linker)
         val component: Component = componentEngine.compileComponent(componentBytes)
         return linker.instantiate(store, component)
     }
@@ -59,7 +64,7 @@ class WasmtimeCmLinker(
         runCatching { runtime.close() }
     }
 
-    private fun registerResources(linker: ComponentLinker<Any>) {
+    private fun registerExperimentalResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
         // With PACKAGE "experimental:webgpu-cm" + "host@0.4.0" that yields
         // "experimental:webgpu-cm/host@0.4.0" — matching defineFunction / guest import.
@@ -74,7 +79,36 @@ class WasmtimeCmLinker(
         }
     }
 
-    private fun registerImports(linker: ComponentLinker<Any>, bindings: AbiCmHostBindings) {
+    /**
+     * Dual-track (slice B): register standard-package resources on the same linker so
+     * `wasi:webgpu/webgpu@0.3.0-rc.2` coexists with experimental. Function wiring is C+.
+     */
+    private fun registerWasiResources(linker: ComponentLinker<Any>) {
+        val ns = AbiWasi.PACKAGE
+        val iface = "${AbiWasi.INTERFACE}@${AbiWasi.VERSION}"
+        for (name in AbiWasi.Resource.ALL) {
+            val definition = ComponentResourceDefinition.builder<Any>(name).build()
+            linker.defineResource(ns, iface, name, definition)
+        }
+    }
+
+    /**
+     * Stub every wasi:webgpu import so a Guest that resolves the standard package gets a clear
+     * [HostException.Unsupported] instead of a missing-import link error. Real wiring is C+.
+     */
+    private fun registerWasiImportStubs(linker: ComponentLinker<Any>) {
+        val stub = ComponentHostFunction.singleValue { _ ->
+            throw HostException.Unsupported(
+                "wasi:webgpu@${AbiWasi.VERSION} import not wired yet " +
+                    "(compliant-world slice B stub; wire in C+)",
+            )
+        }
+        for (func in AbiWasi.Func.ALL) {
+            linker.defineFunction("${AbiWasi.IMPORT_INTERFACE}#$func", stub)
+        }
+    }
+
+    private fun registerExperimentalImports(linker: ComponentLinker<Any>, bindings: AbiCmHostBindings) {
         fun path(func: String): String = "${AbiCm.IMPORT_INTERFACE}#$func"
 
         fun define(name: String, impl: ComponentHostFunction) {

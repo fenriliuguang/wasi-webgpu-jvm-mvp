@@ -41,6 +41,7 @@ val upstreamWasmtime4jNative by configurations.creating {
 dependencies {
     api(project(":abi-mvp"))
     api(project(":abi-cm"))
+    api(project(":abi-wasi"))
     api(project(":host-api"))
     api(libs.wasmtime4j)
     // JNI implementation required on both desktop and Android (ART).

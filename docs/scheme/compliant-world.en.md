@@ -2,9 +2,9 @@
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09).** Slice **A complete** (vendor + method-level gap matrix).  
+> **Status: in progress (locked 2026-08-09).** Slices **A–B complete** (vendor + dual-track Linker stubs).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B) → compute de-specialize (C) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
 
 ## One-liner
 
@@ -46,9 +46,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### B — Dual-track package identity / Linker
 
-- [ ] Standard import path (`wasi:webgpu/webgpu@0.3.0-rc.2`) coexists with `experimental:webgpu-cm@0.4.0` in the Linker
-- [ ] Document ABI constants / resource-name mapping; old Guests may keep experimental until C/E migration
-- [ ] Docs: dual-track is transitional; after close-out the standard package is the primary acceptance path
+- [x] Standard import path (`wasi:webgpu/webgpu@0.3.0-rc.2`) coexists with `experimental:webgpu-cm@0.4.0` on the Linker ([`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt))
+- [x] ABI constants / resource-name mapping documented: [`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md); old Guests stay on experimental until C/E
+- [x] Docs: dual-track is transitional; after close-out the standard package is the primary acceptance path; standard funcs are **Unsupported stubs** for now (wire in C+)
 
 ### C — Compute de-specialize
 
@@ -109,6 +109,7 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 - Scheme index: [`docs/scheme/README.en.md`](README.en.md)  
 - Prior archive: [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)  
 - Gap matrix: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
+- Dual-track: [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) · [`abi-wasi`](../../abi-wasi/)  
 - Compute / Render subsets: [`compute-subset.en.md`](../mapping/compute-subset.en.md) · [`render-subset.en.md`](../mapping/render-subset.en.md)  
 - Errors & async: [`errors-async.en.md`](../mapping/errors-async.en.md)  
 - WIT: [`wit/README.en.md`](../../wit/README.en.md) · [`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)  

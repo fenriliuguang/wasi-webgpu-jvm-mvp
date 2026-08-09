@@ -81,6 +81,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Semantic hardening plan (complete) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
 | Compliant-world plan (in progress, no gfx) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
 | Compliant-world gap matrix | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
+| Compliant-world dual-track | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

@@ -17,7 +17,7 @@
 | **Demo CM 稳性 + 帧循环** | **完成**（2026-08-07）— 详见 [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) |
 | **Demo CM 真机稳性回归** | **完成**（2026-08-08，V2458A，D1–D6）— 见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) |
 | **语义加固与工程清债** | **完成**（2026-08-09）— 详见 [`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)；计划页 [`semantic-hardening.md`](semantic-hardening.md) |
-| **合规 wasi:webgpu World（无 gfx）** | **进行中（已锁定；切片 A 完成）** — 计划 [`compliant-world.md`](compliant-world.md)；缺口 [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)；vendor [`wit/deps/wasi-webgpu/`](../../wit/deps/wasi-webgpu/)。**不做** wasi-gfx；移交 Maven / `abi-mvp` render / perf |
+| **合规 wasi:webgpu World（无 gfx）** | **进行中（A–B 完成）** — 计划 [`compliant-world.md`](compliant-world.md)；缺口 [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)；双轨 [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)；vendor [`wit/deps/wasi-webgpu/`](../../wit/deps/wasi-webgpu/)。**不做** wasi-gfx |
 
 ## 硬原则（摘录）
 
