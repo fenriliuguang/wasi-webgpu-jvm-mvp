@@ -1,10 +1,11 @@
-# Compliant wasi:webgpu world (no gfx) (compliant-world) — in progress
+# Compliant wasi:webgpu world (no gfx) (compliant-world) — complete
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09).** Slices **A–E complete** (through generic render descriptors; Guest nested-borrow waits on `.so` rebuild).  
+> **Status: complete (2026-08-09).** DoD archive: [`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md).  
+> Slices **A–G all done**. Matrix close-out ≠ compliance marketing (experimental remains primary).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E ✅) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E ✅) → error lift (F ✅) → long-tail close (G ✅).
 
 ## One-liner
 
@@ -78,9 +79,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### G — Long-tail coverage close-out
 
-- [ ] query-set / render-bundle / features·limits / adapter-info etc.: implement or explicit `Unsupported`
-- [ ] No dangling “missing” rows in the gap matrix (each row ✅ / ⚠️ / ❌)
-- [ ] Docs wrap-up: check DoD here → `archive-compliant-world-dod.en.md`; root README / scheme / CHANGELOG; still **no** compliance claim before matrix close-out
+- [x] query-set / render-bundle / features·limits / adapter-info etc.: implement or explicit `Unsupported`
+- [x] No dangling “missing” rows in the gap matrix (each row ✅ / ⚠️ / ❌)
+- [x] Docs wrap-up: check DoD here → [`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md); root README / scheme / CHANGELOG; still **no** compliance-product marketing
 
 ## Out of scope (this phase)
 

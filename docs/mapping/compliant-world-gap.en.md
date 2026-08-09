@@ -2,7 +2,7 @@
 
 [中文](compliant-world-gap.md) | **English**
 
-> **Status:** slice A method-level fill (2026-08-09); pin [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md).  
+> **Status:** slice G close-out (2026-08-09); DoD [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md).  
 > **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  
 > **Current package:** `experimental:webgpu-cm@0.7.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
 > **Phase plan:** [`docs/scheme/compliant-world.en.md`](../scheme/compliant-world.en.md)  
@@ -53,58 +53,58 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
 | `gpu.request-adapter` `async` | ✅ | B/C | experimental request-adapter; async→sync; options subset |
-| `gpu.get-preferred-canvas-format` | ❌ | E/G | no gfx canvas; Unsupported OK |
-| `gpu.wgsl-language-features` | ❌ | G | Unsupported OK |
+| `gpu.get-preferred-canvas-format` | ❌ | E/G | G close-out: explicit Unsupported (no gfx; wasi stub) |
+| `gpu.wgsl-language-features` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-adapter`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-adapter.features` | ❌ | G | Unsupported OK |
-| `gpu-adapter.limits` | ❌ | G | Unsupported OK |
-| `gpu-adapter.info` | ❌ | G | Unsupported OK |
+| `gpu-adapter.features` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter.limits` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter.info` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-adapter.request-device` `async` | ⚠️ | C/F | no full device descriptor; async→sync; wasi result Err lifted (stub) |
 
 ## `gpu-adapter-info`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-adapter-info.vendor` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.architecture` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.device` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.description` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.subgroup-min-size` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.subgroup-max-size` | ❌ | G | Unsupported OK |
-| `gpu-adapter-info.is-fallback-adapter` | ❌ | G | Unsupported OK |
+| `gpu-adapter-info.vendor` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.architecture` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.device` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.description` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.subgroup-min-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.subgroup-max-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-adapter-info.is-fallback-adapter` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-bind-group`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-bind-group.label` | ❌ | G | Unsupported OK |
-| `gpu-bind-group.set-label` | ❌ | G | Unsupported OK |
+| `gpu-bind-group.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-bind-group.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-bind-group-layout`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-bind-group-layout.label` | ❌ | G | Unsupported OK |
-| `gpu-bind-group-layout.set-label` | ❌ | G | Unsupported OK |
+| `gpu-bind-group-layout.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-bind-group-layout.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-buffer`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-buffer.size` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
-| `gpu-buffer.usage` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
-| `gpu-buffer.map-state` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
+| `gpu-buffer.size` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-buffer.usage` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-buffer.map-state` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync wait; wasi result Err lifted (stub); experimental still traps |
 | `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray copy; wasi result Err lifted (stub) |
 | `gpu-buffer.unmap` | ✅ | C |  |
-| `gpu-buffer.destroy` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
-| `gpu-buffer.label` | ❌ | G | Unsupported OK |
-| `gpu-buffer.set-label` | ❌ | G | Unsupported OK |
-| `gpu-buffer.get-mapped-range-set-with-copy` | ❌ | C/G | Unsupported OK |
+| `gpu-buffer.destroy` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-buffer.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-buffer.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-buffer.get-mapped-range-set-with-copy` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-canvas-context`
 
@@ -112,15 +112,15 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 |-----------------|--------|-------|-------|
 | `gpu-canvas-context.configure` | ⚠️ | E | experimental surface.*; Host-inject native window; not gfx |
 | `gpu-canvas-context.unconfigure` | ⚠️ | E | experimental surface.*; Host-inject native window; not gfx |
-| `gpu-canvas-context.get-configuration` | ❌ | E/G | Unsupported OK |
+| `gpu-canvas-context.get-configuration` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-canvas-context.get-current-texture` | ⚠️ | E | wrapped as get-current-texture-view |
 
 ## `gpu-command-buffer`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-command-buffer.label` | ❌ | G | Unsupported OK |
-| `gpu-command-buffer.set-label` | ❌ | G | Unsupported OK |
+| `gpu-command-buffer.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-buffer.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-command-encoder`
 
@@ -129,33 +129,33 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-command-encoder.begin-render-pass` | ✅ | E | experimental descriptor; helper `begin-render-pass-clear` deprecated |
 | `gpu-command-encoder.begin-compute-pass` | ✅ | C |  |
 | `gpu-command-encoder.copy-buffer-to-buffer` | ✅ | C |  |
-| `gpu-command-encoder.copy-buffer-to-texture` | ❌ | D/G | Unsupported OK |
-| `gpu-command-encoder.copy-texture-to-buffer` | ❌ | D/G | Unsupported OK |
-| `gpu-command-encoder.copy-texture-to-texture` | ❌ | D/G | Unsupported OK |
-| `gpu-command-encoder.clear-buffer` | ❌ | D/G | Unsupported OK |
-| `gpu-command-encoder.resolve-query-set` | ❌ | D/G | Unsupported OK |
+| `gpu-command-encoder.copy-buffer-to-texture` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.copy-texture-to-buffer` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.copy-texture-to-texture` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.clear-buffer` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.resolve-query-set` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-command-encoder.finish` | ✅ | C |  |
-| `gpu-command-encoder.label` | ❌ | G | Unsupported OK |
-| `gpu-command-encoder.set-label` | ❌ | G | Unsupported OK |
-| `gpu-command-encoder.push-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-command-encoder.pop-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-command-encoder.insert-debug-marker` | ❌ | G | Unsupported OK |
+| `gpu-command-encoder.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-command-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-compilation-info`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-compilation-info.messages` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-compilation-info.messages` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-compilation-message`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-compilation-message.message` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-compilation-message.line-num` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-compilation-message.line-pos` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-compilation-message.offset` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-compilation-message.length` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-compilation-message.message` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compilation-message.line-num` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compilation-message.line-pos` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compilation-message.offset` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compilation-message.length` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-compute-pass-encoder`
 
@@ -163,33 +163,33 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 |-----------------|--------|-------|-------|
 | `gpu-compute-pass-encoder.set-pipeline` | ✅ | C |  |
 | `gpu-compute-pass-encoder.dispatch-workgroups` | ✅ | C |  |
-| `gpu-compute-pass-encoder.dispatch-workgroups-indirect` | ❌ | C/G | Unsupported OK |
+| `gpu-compute-pass-encoder.dispatch-workgroups-indirect` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-compute-pass-encoder.end` | ✅ | C |  |
-| `gpu-compute-pass-encoder.label` | ❌ | G | Unsupported OK |
-| `gpu-compute-pass-encoder.set-label` | ❌ | G | Unsupported OK |
-| `gpu-compute-pass-encoder.push-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-compute-pass-encoder.pop-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-compute-pass-encoder.insert-debug-marker` | ❌ | G | Unsupported OK |
+| `gpu-compute-pass-encoder.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pass-encoder.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pass-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pass-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pass-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-compute-pass-encoder.set-bind-group` | ✅ | C |  |
-| `gpu-compute-pass-encoder.set-immediates` | ❌ | C/G | Unsupported OK |
+| `gpu-compute-pass-encoder.set-immediates` | ❌ | C/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-compute-pipeline`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-compute-pipeline.label` | ❌ | G | Unsupported OK |
-| `gpu-compute-pipeline.set-label` | ❌ | G | Unsupported OK |
-| `gpu-compute-pipeline.get-bind-group-layout` | ❌ | C/E/G | Unsupported OK |
+| `gpu-compute-pipeline.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pipeline.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-compute-pipeline.get-bind-group-layout` | ❌ | C/E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-device`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-device.features` | ❌ | G | Unsupported OK |
-| `gpu-device.limits` | ❌ | G | Unsupported OK |
-| `gpu-device.adapter-info` | ❌ | G | Unsupported OK |
+| `gpu-device.features` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.limits` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.adapter-info` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-device.queue` | ✅ | B/C | experimental get-queue |
-| `gpu-device.destroy` | ❌ | G | Unsupported OK |
+| `gpu-device.destroy` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-device.create-buffer` | ✅ | C | buffer-descriptor aligned |
 | `gpu-device.create-texture` | ✅ | D | experimental + L2/Dawn/Cpu |
 | `gpu-device.create-sampler` | ✅ | D | experimental + L2/Dawn/Cpu (minimal / option descriptor) |
@@ -202,179 +202,179 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat; wasi stub → create-pipeline-error result Err |
 | `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat; wasi stub → create-pipeline-error result Err |
 | `gpu-device.create-command-encoder` | ✅ | C |  |
-| `gpu-device.create-render-bundle-encoder` | ❌ | G | Unsupported OK |
-| `gpu-device.create-query-set` | ❌ | G | Unsupported OK |
-| `gpu-device.label` | ❌ | G | Unsupported OK |
-| `gpu-device.set-label` | ❌ | G | Unsupported OK |
-| `gpu-device.lost` | ❌ | G | Unsupported OK |
-| `gpu-device.push-error-scope` | ❌ | G | Unsupported OK |
-| `gpu-device.pop-error-scope` `async` | ❌ | G | Unsupported OK |
-| `gpu-device.on-uncaptured-error` | ❌ | G | Unsupported OK |
+| `gpu-device.create-render-bundle-encoder` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.create-query-set` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.lost` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.push-error-scope` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.pop-error-scope` `async` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device.on-uncaptured-error` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-device-lost-info`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-device-lost-info.reason` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-device-lost-info.message` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-device-lost-info.reason` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-device-lost-info.message` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-error`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-error.message` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-error.kind` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-error.message` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-error.kind` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-pipeline-layout`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-pipeline-layout.label` | ❌ | D/G | Unsupported OK |
-| `gpu-pipeline-layout.set-label` | ❌ | D/G | Unsupported OK |
+| `gpu-pipeline-layout.label` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-pipeline-layout.set-label` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-query-set`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-query-set.destroy` | ❌ | G | Unsupported OK |
-| `gpu-query-set.count` | ❌ | G | Unsupported OK |
-| `gpu-query-set.label` | ❌ | G | Unsupported OK |
-| `gpu-query-set.set-label` | ❌ | G | Unsupported OK |
+| `gpu-query-set.destroy` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-query-set.count` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-query-set.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-query-set.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-queue`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
 | `gpu-queue.submit` | ⚠️ | C | specialized submit1 |
-| `gpu-queue.on-submitted-work-done` `async` | ❌ | D/G | Unsupported OK |
+| `gpu-queue.on-submitted-work-done` `async` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-queue.write-buffer-with-copy` | ✅ | C | experimental write-buffer |
-| `gpu-queue.write-texture-with-copy` | ❌ | D/G | Unsupported OK |
-| `gpu-queue.label` | ❌ | G | Unsupported OK |
-| `gpu-queue.set-label` | ❌ | G | Unsupported OK |
+| `gpu-queue.write-texture-with-copy` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-queue.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-queue.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-render-bundle`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-render-bundle.label` | ❌ | G | Unsupported OK |
-| `gpu-render-bundle.set-label` | ❌ | G | Unsupported OK |
+| `gpu-render-bundle.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-render-bundle-encoder`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-render-bundle-encoder.finish` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.label` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-label` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.push-debug-group` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.pop-debug-group` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.insert-debug-marker` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-bind-group` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-immediates` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-pipeline` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-index-buffer` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.set-vertex-buffer` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.draw` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.draw-indexed` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.draw-indirect` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-render-bundle-encoder.draw-indexed-indirect` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-render-bundle-encoder.finish` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-bind-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-immediates` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-pipeline` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-index-buffer` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.set-vertex-buffer` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.draw` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.draw-indexed` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.draw-indirect` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-bundle-encoder.draw-indexed-indirect` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-render-pass-encoder`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-render-pass-encoder.set-viewport` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.set-scissor-rect` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.set-blend-constant` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.set-stencil-reference` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.begin-occlusion-query` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.end-occlusion-query` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.execute-bundles` | ❌ | E/G | Unsupported OK |
+| `gpu-render-pass-encoder.set-viewport` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-scissor-rect` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-blend-constant` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-stencil-reference` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.begin-occlusion-query` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.end-occlusion-query` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.execute-bundles` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.end` | ✅ | E |  |
-| `gpu-render-pass-encoder.label` | ❌ | G | Unsupported OK |
-| `gpu-render-pass-encoder.set-label` | ❌ | G | Unsupported OK |
-| `gpu-render-pass-encoder.push-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-render-pass-encoder.pop-debug-group` | ❌ | G | Unsupported OK |
-| `gpu-render-pass-encoder.insert-debug-marker` | ❌ | G | Unsupported OK |
-| `gpu-render-pass-encoder.set-bind-group` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.set-immediates` | ❌ | E/G | Unsupported OK |
+| `gpu-render-pass-encoder.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.push-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.pop-debug-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.insert-debug-marker` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-bind-group` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.set-immediates` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.set-pipeline` | ✅ | E |  |
-| `gpu-render-pass-encoder.set-index-buffer` | ❌ | E/G | Unsupported OK |
+| `gpu-render-pass-encoder.set-index-buffer` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 | `gpu-render-pass-encoder.set-vertex-buffer` | ✅ | E |  |
 | `gpu-render-pass-encoder.draw` | ⚠️ | E | arity subset (vertex-count only) |
-| `gpu-render-pass-encoder.draw-indexed` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.draw-indirect` | ❌ | E/G | Unsupported OK |
-| `gpu-render-pass-encoder.draw-indexed-indirect` | ❌ | E/G | Unsupported OK |
+| `gpu-render-pass-encoder.draw-indexed` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.draw-indirect` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pass-encoder.draw-indexed-indirect` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-render-pipeline`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-render-pipeline.label` | ❌ | G | Unsupported OK |
-| `gpu-render-pipeline.set-label` | ❌ | G | Unsupported OK |
-| `gpu-render-pipeline.get-bind-group-layout` | ❌ | C/E/G | Unsupported OK |
+| `gpu-render-pipeline.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pipeline.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-render-pipeline.get-bind-group-layout` | ❌ | C/E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-sampler`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-sampler.label` | ❌ | D/G | Unsupported OK |
-| `gpu-sampler.set-label` | ❌ | D/G | Unsupported OK |
+| `gpu-sampler.label` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-sampler.set-label` | ❌ | D/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-shader-module`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-shader-module.get-compilation-info` `async` | ❌ | G | Unsupported OK |
-| `gpu-shader-module.label` | ❌ | G | Unsupported OK |
-| `gpu-shader-module.set-label` | ❌ | G | Unsupported OK |
+| `gpu-shader-module.get-compilation-info` `async` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-shader-module.label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-shader-module.set-label` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-supported-features`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-supported-features.has` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-supported-features.has` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-supported-limits`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-supported-limits.max-texture-dimension1-d` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-texture-dimension2-d` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-texture-dimension3-d` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-texture-array-layers` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-bind-groups` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-bind-groups-plus-vertex-buffers` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-immediate-size` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-bindings-per-bind-group` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-dynamic-uniform-buffers-per-pipeline-layout` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-dynamic-storage-buffers-per-pipeline-layout` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-sampled-textures-per-shader-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-samplers-per-shader-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-buffers-per-shader-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-buffers-in-vertex-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-buffers-in-fragment-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-textures-per-shader-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-textures-in-vertex-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-textures-in-fragment-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-uniform-buffers-per-shader-stage` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-uniform-buffer-binding-size` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-storage-buffer-binding-size` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.min-uniform-buffer-offset-alignment` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.min-storage-buffer-offset-alignment` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-vertex-buffers` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-buffer-size` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-vertex-attributes` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-vertex-buffer-array-stride` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-inter-stage-shader-variables` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-color-attachments` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-color-attachment-bytes-per-sample` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-workgroup-storage-size` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-invocations-per-workgroup` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-workgroup-size-x` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-workgroup-size-y` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-workgroup-size-z` | ❌ | G | long-tail; Unsupported closes |
-| `gpu-supported-limits.max-compute-workgroups-per-dimension` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-supported-limits.max-texture-dimension1-d` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-texture-dimension2-d` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-texture-dimension3-d` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-texture-array-layers` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-bind-groups` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-bind-groups-plus-vertex-buffers` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-immediate-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-bindings-per-bind-group` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-dynamic-uniform-buffers-per-pipeline-layout` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-dynamic-storage-buffers-per-pipeline-layout` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-sampled-textures-per-shader-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-samplers-per-shader-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-buffers-per-shader-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-buffers-in-vertex-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-buffers-in-fragment-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-textures-per-shader-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-textures-in-vertex-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-textures-in-fragment-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-uniform-buffers-per-shader-stage` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-uniform-buffer-binding-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-storage-buffer-binding-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.min-uniform-buffer-offset-alignment` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.min-storage-buffer-offset-alignment` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-vertex-buffers` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-buffer-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-vertex-attributes` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-vertex-buffer-array-stride` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-inter-stage-shader-variables` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-color-attachments` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-color-attachment-bytes-per-sample` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-workgroup-storage-size` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-invocations-per-workgroup` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-workgroup-size-x` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-workgroup-size-y` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-workgroup-size-z` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-supported-limits.max-compute-workgroups-per-dimension` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-texture`
 
@@ -398,44 +398,44 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-texture-view.label` | ❌ | E/G | resource exists; label Unsupported OK |
-| `gpu-texture-view.set-label` | ❌ | E/G | resource exists; label Unsupported OK |
+| `gpu-texture-view.label` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `gpu-texture-view.set-label` | ❌ | E/G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `gpu-uncaptured-error-event`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-uncaptured-error-event.error` | ❌ | G | long-tail; Unsupported closes |
+| `gpu-uncaptured-error-event.error` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `record-gpu-pipeline-constant-value`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `record-gpu-pipeline-constant-value.add` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.get` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.has` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.remove` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.keys` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.values` | ❌ | G | long-tail; Unsupported closes |
-| `record-gpu-pipeline-constant-value.entries` | ❌ | G | long-tail; Unsupported closes |
+| `record-gpu-pipeline-constant-value.add` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.get` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.has` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.remove` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.keys` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.values` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-gpu-pipeline-constant-value.entries` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `record-option-gpu-size64`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `record-option-gpu-size64.add` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.get` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.has` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.remove` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.keys` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.values` | ❌ | G | long-tail; Unsupported closes |
-| `record-option-gpu-size64.entries` | ❌ | G | long-tail; Unsupported closes |
+| `record-option-gpu-size64.add` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.get` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.has` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.remove` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.keys` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.values` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
+| `record-option-gpu-size64.entries` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## `wgsl-language-features`
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `wgsl-language-features.has` | ❌ | G | long-tail; Unsupported closes |
+| `wgsl-language-features.has` | ❌ | G | G close-out: explicit Unsupported (wasi stub / long-tail) |
 
 ## Update rules
 

@@ -62,8 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md)
-- **Next phase (locked)**: **compliant wasi:webgpu world (no gfx)** — [plan](docs/scheme/compliant-world.en.md) · [gap matrix](docs/mapping/compliant-world-gap.en.md); no wasi-gfx; Maven / `abi-mvp` render / perf deferred
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md)
+- **Next phase**: unlocked (compliant-world A–G archived — [DoD](docs/scheme/archive-compliant-world-dod.en.md)); no wasi-gfx; Maven / `abi-mvp` render / perf still deferred
 
 ## References
 
@@ -79,7 +79,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Demo CM device stability regression blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) (ZH) |
 | Semantic hardening DoD archive | [docs/scheme/archive-semantic-hardening-dod.en.md](docs/scheme/archive-semantic-hardening-dod.en.md) |
 | Semantic hardening plan (complete) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
-| Compliant-world plan (in progress, no gfx) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
+| Compliant-world DoD archive (complete, no gfx) | [docs/scheme/archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |
+| Compliant-world plan (complete, no gfx) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
 | Compliant-world gap matrix | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
 | Compliant-world dual-track | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |

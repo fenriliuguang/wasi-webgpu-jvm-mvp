@@ -5,6 +5,11 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice G — long-tail close-out
+
+- Gap matrix: remaining ❌ rows marked explicit Unsupported (wasi stub / long-tail); no dangling “missing”
+- DoD archived: [`docs/scheme/archive-compliant-world-dod.md`](docs/scheme/archive-compliant-world-dod.md); plan A–G complete; **still no** compliance-product marketing
+
 ### Compliant-world slice F — result / error-kind lift
 
 - `HostErrorMapping` + WIT error-kind mirrors (`WasiWebGpuError.kt`); wasi result stubs return `ComponentVal.err` via `WasiResultCodec` / `AbiWasiResults`

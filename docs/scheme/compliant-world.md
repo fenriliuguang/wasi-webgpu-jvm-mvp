@@ -1,10 +1,11 @@
-# 合规 wasi:webgpu World（无 gfx）（compliant-world）— 进行中
+# 合规 wasi:webgpu World（无 gfx）（compliant-world）— 已完成
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–E 已完成**（至通用 Render descriptor；Guest 嵌套 borrow 待 `.so` 重编）。  
+> **状态：已完成（2026-08-09）。** DoD 归档：[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)。  
+> 切片 **A–G 全部完成**。矩阵关门 ≠ 合规产品宣传（仍以 experimental 为主轨）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E ✅）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E ✅）→ 错误抬升（F ✅）→ 长尾关门（G ✅）。
 
 ## 一句话
 
@@ -79,9 +80,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### G — 长尾覆盖率关门
 
-- [ ] query-set / render-bundle / features·limits / adapter-info 等长尾：实现或显式 `Unsupported`
-- [ ] 缺口矩阵无「无」悬空行（每行 ✅ / ⚠️ / ❌）
-- [ ] 文档收口：本页 DoD 勾选 → `archive-compliant-world-dod.md`；根 README / scheme / CHANGELOG；**仍**不得在矩阵未关门前宣传合规
+- [x] query-set / render-bundle / features·limits / adapter-info 等长尾：实现或显式 `Unsupported`
+- [x] 缺口矩阵无「无」悬空行（每行 ✅ / ⚠️ / ❌）
+- [x] 文档收口：本页 DoD 勾选 → [`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)；根 README / scheme / CHANGELOG；**仍**不得宣传合规产品
 
 ## 本阶段不做
 
