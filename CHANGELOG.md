@@ -5,9 +5,15 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice A — upstream pin + gap matrix
+
+- Vendored `wasi:webgpu@0.3.0-rc.2` at [`wit/deps/wasi-webgpu/`](wit/deps/wasi-webgpu/) ([`PIN.md`](wit/deps/wasi-webgpu/PIN.md), `webgpu.wit`, `imports.wit`, `_inventory.json`)
+- Method-level gap matrix (224 rows): [`docs/mapping/compliant-world-gap.md`](docs/mapping/compliant-world-gap.md); regen via `scripts/gen-wasi-webgpu-inventory.py` + `scripts/gen-compliant-world-gap.py`
+- wit-lock dual-track notes; plan DoD A checked; still **no** Host/ABI/Guest wiring (slice B+)
+
 ### Planning
 
-- **Compliant wasi:webgpu world (no gfx) locked** (2026-08-09, docs only): [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); gap skeleton [`docs/mapping/compliant-world-gap.md`](docs/mapping/compliant-world-gap.md); slices A–G; **no** wasi-gfx / Maven / `abi-mvp` render / perf; no Host/ABI/Guest code in this lock
+- **Compliant wasi:webgpu world (no gfx) locked** (2026-08-09): [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); slices A–G; **no** wasi-gfx / Maven / `abi-mvp` render / perf
 - **Semantic hardening complete** (2026-08-09): A–E archived; see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
 

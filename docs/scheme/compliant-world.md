@@ -2,9 +2,9 @@
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09，文档锁定）。**  
+> **状态：进行中（已锁定 2026-08-09）。** 切片 **A 已完成**（vendor + 方法级缺口矩阵）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A）→ 双轨 Linker（B）→ Compute 去特化（C）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B）→ Compute 去特化（C）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
 
 ## 一句话
 
@@ -40,9 +40,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### A — 上游钉定 + 缺口矩阵
 
-- [ ] Vendor / pin 上游 `wasi:webgpu@0.3.0-rc.2` WIT（如 `wit/deps/wasi-webgpu/` + `PIN.md`）；**不**随 tip 漂移
-- [ ] 缺口矩阵按方法补全（本页锁定时已有骨架：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)）
-- [ ] 更新 [`wit/README.md`](../../wit/README.md)：标准包钉定路径与 experimental 双轨说明
+- [x] Vendor / pin 上游 `wasi:webgpu@0.3.0-rc.2` WIT（[`wit/deps/wasi-webgpu/`](../../wit/deps/wasi-webgpu/) + [`PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)）；**不**随 tip 漂移
+- [x] 缺口矩阵按方法补全（224 行：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)；inventory [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json)）
+- [x] 更新 [`wit/README.md`](../../wit/README.md)：标准包钉定路径与 experimental 双轨说明；再生脚本 `scripts/gen-wasi-webgpu-inventory.py` / `gen-compliant-world-gap.py`
 
 ### B — 双轨包身份 / Linker
 

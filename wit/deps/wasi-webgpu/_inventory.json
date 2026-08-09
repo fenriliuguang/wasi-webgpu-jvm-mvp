@@ -1,0 +1,1193 @@
+{
+  "package": "wasi:webgpu",
+  "version": "0.3.0-rc.2",
+  "resources": {
+    "gpu": [
+      {
+        "name": "request-adapter",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "get-preferred-canvas-format",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "wgsl-language-features",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-adapter": [
+      {
+        "name": "features",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "limits",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "info",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "request-device",
+        "async": true,
+        "static": false
+      }
+    ],
+    "gpu-adapter-info": [
+      {
+        "name": "vendor",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "architecture",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "device",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "description",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "subgroup-min-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "subgroup-max-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "is-fallback-adapter",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-bind-group": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-bind-group-layout": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-buffer": [
+      {
+        "name": "size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "usage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "map-state",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "map-async",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "get-mapped-range-get-with-copy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "unmap",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "destroy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get-mapped-range-set-with-copy",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-canvas-context": [
+      {
+        "name": "configure",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "unconfigure",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get-configuration",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get-current-texture",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-command-buffer": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-command-encoder": [
+      {
+        "name": "begin-render-pass",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "begin-compute-pass",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "copy-buffer-to-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "copy-buffer-to-texture",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "copy-texture-to-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "copy-texture-to-texture",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "clear-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "resolve-query-set",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "finish",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "push-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "pop-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "insert-debug-marker",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-compilation-info": [
+      {
+        "name": "messages",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-compilation-message": [
+      {
+        "name": "message",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "line-num",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "line-pos",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "offset",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "length",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-compute-pass-encoder": [
+      {
+        "name": "set-pipeline",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "dispatch-workgroups",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "dispatch-workgroups-indirect",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "end",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "push-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "pop-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "insert-debug-marker",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-bind-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-immediates",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-compute-pipeline": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get-bind-group-layout",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-device": [
+      {
+        "name": "features",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "limits",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "adapter-info",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "queue",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "destroy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-texture",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-sampler",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-bind-group-layout",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-pipeline-layout",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-bind-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-shader-module",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-compute-pipeline",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-render-pipeline",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-compute-pipeline-async",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "create-render-pipeline-async",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "create-command-encoder",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-render-bundle-encoder",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "create-query-set",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "lost",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "push-error-scope",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "pop-error-scope",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "on-uncaptured-error",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-device-lost-info": [
+      {
+        "name": "reason",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "message",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-error": [
+      {
+        "name": "message",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "kind",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-pipeline-layout": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-query-set": [
+      {
+        "name": "destroy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "count",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-queue": [
+      {
+        "name": "submit",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "on-submitted-work-done",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "write-buffer-with-copy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "write-texture-with-copy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-render-bundle": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-render-bundle-encoder": [
+      {
+        "name": "finish",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "push-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "pop-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "insert-debug-marker",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-bind-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-immediates",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-pipeline",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-index-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-vertex-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indexed",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indirect",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indexed-indirect",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-render-pass-encoder": [
+      {
+        "name": "set-viewport",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-scissor-rect",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-blend-constant",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-stencil-reference",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "begin-occlusion-query",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "end-occlusion-query",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "execute-bundles",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "end",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "push-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "pop-debug-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "insert-debug-marker",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-bind-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-immediates",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-pipeline",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-index-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-vertex-buffer",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indexed",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indirect",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "draw-indexed-indirect",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-render-pipeline": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get-bind-group-layout",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-sampler": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-shader-module": [
+      {
+        "name": "get-compilation-info",
+        "async": true,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-supported-features": [
+      {
+        "name": "has",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-supported-limits": [
+      {
+        "name": "max-texture-dimension1-d",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-texture-dimension2-d",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-texture-dimension3-d",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-texture-array-layers",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-bind-groups",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-bind-groups-plus-vertex-buffers",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-immediate-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-bindings-per-bind-group",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-dynamic-uniform-buffers-per-pipeline-layout",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-dynamic-storage-buffers-per-pipeline-layout",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-sampled-textures-per-shader-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-samplers-per-shader-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-buffers-per-shader-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-buffers-in-vertex-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-buffers-in-fragment-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-textures-per-shader-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-textures-in-vertex-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-textures-in-fragment-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-uniform-buffers-per-shader-stage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-uniform-buffer-binding-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-storage-buffer-binding-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "min-uniform-buffer-offset-alignment",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "min-storage-buffer-offset-alignment",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-vertex-buffers",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-buffer-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-vertex-attributes",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-vertex-buffer-array-stride",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-inter-stage-shader-variables",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-color-attachments",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-color-attachment-bytes-per-sample",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-workgroup-storage-size",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-invocations-per-workgroup",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-workgroup-size-x",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-workgroup-size-y",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-workgroup-size-z",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "max-compute-workgroups-per-dimension",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-texture": [
+      {
+        "name": "create-view",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "destroy",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "width",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "height",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "depth-or-array-layers",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "mip-level-count",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "sample-count",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "dimension",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "format",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "usage",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "texture-binding-view-dimension",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-texture-view": [
+      {
+        "name": "label",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "set-label",
+        "async": false,
+        "static": false
+      }
+    ],
+    "gpu-uncaptured-error-event": [
+      {
+        "name": "error",
+        "async": false,
+        "static": false
+      }
+    ],
+    "record-gpu-pipeline-constant-value": [
+      {
+        "name": "add",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "has",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "remove",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "keys",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "values",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "entries",
+        "async": false,
+        "static": false
+      }
+    ],
+    "record-option-gpu-size64": [
+      {
+        "name": "add",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "get",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "has",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "remove",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "keys",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "values",
+        "async": false,
+        "static": false
+      },
+      {
+        "name": "entries",
+        "async": false,
+        "static": false
+      }
+    ],
+    "wgsl-language-features": [
+      {
+        "name": "has",
+        "async": false,
+        "static": false
+      }
+    ]
+  },
+  "method_count": 224
+}

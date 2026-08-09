@@ -2,9 +2,9 @@
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09, docs lock).**  
+> **Status: in progress (locked 2026-08-09).** Slice **A complete** (vendor + method-level gap matrix).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A) → dual-track Linker (B) → compute de-specialize (C) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B) → compute de-specialize (C) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
 
 ## One-liner
 
@@ -40,9 +40,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### A — Upstream pin + gap matrix
 
-- [ ] Vendor / pin upstream `wasi:webgpu@0.3.0-rc.2` WIT (e.g. `wit/deps/wasi-webgpu/` + `PIN.md`); do **not** drift with tip
-- [ ] Complete the method-level gap matrix (skeleton already locked: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md))
-- [ ] Update [`wit/README.en.md`](../../wit/README.en.md): standard-package pin path and experimental dual-track notes
+- [x] Vendor / pin upstream `wasi:webgpu@0.3.0-rc.2` WIT ([`wit/deps/wasi-webgpu/`](../../wit/deps/wasi-webgpu/) + [`PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)); do **not** drift with tip
+- [x] Method-level gap matrix complete (224 rows: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md); inventory [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json))
+- [x] Update [`wit/README.en.md`](../../wit/README.en.md): standard-package pin path and experimental dual-track notes; regen scripts `scripts/gen-wasi-webgpu-inventory.py` / `gen-compliant-world-gap.py`
 
 ### B — Dual-track package identity / Linker
 
