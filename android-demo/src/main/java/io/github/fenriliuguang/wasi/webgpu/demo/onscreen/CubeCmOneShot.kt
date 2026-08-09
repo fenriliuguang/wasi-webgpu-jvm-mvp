@@ -7,7 +7,7 @@ import android.util.Log
 import android.view.Surface
 import androidx.webgpu.helper.Util
 import io.github.fenriliuguang.wasi.webgpu.demo.WasmtimeCmCubeAndroid
-import io.github.fenriliuguang.wasi.webgpu.demo.WasmtimeVectorAddAndroid
+import io.github.fenriliuguang.wasi.webgpu.demo.WasmtimeNativeLoader
 import io.github.fenriliuguang.wasi.webgpu.experimental.dawn.DawnWasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.runtime.cm.WasmtimeCmCube
@@ -18,8 +18,7 @@ import java.util.concurrent.TimeUnit
  * CM Guest rotating textured cube on an Android [Surface] (host-driven frame loop).
  *
  * Keeps one [DawnWasiWebGpuHost] + [WasmtimeCmCube.Session] for the Activity.
- * Do not run back-to-back with triangle CM in the same process without force-stop
- * (wasmtime4j process-global CM registry).
+ * Primary Demo / instrumented acceptance path.
  */
 class CubeCmOneShot(
     private val appContext: Context,
@@ -98,7 +97,7 @@ class CubeCmOneShot(
     private fun ensureSession(): WasmtimeCmCube.Session {
         val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
         session?.let { return it }
-        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        WasmtimeNativeLoader.ensureLoaded()
         return WasmtimeCmCubeAndroid.openSession(appContext, h).also { session = it }
     }
 
@@ -108,7 +107,7 @@ class CubeCmOneShot(
         Thread.sleep(SESSION_RECREATE_SETTLE_MS)
         releaseGpuOwnership()
         val h = host ?: DawnWasiWebGpuHost.create().also { host = it }
-        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        WasmtimeNativeLoader.ensureLoaded()
         session = WasmtimeCmCubeAndroid.openSession(appContext, h)
     }
 

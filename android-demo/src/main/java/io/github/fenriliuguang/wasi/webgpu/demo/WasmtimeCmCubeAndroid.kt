@@ -19,7 +19,7 @@ object WasmtimeCmCubeAndroid {
         context.assets.open("guest/cube_cm.wasm").use { it.readBytes() }
 
     fun openSession(context: Context, host: WasiWebGpuHost): WasmtimeCmCube.Session {
-        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        WasmtimeNativeLoader.ensureLoaded()
         return WasmtimeCmCube.openSession(loadGuestComponent(context), host)
     }
 
@@ -32,7 +32,7 @@ object WasmtimeCmCubeAndroid {
     ) {
         require(surface.isValid) { "Surface is not valid" }
         require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-        WasmtimeVectorAddAndroid.ensureNativeLoaded()
+        WasmtimeNativeLoader.ensureLoaded()
         val component = loadGuestComponent(context)
         val windowHandle = Util.windowFromSurface(surface)
         val ownedHost = host == null

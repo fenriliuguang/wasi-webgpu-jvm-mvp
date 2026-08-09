@@ -3,37 +3,25 @@
 **中文** | [English](android-wasmtime.en.md)
 
 > experimental · Guest → Wasmtime (L1) → `WasiWebGpuHost` (L2) → `DawnWasiWebGpuHost`  
-> 验收：`WasmtimeVectorAddInstrumentedTest`（abi-mvp）+ `WasmtimeCmVectorAddInstrumentedTest`（CM）+ `WasmtimeCmTriangleInstrumentedTest`（Guest 上屏）
+> 真机验收基准：`WasmtimeCmCubeInstrumentedTest`（CM 旋转纹理立方体）
 
 ## 进度
 
 | 项 | 状态 |
 |----|------|
-| 桌面 P1：Guest → Wasmtime → CpuHost（`:runtime-wasmtime:test`） | 完成 |
+| 桌面 P1：Guest → Wasmtime → CpuHost（`:runtime-wasmtime:test`） | 完成（历史 vector-add；现行桌面 CM 以 cube 为主） |
 | 桌面 CM：Guest.component → ComponentLinker → CpuHost | 完成 |
 | Android：交叉编译 Bionic `libwasmtime4j.so`（arm64-v8a / x86_64） | 完成 |
 | Android：jniLibs 打包 + 排除 Maven 桌面 `wasmtime4j-native` | 完成 |
-| Android：guest wasm 进 assets，仪器测试向量加（abi-mvp） | 完成（绿灯） |
-| Android CM：CM-patched `.so` + `vector_add_cm.wasm` 仪器测试 | 完成（绿灯） |
+| Android：guest wasm 进 assets | 完成（现行仅 `cube_cm.wasm`） |
 | 桌面 CM：`desktop-natives/`（不改 Gradle cache）+ CM 测试门控 | 完成 |
-| 上屏（L2 Kotlin） | demo：`TriangleRenderer` → L2 Host → Dawn ✅ |
-| 上屏（Guest CM） | `triangle-cm` → abi-cm → 同一 L2 → Dawn ✅（`WasmtimeCmTriangleInstrumentedTest`） |
+| 上屏（Guest CM） | `cube-cm` → abi-cm → 同一 L2 → Dawn ✅（`WasmtimeCmCubeInstrumentedTest`） |
 | wasi-gfx | ❌ 本阶段不做 |
 
-路径（abi-mvp）：
+路径（CM cube，现行验收）：
 
 ```text
-guest/vector_add.wasm
-  → System.loadLibrary("wasmtime4j")   # APK jniLibs（Bionic）
-  → Wasmtime4j JNI + abi-mvp
-  → WasiWebGpuHost
-  → DawnWasiWebGpuHost
-```
-
-路径（CM）：
-
-```text
-guest/vector_add_cm.wasm
+guest/cube_cm.wasm
   → System.loadLibrary("wasmtime4j")   # 需 android + cm-resources 双补丁
   → Wasmtime4j ComponentLinker + abi-cm
   → WasiWebGpuHost

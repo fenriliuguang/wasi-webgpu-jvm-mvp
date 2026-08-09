@@ -90,21 +90,10 @@ tasks.test {
     if (patchedWasmtime4jNativeJar != null) {
         dependsOn(patchedWasmtime4jNativeJar)
     }
-    // wasmtime4j CM host callbacks are process-global; isolate classes so triangle/vector-add
+    // wasmtime4j CM host callbacks are process-global; isolate classes so CM tests
     // do not poison each other's linker registry in one JVM.
     setForkEvery(1)
     systemProperty("wasmtime4j.runtime", "jni")
-    val guestWasm = rootProject.file("guest/vector-add/vector_add.wasm")
-    inputs.file(guestWasm)
-    systemProperty("wasi.webgpu.guest.vectorAdd", guestWasm.absolutePath)
-
-    val guestCm = rootProject.file("guest/vector-add-cm/vector_add_cm.wasm")
-    inputs.file(guestCm)
-    systemProperty("wasi.webgpu.guest.vectorAddCm", guestCm.absolutePath)
-
-    val guestTriangleCm = rootProject.file("guest/triangle-cm/triangle_cm.wasm")
-    inputs.file(guestTriangleCm)
-    systemProperty("wasi.webgpu.guest.triangleCm", guestTriangleCm.absolutePath)
 
     val guestCubeCm = rootProject.file("guest/cube-cm/cube_cm.wasm")
     inputs.file(guestCubeCm)

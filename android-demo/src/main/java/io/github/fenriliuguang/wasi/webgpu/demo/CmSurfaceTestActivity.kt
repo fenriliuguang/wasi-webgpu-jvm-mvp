@@ -7,12 +7,12 @@ import android.widget.FrameLayout
 
 /**
  * Minimal Activity that only hosts a [SurfaceView] for CM Guest instrumented tests.
- * Does **not** start L2 [io.github.fenriliuguang.wasi.webgpu.demo.onscreen.TriangleRenderer].
+ * Does **not** wire Demo [MainActivity] cube autorun.
  */
 class CmSurfaceTestActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        android.util.Log.i(TAG, "onCreate — Surface-only Activity (no L2 TriangleRenderer)")
+        android.util.Log.i(TAG, "onCreate — Surface-only Activity (no Demo autorun)")
         val surfaceView = SurfaceView(this).apply {
             id = SURFACE_VIEW_ID
             layoutParams = FrameLayout.LayoutParams(

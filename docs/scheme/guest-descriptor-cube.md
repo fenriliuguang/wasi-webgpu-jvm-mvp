@@ -34,7 +34,7 @@ A 重编 Android CM natives（嵌套 borrow）
 | Async | 仍 **sync-compat**；真 CM async 不做 |
 | 合规宣称 | 包名 / README 保持 `experimental`；C 接线后 **仍不得**宣传已合规 `wasi:webgpu` 产品 |
 | 上游 | overlay / 补丁自洽；**不对** tegmentum/wasmtime4j 提 issue/PR |
-| 验收形态 | 桌面单测（有 natives）+ `run-android-instrumented.ps1` 两波不回归（vector-add + 既有/新立方体路径）+ Demo 手点可见缓慢旋转纹理立方体；每子切片 CHANGELOG / 映射文档 |
+| 验收形态 | 桌面单测（有 natives）+ `run-android-instrumented.ps1`（**CM cube**）+ Demo 手点可见缓慢旋转纹理立方体；每子切片 CHANGELOG / 映射文档 |
 
 ## 子切片与 DoD
 

@@ -25,9 +25,7 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Android acceptance: CM Guest `run-cube` / short frame loop → Dawn present.
  *
- * Run in a **separate am-instrument wave** from triangle CM
- * (`scripts/run-android-instrumented.ps1`) — do not back-to-back triangle+cube
- * in the same process (wasmtime4j process-global CM registry).
+ * Primary instrumented baseline (`scripts/run-android-instrumented.ps1`).
  */
 @RunWith(AndroidJUnit4::class)
 class WasmtimeCmCubeInstrumentedTest {
@@ -88,7 +86,7 @@ class WasmtimeCmCubeInstrumentedTest {
         val context = instrumentation.targetContext
 
         val intent = Intent(context, MainActivity::class.java).apply {
-            putExtra(MainActivity.EXTRA_SKIP_L2_TRIANGLE, true)
+            putExtra(MainActivity.EXTRA_SKIP_DEMO_AUTORUN, true)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
         context.startActivity(intent)
@@ -103,7 +101,7 @@ class WasmtimeCmCubeInstrumentedTest {
         val heightRef = AtomicReference(0)
 
         instrumentation.runOnMainSync {
-            val surfaceView = activity.findViewById<SurfaceView>(R.id.triangleSurface)
+            val surfaceView = activity.findViewById<SurfaceView>(R.id.demoSurface)
             fun capture(surface: Surface, width: Int, height: Int) {
                 if (!surface.isValid || width <= 0 || height <= 0) return
                 surfaceRef.set(surface)
@@ -143,7 +141,7 @@ class WasmtimeCmCubeInstrumentedTest {
             instrumentation.runOnMainSync {
                 if (surfaceReady.count == 0L) return@runOnMainSync
                 if (activity.isFinishing) return@runOnMainSync
-                val surfaceView = activity.findViewById<SurfaceView>(R.id.triangleSurface)
+                val surfaceView = activity.findViewById<SurfaceView>(R.id.demoSurface)
                 val holder = surfaceView.holder
                 val frame = holder.surfaceFrame
                 val surface = holder.surface
@@ -213,7 +211,7 @@ class WasmtimeCmCubeInstrumentedTest {
             synchronized(sessionLock) {
                 val host = sharedHost ?: DawnWasiWebGpuHost.create().also { sharedHost = it }
                 val session = sharedSession ?: run {
-                    WasmtimeVectorAddAndroid.ensureNativeLoaded()
+                    WasmtimeNativeLoader.ensureLoaded()
                     releaseGpuOwnership(host)
                     WasmtimeCmCubeAndroid.openSession(context, host).also { sharedSession = it }
                 }

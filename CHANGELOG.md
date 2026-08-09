@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Cube-only acceptance baseline
+
+- Remove vector-add / triangle Guest demos (`guest/vector-add*`, `guest/triangle-cm`), Demo UI buttons, L1 runtime entrypoints, and instrumented tests
+- Demo / instrumented acceptance is **CM cube only** (`WasmtimeCmCubeInstrumentedTest`); `run-android-instrumented.ps1` no longer multi-wave
+- `releaseFrameResources` sweeps encoders only (not Guest-owned Texture/View) so cube depth/albedo survive across frames; uniform buffer size 256 for Dawn alignment
+
 ### guest-descriptor-cube slice B — rotating textured cube + depth / write-texture
 
 - `experimental:webgpu-cm` **0.7.0 → 0.8.0**: `queue.write-texture`, render-pass `set-bind-group`, `depth-stencil-state` / pass attachment, `world cube`

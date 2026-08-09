@@ -2,8 +2,5 @@
 <resources>
     <string name="app_name">wasi-webgpu demo</string>
     <string name="status_idle">Waiting for Surface…</string>
-    <string name="run_vector_add">Run vector add</string>
-    <string name="run_cm_triangle">CM triangle</string>
     <string name="run_cm_cube">CM cube</string>
-    <string name="triangle_ready">Triangle rendering (Kotlin→Dawn Surface)</string>
 </resources>

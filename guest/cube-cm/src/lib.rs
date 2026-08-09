@@ -316,8 +316,10 @@ fn create_resources(
     });
     queue.write_buffer(&vertex_buffer, 0, &verts);
 
+    // WebGPU: UNIFORM buffer size must be a multiple of
+    // minUniformBufferOffsetAlignment (default 256 on Dawn/Android).
     let uniform_buffer = device.create_buffer(&BufferDescriptor {
-        size: 64,
+        size: 256,
         usage: USAGE_UNIFORM,
         mapped_at_creation: false,
         label: Some("cube-ub".into()),

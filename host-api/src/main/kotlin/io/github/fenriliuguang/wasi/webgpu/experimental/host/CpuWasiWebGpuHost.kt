@@ -405,10 +405,9 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     override fun tryDrop(handle: GpuHandle): Boolean = handles.tryDrop(handle) != null
 
     override fun releaseFrameResources() {
+        // Encoder orphans only — see DawnWasiWebGpuHost.releaseFrameResourcesLocked.
         for (
             kind in listOf(
-                ResourceKind.TextureView,
-                ResourceKind.Texture,
                 ResourceKind.CommandBuffer,
                 ResourceKind.RenderPassEncoder,
                 ResourceKind.ComputePassEncoder,
@@ -423,6 +422,16 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
 
     override fun releaseSurfaces() {
         releaseFrameResources()
+        for (
+            kind in listOf(
+                ResourceKind.TextureView,
+                ResourceKind.Texture,
+            )
+        ) {
+            for (handle in handles.handlesOfKind(kind)) {
+                tryDrop(handle)
+            }
+        }
         for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
             runCatching { drop(handle) }
         }

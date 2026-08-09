@@ -6,7 +6,7 @@ Local build output for **CM resources**–patched desktop `wasmtime4j` natives.
 Used by `:runtime-wasmtime` when present; **not** committed (see root `.gitignore`).
 
 Without these files, desktop abi-mvp tests still run against Maven `wasmtime4j-native`.
-CM tests (`WasmtimeCmVectorAddTest`) **skip** until you rebuild.
+CM tests (`WasmtimeCmCubeTest`) **skip** until you rebuild.
 
 ## Layout
 

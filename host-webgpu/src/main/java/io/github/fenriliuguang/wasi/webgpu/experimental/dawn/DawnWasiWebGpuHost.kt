@@ -928,11 +928,11 @@ class DawnWasiWebGpuHost private constructor(
 
     /** Caller must hold [gpuLock]. */
     private fun releaseFrameResourcesLocked() {
-        // Order: views → textures (return swapchain buffers) → encoders/buffers.
+        // Encoder / pass / command-buffer orphans only.
+        // Swapchain View↔Texture pairs are tryDrop'd by AbiCmHostBindings.frameTextureByView.
+        // Must NOT sweep all Texture/TextureView — Guest-owned depth/albedo (cube) live across frames.
         for (
             kind in listOf(
-                ResourceKind.TextureView,
-                ResourceKind.Texture,
                 ResourceKind.CommandBuffer,
                 ResourceKind.RenderPassEncoder,
                 ResourceKind.ComputePassEncoder,
@@ -954,9 +954,19 @@ class DawnWasiWebGpuHost private constructor(
 
     override fun releaseSurfaces() {
         synchronized(gpuLock) {
-            // Per-frame Texture/View (and unpaired orphans) can pin the Android swapchain so
-            // GPUSurface.close() never api_disconnects (WINDOW_IN_USE for the next owner).
+            // Encoders + leftover swapchain Texture/View so GPUSurface can disconnect.
+            // Guest-owned textures should already be gone via drop-cube / releaseAllGpuObjects.
             releaseFrameResourcesLocked()
+            for (
+                kind in listOf(
+                    ResourceKind.TextureView,
+                    ResourceKind.Texture,
+                )
+            ) {
+                for (handle in handles.handlesOfKind(kind)) {
+                    tryDropLocked(handle, closeResource = true)
+                }
+            }
             for (handle in handles.handlesOfKind(ResourceKind.Surface)) {
                 runCatching {
                     handles.get<GPUSurface>(handle, ResourceKind.Surface).unconfigure()

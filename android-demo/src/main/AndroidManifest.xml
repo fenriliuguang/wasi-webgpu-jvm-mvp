@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Surface-only host for CM Guest instrumented tests (no L2 TriangleRenderer).
+        <!-- Surface-only host for CM Guest instrumented tests (no Demo autorun).
              Separate taskAffinity avoids vivo redirecting launches to the launcher MainActivity. -->
         <activity
             android:name=".CmSurfaceTestActivity"

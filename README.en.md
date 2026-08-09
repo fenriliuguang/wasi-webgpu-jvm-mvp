@@ -12,7 +12,7 @@
 - **L2 Host**: `WasiWebGpuHost` (compute + minimal Android surface/render) + desktop `CpuWasiWebGpuHost`
 - **L3 Dawn**: `DawnWasiWebGpuHost` (Android / androidx.webgpu)
 - **Runtime**: Wasmtime4j — **abi-mvp** (core wasm) and **abi-cm** (Component Model / `experimental:webgpu-cm@0.8.0`)
-- **Guest**: vector-add (abi-mvp + CM); red triangle two ways: Kotlin `SurfaceView` via L2 Host→Dawn, and CM Guest (triangle-cm) via abi-cm → same L2 → Dawn
+- **Guest**: CM rotating textured cube (`guest/cube-cm`) via abi-cm → L2 → Dawn; device / Demo acceptance baseline
 - **Engineering**: multi-module Gradle, CI (JVM tests + `assembleDebug`), Bionic / desktop CM-patched native scripts
 
 Package: `io.github.fenriliuguang.wasi.webgpu.experimental.*`
@@ -23,7 +23,7 @@ Build the **lamp wiring (Host glue)** first, then plug in the **socket (Wasmtime
 
 ```text
 Kotlin / Demo ──► WasiWebGpuHost (L2) ──► Dawn (Android) or CpuHost (desktop)
-Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► same L2
+Guest.wasm ──► Wasmtime + abi-cm ──► same L2
 ```
 
 | Layer | Module |
@@ -31,7 +31,7 @@ Guest.wasm ──► Wasmtime + abi-mvp / abi-cm ──► same L2
 | L2 | `host-api` |
 | L3 | `host-webgpu` |
 | L1 + ABI | `runtime-wasmtime` + `abi-mvp` / `abi-cm` |
-| Guest | `guest/vector-add`, `guest/vector-add-cm`, `guest/triangle-cm` (CM on-screen working) |
+| Guest | `guest/cube-cm` (device acceptance baseline) |
 | Demo | `android-demo` |
 
 ## Repository layout
@@ -55,7 +55,7 @@ Requires full **JDK** (not JRE) and Android SDK. If Gradle picks a JRE, set `org
 Instrumented tests (device + WebGPU/Vulkan) — **recommended entry**:
 
 ```powershell
-./scripts/run-android-instrumented.ps1   # two-wave am instrument; do not rely on Studio UTP
+./scripts/run-android-instrumented.ps1   # CM cube; do not rely on Studio UTP
 ```
 
 Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/android-wasmtime.en.md), [`runtime-wasmtime/android-natives/README.md`](runtime-wasmtime/android-natives/README.md), `scripts/build-*.ps1`.
@@ -63,7 +63,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 ## Status
 
 - **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md)
-- **Next phase**: **in progress** — [Guest standard descriptors on device + rotating textured cube (A–D)](docs/scheme/guest-descriptor-cube.en.md) (**A ✅ B ✅**; C–D not started); no wasi-gfx / compliance marketing / true CM async / upstream PRs; Maven / `abi-mvp` render / perf still deferred
+- **Next phase**: **in progress** — [Guest standard descriptors on device + rotating textured cube (A–D)](docs/scheme/guest-descriptor-cube.en.md) (**A ✅ B ✅**; C–D not started); **device acceptance baseline = CM cube** (vector-add / triangle demos removed); no wasi-gfx / compliance marketing / true CM async / upstream PRs; Maven / `abi-mvp` render / perf still deferred
 
 ## References
 

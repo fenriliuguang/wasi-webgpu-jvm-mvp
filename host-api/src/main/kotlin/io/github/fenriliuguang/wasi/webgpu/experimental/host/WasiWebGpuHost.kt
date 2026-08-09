@@ -228,11 +228,12 @@ interface WasiWebGpuHost : AutoCloseable {
     fun tryDrop(handle: GpuHandle): Boolean
 
     /**
-     * Drop per-frame GPU objects (TextureView / Texture / encoders / command buffers).
+     * Drop per-frame encoder / pass / command-buffer orphans.
      *
-     * Slice B: AbiCm tracks View↔Texture pairs and [tryDrop]s them on present / next acquire;
-     * this sweep remains the insurance for encoders / orphans (true WIT destructors still
-     * blocked on wasmtime4j `resourceTable`). Call after [surfacePresent] (or on frame abort).
+     * Swapchain View↔Texture pairs are [tryDrop]ped by AbiCm on present / next acquire
+     * (`frameTextureByView`). This must **not** sweep Guest-owned Texture/TextureView
+     * (e.g. cube depth + albedo) that live across frames. Call after [surfacePresent]
+     * (or on frame abort).
      */
     fun releaseFrameResources()
 

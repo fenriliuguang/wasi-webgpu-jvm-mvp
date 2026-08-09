@@ -34,7 +34,7 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (16 âœ
 | Async | Stay **sync-compat**; no true CM async |
 | Compliance claims | Package / README stay `experimental`; wiring in C still **must not** claim a compliant `wasi:webgpu` product |
 | Upstream | Overlay/patches self-contained; **no** issues/PRs to tegmentum/wasmtime4j |
-| Acceptance | Desktop unit tests (with natives) + `run-android-instrumented.ps1` two waves no-regression + hand-tap demo shows slow rotating textured cube; per-slice CHANGELOG / mapping docs |
+| Acceptance | Desktop unit tests (with natives) + `run-android-instrumented.ps1` (**CM cube**) + hand-tap demo shows slow rotating textured cube; per-slice CHANGELOG / mapping docs |
 
 ## Slices & DoD
 
