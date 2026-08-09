@@ -11,7 +11,7 @@
 
 - **L2 Host**: `WasiWebGpuHost` (compute + minimal Android surface/render) + desktop `CpuWasiWebGpuHost`
 - **L3 Dawn**: `DawnWasiWebGpuHost` (Android / androidx.webgpu)
-- **Runtime**: Wasmtime4j — **abi-mvp** (core wasm) and **abi-cm** (Component Model / `experimental:webgpu-cm@0.5.0`)
+- **Runtime**: Wasmtime4j — **abi-mvp** (core wasm) and **abi-cm** (Component Model / `experimental:webgpu-cm@0.6.0`)
 - **Guest**: vector-add (abi-mvp + CM); red triangle two ways: Kotlin `SurfaceView` via L2 Host→Dawn, and CM Guest (triangle-cm) via abi-cm → same L2 → Dawn
 - **Engineering**: multi-module Gradle, CI (JVM tests + `assembleDebug`), Bionic / desktop CM-patched native scripts
 

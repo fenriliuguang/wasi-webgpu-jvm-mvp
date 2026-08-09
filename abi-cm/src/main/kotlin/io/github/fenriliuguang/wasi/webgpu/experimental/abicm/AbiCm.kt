@@ -10,7 +10,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 object AbiCm {
     const val PACKAGE: String = "experimental:webgpu-cm"
     const val INTERFACE: String = "host"
-    const val VERSION: String = "0.5.0"
+    const val VERSION: String = "0.6.0"
 
     /** Full import interface id as emitted by wit-bindgen / wasm-tools. */
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
@@ -29,8 +29,11 @@ object AbiCm {
         const val SHADER_MODULE = "shader-module"
         const val BIND_GROUP_LAYOUT = "bind-group-layout"
         const val BIND_GROUP = "bind-group"
+        const val PIPELINE_LAYOUT = "pipeline-layout"
         const val COMPUTE_PIPELINE = "compute-pipeline"
         const val RENDER_PIPELINE = "render-pipeline"
+        const val SAMPLER = "sampler"
+        const val TEXTURE = "texture"
         const val TEXTURE_VIEW = "texture-view"
         const val SURFACE = "surface"
         const val COMMAND_ENCODER = "command-encoder"
@@ -46,8 +49,11 @@ object AbiCm {
             SHADER_MODULE,
             BIND_GROUP_LAYOUT,
             BIND_GROUP,
+            PIPELINE_LAYOUT,
             COMPUTE_PIPELINE,
             RENDER_PIPELINE,
+            SAMPLER,
+            TEXTURE,
             TEXTURE_VIEW,
             SURFACE,
             COMMAND_ENCODER,
@@ -67,6 +73,9 @@ object AbiCm {
         const val DEVICE_CREATE_SHADER_MODULE = "[method]device.create-shader-module"
         const val DEVICE_CREATE_BIND_GROUP_LAYOUT = "[method]device.create-bind-group-layout"
         const val DEVICE_CREATE_BIND_GROUP = "[method]device.create-bind-group"
+        const val DEVICE_CREATE_TEXTURE = "[method]device.create-texture"
+        const val DEVICE_CREATE_SAMPLER = "[method]device.create-sampler"
+        const val DEVICE_CREATE_PIPELINE_LAYOUT = "[method]device.create-pipeline-layout"
         const val DEVICE_CREATE_COMPUTE_PIPELINE = "[method]device.create-compute-pipeline"
         const val DEVICE_CREATE_BIND_GROUP_LAYOUT_STORAGE3 =
             "[method]device.create-bind-group-layout-storage3"
@@ -78,6 +87,7 @@ object AbiCm {
         const val DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE_BUFFERS =
             "[method]device.create-render-pipeline-triangle-buffers"
         const val DEVICE_CREATE_COMMAND_ENCODER = "[method]device.create-command-encoder"
+        const val TEXTURE_CREATE_VIEW = "[method]texture.create-view"
         const val SURFACE_CONFIGURE = "[method]surface.configure"
         const val SURFACE_GET_CURRENT_TEXTURE_VIEW = "[method]surface.get-current-texture-view"
         const val SURFACE_PRESENT = "[method]surface.present"

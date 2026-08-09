@@ -27,6 +27,7 @@ import androidx.webgpu.GPUComputePipelineDescriptor
 import androidx.webgpu.GPUComputeState
 import androidx.webgpu.GPUDevice
 import androidx.webgpu.GPUDeviceDescriptor
+import androidx.webgpu.GPUExtent3D
 import androidx.webgpu.GPUFragmentState
 import androidx.webgpu.GPUInstance
 import androidx.webgpu.GPUPipelineLayout
@@ -40,6 +41,9 @@ import androidx.webgpu.GPURenderPipeline
 import androidx.webgpu.GPURenderPipelineDescriptor
 import androidx.webgpu.GPURequestAdapterOptions
 import androidx.webgpu.GPURequestCallback
+import androidx.webgpu.GPUSampler
+import androidx.webgpu.GPUSamplerBindingLayout
+import androidx.webgpu.GPUSamplerDescriptor
 import androidx.webgpu.GPUShaderModule
 import androidx.webgpu.GPUShaderModuleDescriptor
 import androidx.webgpu.GPUShaderSourceWGSL
@@ -48,6 +52,8 @@ import androidx.webgpu.GPUSurfaceConfiguration
 import androidx.webgpu.GPUSurfaceDescriptor
 import androidx.webgpu.GPUSurfaceSourceAndroidNativeWindow
 import androidx.webgpu.GPUTexture
+import androidx.webgpu.GPUTextureBindingLayout
+import androidx.webgpu.GPUTextureDescriptor
 import androidx.webgpu.GPUTextureView
 import androidx.webgpu.GPUVertexAttribute
 import androidx.webgpu.GPUVertexBufferLayout
@@ -56,31 +62,41 @@ import androidx.webgpu.LoadOp
 import androidx.webgpu.PowerPreference as DawnPowerPreference
 import androidx.webgpu.PresentMode
 import androidx.webgpu.PrimitiveTopology
+import androidx.webgpu.SamplerBindingType
 import androidx.webgpu.StoreOp
 import androidx.webgpu.SurfaceGetCurrentTextureStatus
+import androidx.webgpu.TextureSampleType
 import androidx.webgpu.TextureUsage
+import androidx.webgpu.TextureViewDimension
 import androidx.webgpu.UncapturedErrorCallback
 import androidx.webgpu.VertexFormat
 import androidx.webgpu.VertexStepMode
 import androidx.webgpu.helper.initLibrary
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindingResource
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.CommandEncoderDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePassDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuSamplerBindingType
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureSampleType
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureViewDimension
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuVertexFormat
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuVertexStepMode
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HandleTable
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PowerPreference
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RequestAdapterOptions
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureResult
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 import java.nio.ByteBuffer
@@ -211,20 +227,59 @@ class DawnWasiWebGpuHost private constructor(
         val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
         val entries = descriptor.entries.map { entry ->
             val bufferLayout = entry.buffer
-                ?: throw HostException.Validation("P0 bind-group-layout entry requires buffer layout")
-            GPUBindGroupLayoutEntry(
-                binding = entry.binding,
-                visibility = entry.visibility,
-                buffer = GPUBufferBindingLayout(
-                    type = when (bufferLayout.type) {
-                        BufferBindingType.Uniform -> DawnBufferBindingType.Uniform
-                        BufferBindingType.Storage -> DawnBufferBindingType.Storage
-                        BufferBindingType.ReadOnlyStorage -> DawnBufferBindingType.ReadOnlyStorage
-                    },
-                    hasDynamicOffset = bufferLayout.hasDynamicOffset,
-                    minBindingSize = bufferLayout.minBindingSize,
-                ),
-            )
+            val samplerLayout = entry.sampler
+            val textureLayout = entry.texture
+            if (bufferLayout == null && samplerLayout == null && textureLayout == null) {
+                throw HostException.Validation("bind-group-layout entry needs buffer, sampler, or texture")
+            }
+            val builder = GPUBindGroupLayoutEntry.Builder(entry.binding, entry.visibility)
+            if (bufferLayout != null) {
+                builder.setBuffer(
+                    GPUBufferBindingLayout(
+                        type = when (bufferLayout.type) {
+                            BufferBindingType.Uniform -> DawnBufferBindingType.Uniform
+                            BufferBindingType.Storage -> DawnBufferBindingType.Storage
+                            BufferBindingType.ReadOnlyStorage -> DawnBufferBindingType.ReadOnlyStorage
+                        },
+                        hasDynamicOffset = bufferLayout.hasDynamicOffset,
+                        minBindingSize = bufferLayout.minBindingSize,
+                    ),
+                )
+            }
+            if (samplerLayout != null) {
+                builder.setSampler(
+                    GPUSamplerBindingLayout(
+                        type = when (samplerLayout.type) {
+                            GpuSamplerBindingType.NON_FILTERING -> SamplerBindingType.NonFiltering
+                            GpuSamplerBindingType.COMPARISON -> SamplerBindingType.Comparison
+                            else -> SamplerBindingType.Filtering
+                        },
+                    ),
+                )
+            }
+            if (textureLayout != null) {
+                builder.setTexture(
+                    GPUTextureBindingLayout(
+                        sampleType = when (textureLayout.sampleType) {
+                            GpuTextureSampleType.UNFILTERABLE_FLOAT -> TextureSampleType.UnfilterableFloat
+                            GpuTextureSampleType.DEPTH -> TextureSampleType.Depth
+                            GpuTextureSampleType.SINT -> TextureSampleType.Sint
+                            GpuTextureSampleType.UINT -> TextureSampleType.Uint
+                            else -> TextureSampleType.Float
+                        },
+                        viewDimension = when (textureLayout.viewDimension) {
+                            GpuTextureViewDimension.D1 -> TextureViewDimension._1D
+                            GpuTextureViewDimension.D2_ARRAY -> TextureViewDimension._2DArray
+                            GpuTextureViewDimension.CUBE -> TextureViewDimension.Cube
+                            GpuTextureViewDimension.CUBE_ARRAY -> TextureViewDimension.CubeArray
+                            GpuTextureViewDimension.D3 -> TextureViewDimension._3D
+                            else -> TextureViewDimension._2D
+                        },
+                        multisampled = textureLayout.multisampled,
+                    ),
+                )
+            }
+            builder.build()
         }.toTypedArray()
         val layout = gpuDevice.createBindGroupLayout(
             GPUBindGroupLayoutDescriptor(
@@ -239,13 +294,25 @@ class DawnWasiWebGpuHost private constructor(
         val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
         val layout = handles.get<GPUBindGroupLayout>(descriptor.layout, ResourceKind.BindGroupLayout)
         val entries = descriptor.entries.map { entry ->
-            val buffer = handles.get<GPUBuffer>(entry.resource.buffer, ResourceKind.Buffer)
-            GPUBindGroupEntry(
-                binding = entry.binding,
-                buffer = buffer,
-                offset = entry.resource.offset,
-                size = entry.resource.size ?: (buffer.size - entry.resource.offset),
-            )
+            when (val resource = entry.resource) {
+                is BindingResource.Buffer -> {
+                    val buffer = handles.get<GPUBuffer>(resource.binding.buffer, ResourceKind.Buffer)
+                    GPUBindGroupEntry(
+                        binding = entry.binding,
+                        buffer = buffer,
+                        offset = resource.binding.offset,
+                        size = resource.binding.size ?: (buffer.size - resource.binding.offset),
+                    )
+                }
+                is BindingResource.Sampler -> {
+                    val sampler = handles.get<GPUSampler>(resource.sampler, ResourceKind.Sampler)
+                    GPUBindGroupEntry(binding = entry.binding, sampler = sampler)
+                }
+                is BindingResource.TextureView -> {
+                    val view = handles.get<GPUTextureView>(resource.view, ResourceKind.TextureView)
+                    GPUBindGroupEntry(binding = entry.binding, textureView = view)
+                }
+            }
         }.toTypedArray()
         val bindGroup = gpuDevice.createBindGroup(
             GPUBindGroupDescriptor(
@@ -257,6 +324,51 @@ class DawnWasiWebGpuHost private constructor(
         return handles.insert(ResourceKind.BindGroup, bindGroup)
     }
 
+    override fun deviceCreateTexture(device: GpuHandle, descriptor: TextureDescriptor): GpuHandle {
+        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+        val texture = gpuDevice.createTexture(
+            GPUTextureDescriptor(
+                usage = descriptor.usage,
+                size = GPUExtent3D(
+                    width = descriptor.size.width,
+                    height = descriptor.size.height,
+                    depthOrArrayLayers = descriptor.size.depthOrArrayLayers,
+                ),
+                label = descriptor.label,
+                dimension = descriptor.dimension,
+                format = descriptor.format,
+                mipLevelCount = descriptor.mipLevelCount,
+                sampleCount = descriptor.sampleCount,
+            ),
+        )
+        return handles.insert(ResourceKind.Texture, texture)
+    }
+
+    override fun deviceCreateSampler(device: GpuHandle, descriptor: SamplerDescriptor): GpuHandle {
+        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+        val sampler = gpuDevice.createSampler(
+            GPUSamplerDescriptor(label = descriptor.label),
+        )
+        return handles.insert(ResourceKind.Sampler, sampler)
+    }
+
+    override fun deviceCreatePipelineLayout(
+        device: GpuHandle,
+        descriptor: PipelineLayoutDescriptor,
+    ): GpuHandle {
+        val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
+        val layouts = descriptor.bindGroupLayouts.map { layout ->
+            handles.get<GPUBindGroupLayout>(layout, ResourceKind.BindGroupLayout)
+        }.toTypedArray()
+        val pipelineLayout = gpuDevice.createPipelineLayout(
+            GPUPipelineLayoutDescriptor(
+                bindGroupLayouts = layouts,
+                label = descriptor.label,
+            ),
+        )
+        return handles.insert(ResourceKind.PipelineLayout, pipelineLayout)
+    }
+
     override fun deviceCreateComputePipeline(
         device: GpuHandle,
         descriptor: ComputePipelineDescriptor,
@@ -264,11 +376,8 @@ class DawnWasiWebGpuHost private constructor(
         val gpuDevice = handles.get<GPUDevice>(device, ResourceKind.Device)
         val module = handles.get<GPUShaderModule>(descriptor.compute.module, ResourceKind.ShaderModule)
         val layoutHandle = descriptor.layout
-            ?: throw HostException.Unsupported("auto pipeline layout; pass an explicit bind-group layout handle")
-        val bindGroupLayout = handles.get<GPUBindGroupLayout>(layoutHandle, ResourceKind.BindGroupLayout)
-        val pipelineLayout = gpuDevice.createPipelineLayout(
-            GPUPipelineLayoutDescriptor(bindGroupLayouts = arrayOf(bindGroupLayout)),
-        )
+            ?: throw HostException.Unsupported("auto pipeline layout; pass an explicit pipeline-layout handle")
+        val pipelineLayout = handles.get<GPUPipelineLayout>(layoutHandle, ResourceKind.PipelineLayout)
         val pipeline = gpuDevice.createComputePipeline(
             GPUComputePipelineDescriptor(
                 layout = pipelineLayout,
@@ -279,9 +388,7 @@ class DawnWasiWebGpuHost private constructor(
                 label = descriptor.label,
             ),
         )
-        val handle = handles.insert(ResourceKind.ComputePipeline, pipeline)
-        pipelineLayouts[handle.raw] = pipelineLayout
-        return handle
+        return handles.insert(ResourceKind.ComputePipeline, pipeline)
     }
 
     override fun deviceCreateCommandEncoder(
@@ -738,12 +845,14 @@ class DawnWasiWebGpuHost private constructor(
             val closeOrder = listOf(
                 ResourceKind.TextureView,
                 ResourceKind.Texture,
+                ResourceKind.Sampler,
                 ResourceKind.CommandBuffer,
                 ResourceKind.RenderPassEncoder,
                 ResourceKind.ComputePassEncoder,
                 ResourceKind.CommandEncoder,
                 ResourceKind.RenderPipeline,
                 ResourceKind.ComputePipeline,
+                ResourceKind.PipelineLayout,
                 ResourceKind.BindGroup,
                 ResourceKind.BindGroupLayout,
                 ResourceKind.ShaderModule,
@@ -804,12 +913,14 @@ class DawnWasiWebGpuHost private constructor(
             val closeOrder = listOf(
                 ResourceKind.TextureView,
                 ResourceKind.Texture,
+                ResourceKind.Sampler,
                 ResourceKind.CommandBuffer,
                 ResourceKind.RenderPassEncoder,
                 ResourceKind.ComputePassEncoder,
                 ResourceKind.CommandEncoder,
                 ResourceKind.RenderPipeline,
                 ResourceKind.ComputePipeline,
+                ResourceKind.PipelineLayout,
                 ResourceKind.BindGroup,
                 ResourceKind.BindGroupLayout,
                 ResourceKind.ShaderModule,

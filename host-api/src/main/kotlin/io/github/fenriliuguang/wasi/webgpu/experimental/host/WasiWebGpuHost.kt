@@ -36,6 +36,18 @@ interface WasiWebGpuHost : AutoCloseable {
 
     fun deviceCreateBindGroup(device: GpuHandle, descriptor: BindGroupDescriptor): GpuHandle
 
+    fun deviceCreateTexture(device: GpuHandle, descriptor: TextureDescriptor): GpuHandle
+
+    fun deviceCreateSampler(
+        device: GpuHandle,
+        descriptor: SamplerDescriptor = SamplerDescriptor(),
+    ): GpuHandle
+
+    fun deviceCreatePipelineLayout(
+        device: GpuHandle,
+        descriptor: PipelineLayoutDescriptor,
+    ): GpuHandle
+
     fun deviceCreateComputePipeline(
         device: GpuHandle,
         descriptor: ComputePipelineDescriptor,

@@ -4,7 +4,7 @@
 
 > **Status:** slice A method-level fill (2026-08-09); pin [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md).  
 > **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  
-> **Current package:** `experimental:webgpu-cm@0.5.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
+> **Current package:** `experimental:webgpu-cm@0.6.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
 > **Phase plan:** [`docs/scheme/compliant-world.en.md`](../scheme/compliant-world.en.md)  
 > **Methods:** 224 (resource × method; see [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json))
 
@@ -191,13 +191,13 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-device.queue` | ✅ | B/C | experimental get-queue |
 | `gpu-device.destroy` | ❌ | G | Unsupported OK |
 | `gpu-device.create-buffer` | ✅ | C | buffer-descriptor aligned |
-| `gpu-device.create-texture` | ❌ | D |  |
-| `gpu-device.create-sampler` | ❌ | D |  |
-| `gpu-device.create-bind-group-layout` | ⚠️ | C | specialized create-bind-group-layout-storage3 |
-| `gpu-device.create-pipeline-layout` | ❌ | D |  |
-| `gpu-device.create-bind-group` | ⚠️ | C | specialized create-bind-group3 |
+| `gpu-device.create-texture` | ✅ | D | experimental + L2/Dawn/Cpu |
+| `gpu-device.create-sampler` | ✅ | D | experimental + L2/Dawn/Cpu (minimal / option descriptor) |
+| `gpu-device.create-bind-group-layout` | ✅ | C/D | standard descriptor; sampler/texture entries (D) |
+| `gpu-device.create-pipeline-layout` | ✅ | D | experimental + L2/Dawn/Cpu |
+| `gpu-device.create-bind-group` | ✅ | C/D | standard descriptor; sampler/texture-view (D); nested borrow still .so-limited |
 | `gpu-device.create-shader-module` | ⚠️ | C | WGSL code string only, not full descriptor |
-| `gpu-device.create-compute-pipeline` | ⚠️ | C | layout+shader+entry helper shape |
+| `gpu-device.create-compute-pipeline` | ✅ | C/D | layout is pipeline-layout (D); deprecated BGL helper kept |
 | `gpu-device.create-render-pipeline` | ⚠️ | E | specialized *-triangle* helpers |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
 | `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
@@ -380,19 +380,19 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 
 | Upstream method | Status | Slice | Notes |
 |-----------------|--------|-------|-------|
-| `gpu-texture.create-view` | ⚠️ | D/E | only surface-path textureCreateView |
-| `gpu-texture.destroy` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.width` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.height` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.depth-or-array-layers` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.mip-level-count` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.sample-count` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.dimension` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.format` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.usage` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.texture-binding-view-dimension` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.label` | ❌ | D/G | Unsupported OK |
-| `gpu-texture.set-label` | ❌ | D/G | Unsupported OK |
+| `gpu-texture.create-view` | ✅ | D | create-texture path + surface path; no descriptor shape |
+| `gpu-texture.destroy` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.width` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.height` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.depth-or-array-layers` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.mip-level-count` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.sample-count` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.dimension` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.format` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.usage` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.texture-binding-view-dimension` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.label` | ❌ | D/G | explicit Unsupported |
+| `gpu-texture.set-label` | ❌ | D/G | explicit Unsupported |
 
 ## `gpu-texture-view`
 

@@ -23,6 +23,7 @@ enum class ResourceKind {
     ShaderModule,
     BindGroupLayout,
     BindGroup,
+    PipelineLayout,
     ComputePipeline,
     CommandEncoder,
     ComputePassEncoder,
@@ -31,6 +32,7 @@ enum class ResourceKind {
     Surface,
     Texture,
     TextureView,
+    Sampler,
     RenderPipeline,
     RenderPassEncoder,
 }

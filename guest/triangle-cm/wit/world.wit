@@ -16,8 +16,10 @@
 /// queue.submit(list); keep *storage3 / *3 / submit1 / create-compute-pipeline-bgl deprecated
 /// (compliant-world slice C). compute-pipeline.layout is still bind-group-layout (L2);
 /// wasi pipeline-layout lands in slice D.
+/// 0.6.0: texture / sampler / pipeline-layout + BGL/BG sampler·texture entries;
+/// compute-pipeline.layout is pipeline-layout (compliant-world slice D).
 
-package experimental:webgpu-cm@0.5.0;
+package experimental:webgpu-cm@0.6.0;
 
 interface host {
   /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
@@ -28,8 +30,18 @@ interface host {
   type shader-stage-flags = u32;
   /// 0=uniform, 1=storage, 2=read-only-storage (L2 BufferBindingType ordinal).
   type buffer-binding-type = u32;
+  /// 0=filtering, 1=non-filtering, 2=comparison.
+  type sampler-binding-type = u32;
+  /// 0=float, 1=unfilterable-float, 2=depth, 3=sint, 4=uint.
+  type texture-sample-type = u32;
+  /// 0=d1, 1=d2, 2=d2-array, 3=cube, 4=cube-array, 5=d3.
+  type texture-view-dimension = u32;
   /// Dawn / WebGPU texture format enum value (u32).
   type texture-format = u32;
+  /// WebGPU GPUTextureUsage bitfield.
+  type texture-usage-flags = u32;
+  /// Dawn TextureDimension pass-through (u32).
+  type texture-dimension = u32;
   /// Dawn / WebGPU GPUVertexFormat enum value (u32); e.g. float32x2.
   type vertex-format = u32;
   /// Dawn / WebGPU GPUVertexStepMode enum value (u32); vertex / instance.
@@ -39,6 +51,31 @@ interface host {
     size: u64,
     usage: buffer-usage-flags,
     mapped-at-creation: bool,
+    label: option<string>,
+  }
+
+  record extent3-d {
+    width: u32,
+    height: u32,
+    depth-or-array-layers: u32,
+  }
+
+  record texture-descriptor {
+    size: extent3-d,
+    format: texture-format,
+    usage: texture-usage-flags,
+    mip-level-count: u32,
+    sample-count: u32,
+    dimension: texture-dimension,
+    label: option<string>,
+  }
+
+  record sampler-descriptor {
+    label: option<string>,
+  }
+
+  record pipeline-layout-descriptor {
+    bind-group-layouts: list<borrow<bind-group-layout>>,
     label: option<string>,
   }
 
@@ -60,10 +97,22 @@ interface host {
     min-binding-size: u64,
   }
 
+  record sampler-binding-layout {
+    %type: sampler-binding-type,
+  }
+
+  record texture-binding-layout {
+    sample-type: texture-sample-type,
+    view-dimension: texture-view-dimension,
+    multisampled: bool,
+  }
+
   record bind-group-layout-entry {
     binding: u32,
     visibility: shader-stage-flags,
     buffer: option<buffer-binding-layout>,
+    sampler: option<sampler-binding-layout>,
+    texture: option<texture-binding-layout>,
   }
 
   record bind-group-layout-descriptor {
@@ -71,12 +120,18 @@ interface host {
     label: option<string>,
   }
 
-  /// Buffer-only bind-group entry (compute subset; no sampler/texture variants yet).
-  record bind-group-entry {
-    binding: u32,
+  record buffer-binding {
     buffer: borrow<buffer>,
     offset: u64,
     size: option<u64>,
+  }
+
+  /// Buffer / sampler / texture-view (no storage-texture yet).
+  record bind-group-entry {
+    binding: u32,
+    buffer: option<buffer-binding>,
+    sampler: option<borrow<sampler>>,
+    texture-view: option<borrow<texture-view>>,
   }
 
   record bind-group-descriptor {
@@ -92,8 +147,7 @@ interface host {
 
   record compute-pipeline-descriptor {
     compute: programmable-stage,
-    /// L2: bind-group-layout (not wasi pipeline-layout — slice D).
-    layout: borrow<bind-group-layout>,
+    layout: borrow<pipeline-layout>,
     label: option<string>,
   }
 
@@ -105,11 +159,11 @@ interface host {
     get-queue: func() -> queue;
     create-buffer: func(descriptor: buffer-descriptor) -> buffer;
     create-shader-module: func(code: string) -> shader-module;
-    /// Standard-shaped bind-group-layout (wasi-aligned records; buffer entries only).
     create-bind-group-layout: func(descriptor: bind-group-layout-descriptor) -> bind-group-layout;
-    /// Standard-shaped bind-group (buffer entries only).
     create-bind-group: func(descriptor: bind-group-descriptor) -> bind-group;
-    /// Standard-shaped compute-pipeline descriptor.
+    create-texture: func(descriptor: texture-descriptor) -> texture;
+    create-sampler: func(descriptor: option<sampler-descriptor>) -> sampler;
+    create-pipeline-layout: func(descriptor: pipeline-layout-descriptor) -> pipeline-layout;
     create-compute-pipeline: func(descriptor: compute-pipeline-descriptor) -> compute-pipeline;
     /// Deprecated (slice C): fixed 3× storage layout helper.
     create-bind-group-layout-storage3: func() -> bind-group-layout;
@@ -120,7 +174,7 @@ interface host {
       b1: borrow<buffer>,
       b2: borrow<buffer>,
     ) -> bind-group;
-    /// Deprecated (slice C): layout+shader+entry helper; prefer create-compute-pipeline.
+    /// Deprecated (slice C/D): BGL helper that builds a 1× pipeline-layout internally.
     create-compute-pipeline-bgl: func(
       layout: borrow<bind-group-layout>,
       shader: borrow<shader-module>,
@@ -159,8 +213,13 @@ interface host {
   resource shader-module {}
   resource bind-group-layout {}
   resource bind-group {}
+  resource pipeline-layout {}
   resource compute-pipeline {}
   resource render-pipeline {}
+  resource sampler {}
+  resource texture {
+    create-view: func() -> texture-view;
+  }
   resource texture-view {}
 
   /// Android native-window surface (Host injects window handle; Guest does not create windows).

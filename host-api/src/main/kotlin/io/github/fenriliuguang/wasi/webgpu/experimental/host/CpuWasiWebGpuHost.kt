@@ -18,6 +18,10 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     private class ShaderModule(val code: String)
     private class BindGroupLayout
     private class BindGroup(val buffers: List<GpuHandle>)
+    private class PipelineLayout
+    private class Sampler
+    private class Texture
+    private class TextureView
     private class ComputePipeline(val shader: ShaderModule)
 
     private class CommandEncoder {
@@ -95,6 +99,12 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         descriptor: BindGroupLayoutDescriptor,
     ): GpuHandle {
         handles.get<Device>(device, ResourceKind.Device)
+        for (entry in descriptor.entries) {
+            val kinds = listOfNotNull(entry.buffer, entry.sampler, entry.texture)
+            if (kinds.isEmpty()) {
+                throw HostException.Validation("bind-group-layout entry needs buffer, sampler, or texture")
+            }
+        }
         return handles.insert(ResourceKind.BindGroupLayout, BindGroupLayout())
     }
 
@@ -103,11 +113,46 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         handles.get<BindGroupLayout>(descriptor.layout, ResourceKind.BindGroupLayout)
         val buffers = descriptor.entries
             .sortedBy { it.binding }
-            .map { entry ->
-                handles.get<BufferResource>(entry.resource.buffer, ResourceKind.Buffer)
-                entry.resource.buffer
+            .mapNotNull { entry ->
+                when (val resource = entry.resource) {
+                    is BindingResource.Buffer -> {
+                        handles.get<BufferResource>(resource.binding.buffer, ResourceKind.Buffer)
+                        resource.binding.buffer
+                    }
+                    is BindingResource.Sampler -> {
+                        handles.get<Sampler>(resource.sampler, ResourceKind.Sampler)
+                        null
+                    }
+                    is BindingResource.TextureView -> {
+                        handles.get<TextureView>(resource.view, ResourceKind.TextureView)
+                        null
+                    }
+                }
             }
         return handles.insert(ResourceKind.BindGroup, BindGroup(buffers))
+    }
+
+    override fun deviceCreateTexture(device: GpuHandle, descriptor: TextureDescriptor): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        require(descriptor.size.width > 0 && descriptor.size.height > 0)
+        require(descriptor.usage != 0) { "texture usage must be non-zero" }
+        return handles.insert(ResourceKind.Texture, Texture())
+    }
+
+    override fun deviceCreateSampler(device: GpuHandle, descriptor: SamplerDescriptor): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        return handles.insert(ResourceKind.Sampler, Sampler())
+    }
+
+    override fun deviceCreatePipelineLayout(
+        device: GpuHandle,
+        descriptor: PipelineLayoutDescriptor,
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        for (layout in descriptor.bindGroupLayouts) {
+            handles.get<BindGroupLayout>(layout, ResourceKind.BindGroupLayout)
+        }
+        return handles.insert(ResourceKind.PipelineLayout, PipelineLayout())
     }
 
     override fun deviceCreateComputePipeline(
@@ -116,8 +161,8 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     ): GpuHandle {
         handles.get<Device>(device, ResourceKind.Device)
         val layout = descriptor.layout
-            ?: throw HostException.Unsupported("auto pipeline layout; pass an explicit bind-group layout handle")
-        handles.get<BindGroupLayout>(layout, ResourceKind.BindGroupLayout)
+            ?: throw HostException.Unsupported("auto pipeline layout; pass an explicit pipeline-layout handle")
+        handles.get<PipelineLayout>(layout, ResourceKind.PipelineLayout)
         val shader = handles.get<ShaderModule>(descriptor.compute.module, ResourceKind.ShaderModule)
         return handles.insert(ResourceKind.ComputePipeline, ComputePipeline(shader))
     }
@@ -282,8 +327,10 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         vertexBuffers: List<VertexBufferLayout>,
     ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
 
-    override fun textureCreateView(texture: GpuHandle): GpuHandle =
-        throw HostException.Unsupported("texture view (Cpu host)")
+    override fun textureCreateView(texture: GpuHandle): GpuHandle {
+        handles.get<Texture>(texture, ResourceKind.Texture)
+        return handles.insert(ResourceKind.TextureView, TextureView())
+    }
 
     override fun commandEncoderBeginRenderPassClear(
         encoder: GpuHandle,

@@ -2,9 +2,9 @@
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09).** Slices **A–C complete** (vendor + dual-track Linker + compute de-specialize).  
+> **Status: in progress (locked 2026-08-09).** Slices **A–D complete** (vendor + dual-track Linker + compute de-specialize + texture/sampler/pipeline-layout).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E) → error lift (F) → long-tail close (G).
 
 ## One-liner
 
@@ -59,9 +59,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 - [x] Update [`compute-subset.en.md`](../mapping/compute-subset.en.md)
 ### D — Texture / Sampler / PipelineLayout
 
-- [ ] L2 + Dawn (and Cpu stubs) cover texture / sampler / pipeline-layout main paths (off-screen OK)
-- [ ] Gap rows marked ✅ or explicit ❌ / `Unsupported`
-- [ ] Mapping doc increments (extend compute-subset / new section, or fold into gap)
+- [x] L2 + Dawn (and Cpu stubs) cover texture / sampler / pipeline-layout main paths (off-screen OK)
+- [x] Gap rows marked ✅ or explicit ❌ / `Unsupported`
+- [x] Mapping doc increments (`compute-subset` + gap); `experimental:webgpu-cm@0.6.0`; compute-pipeline.layout → pipeline-layout
 
 ### E — Generic Render (no gfx)
 

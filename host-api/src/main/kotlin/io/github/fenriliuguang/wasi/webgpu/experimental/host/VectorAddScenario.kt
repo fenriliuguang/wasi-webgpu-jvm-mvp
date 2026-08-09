@@ -69,10 +69,14 @@ object VectorAddScenario {
                 ),
             ),
         )
+        val pipelineLayout = host.deviceCreatePipelineLayout(
+            device,
+            PipelineLayoutDescriptor(bindGroupLayouts = listOf(layout)),
+        )
         val pipeline = host.deviceCreateComputePipeline(
             device,
             ComputePipelineDescriptor(
-                layout = layout,
+                layout = pipelineLayout,
                 compute = ProgrammableStage(module = shaderModule, entryPoint = "main"),
             ),
         )

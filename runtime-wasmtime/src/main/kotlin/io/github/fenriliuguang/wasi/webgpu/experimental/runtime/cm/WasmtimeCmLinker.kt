@@ -19,13 +19,20 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupEntry
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutEntry
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindingResource
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBinding
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Extent3D
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerBindingLayout
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureBindingLayout
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
@@ -76,8 +83,8 @@ class WasmtimeCmLinker(
 
     private fun registerExperimentalResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.5.0" that yields
-        // "experimental:webgpu-cm/host@0.5.0" — matching defineFunction / guest import.
+        // With PACKAGE "experimental:webgpu-cm" + "host@0.6.0" that yields
+        // "experimental:webgpu-cm/host@0.6.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
@@ -206,21 +213,43 @@ class WasmtimeCmLinker(
             )
         }
 
-        fun parseBindGroupLayoutEntry(val_: ComponentVal): BindGroupLayoutEntry {
-            require(val_.isRecord) { "expected bind-group-layout-entry record, got ${val_.type}" }
-            val fields = val_.asRecord()
-            val bufferVal = fields.getValue("buffer")
-            val buffer = if (bufferVal.isOption) {
-                bufferVal.asSome().map { parseBufferBindingLayout(it) }.orElse(null)
-            } else if (bufferVal.isRecord) {
-                parseBufferBindingLayout(bufferVal)
+        fun parseOptionalRecord(val_: ComponentVal): ComponentVal? =
+            if (val_.isOption) {
+                val_.asSome().orElse(null)
+            } else if (val_.isRecord) {
+                val_
             } else {
                 null
             }
+
+        fun parseSamplerBindingLayout(val_: ComponentVal): SamplerBindingLayout {
+            require(val_.isRecord) { "expected sampler-binding-layout record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return SamplerBindingLayout(type = fields.getValue("type").asU32().toInt())
+        }
+
+        fun parseTextureBindingLayout(val_: ComponentVal): TextureBindingLayout {
+            require(val_.isRecord) { "expected texture-binding-layout record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return TextureBindingLayout(
+                sampleType = fields.getValue("sample-type").asU32().toInt(),
+                viewDimension = fields.getValue("view-dimension").asU32().toInt(),
+                multisampled = fields.getValue("multisampled").asBool(),
+            )
+        }
+
+        fun parseBindGroupLayoutEntry(val_: ComponentVal): BindGroupLayoutEntry {
+            require(val_.isRecord) { "expected bind-group-layout-entry record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val buffer = parseOptionalRecord(fields.getValue("buffer"))?.let { parseBufferBindingLayout(it) }
+            val sampler = parseOptionalRecord(fields.getValue("sampler"))?.let { parseSamplerBindingLayout(it) }
+            val texture = parseOptionalRecord(fields.getValue("texture"))?.let { parseTextureBindingLayout(it) }
             return BindGroupLayoutEntry(
                 binding = fields.getValue("binding").asU32().toInt(),
                 visibility = fields.getValue("visibility").asU32().toInt(),
                 buffer = buffer,
+                sampler = sampler,
+                texture = texture,
             )
         }
 
@@ -240,8 +269,8 @@ class WasmtimeCmLinker(
             )
         }
 
-        fun parseBindGroupEntry(val_: ComponentVal): BindGroupEntry {
-            require(val_.isRecord) { "expected bind-group-entry record, got ${val_.type}" }
+        fun parseBufferBinding(val_: ComponentVal): BufferBinding {
+            require(val_.isRecord) { "expected buffer-binding record, got ${val_.type}" }
             val fields = val_.asRecord()
             val sizeVal = fields.getValue("size")
             val size = if (sizeVal.isOption) {
@@ -249,14 +278,37 @@ class WasmtimeCmLinker(
             } else {
                 runCatching { sizeVal.asU64() }.getOrNull()
             }
-            return BindGroupEntry(
-                binding = fields.getValue("binding").asU32().toInt(),
-                resource = BufferBinding(
-                    buffer = GpuHandle(fields.getValue("buffer").asU32().toInt()),
-                    offset = fields.getValue("offset").asU64(),
-                    size = size,
-                ),
+            return BufferBinding(
+                buffer = GpuHandle(fields.getValue("buffer").asU32().toInt()),
+                offset = fields.getValue("offset").asU64(),
+                size = size,
             )
+        }
+
+        fun parseBindGroupEntry(val_: ComponentVal): BindGroupEntry {
+            require(val_.isRecord) { "expected bind-group-entry record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val binding = fields.getValue("binding").asU32().toInt()
+            val bufferOpt = parseOptionalRecord(fields.getValue("buffer"))
+            val samplerVal = fields.getValue("sampler")
+            val viewVal = fields.getValue("texture-view")
+            val sampler = if (samplerVal.isOption) {
+                samplerVal.asSome().map { GpuHandle(it.asU32().toInt()) }.orElse(null)
+            } else {
+                null
+            }
+            val textureView = if (viewVal.isOption) {
+                viewVal.asSome().map { GpuHandle(it.asU32().toInt()) }.orElse(null)
+            } else {
+                null
+            }
+            val resource = when {
+                bufferOpt != null -> BindingResource.Buffer(parseBufferBinding(bufferOpt))
+                sampler != null -> BindingResource.Sampler(sampler)
+                textureView != null -> BindingResource.TextureView(textureView)
+                else -> error("bind-group-entry needs buffer, sampler, or texture-view")
+            }
+            return BindGroupEntry(binding = binding, resource = resource)
         }
 
         fun parseBindGroupDescriptor(val_: ComponentVal): BindGroupDescriptor {
@@ -272,6 +324,49 @@ class WasmtimeCmLinker(
             return BindGroupDescriptor(
                 layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
                 entries = entries,
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseTextureDescriptor(val_: ComponentVal): TextureDescriptor {
+            require(val_.isRecord) { "expected texture-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val sizeVal = fields.getValue("size")
+            require(sizeVal.isRecord) { "expected extent3-d record, got ${sizeVal.type}" }
+            val sizeFields = sizeVal.asRecord()
+            return TextureDescriptor(
+                size = Extent3D(
+                    width = sizeFields.getValue("width").asU32().toInt(),
+                    height = sizeFields.getValue("height").asU32().toInt(),
+                    depthOrArrayLayers = sizeFields.getValue("depth-or-array-layers").asU32().toInt(),
+                ),
+                format = fields.getValue("format").asU32().toInt(),
+                usage = fields.getValue("usage").asU32().toInt(),
+                mipLevelCount = fields.getValue("mip-level-count").asU32().toInt(),
+                sampleCount = fields.getValue("sample-count").asU32().toInt(),
+                dimension = fields.getValue("dimension").asU32().toInt(),
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseSamplerDescriptor(val_: ComponentVal): SamplerDescriptor {
+            require(val_.isRecord) { "expected sampler-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return SamplerDescriptor(label = parseOptionalString(fields.getValue("label")))
+        }
+
+        fun parsePipelineLayoutDescriptor(val_: ComponentVal): PipelineLayoutDescriptor {
+            require(val_.isRecord) { "expected pipeline-layout-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val layoutsVal = fields.getValue("bind-group-layouts")
+            require(layoutsVal.isList) { "expected bind-group-layouts list, got ${layoutsVal.type}" }
+            val layouts = layoutsVal.asList().map { el ->
+                val item = el as? ComponentVal
+                    ?: error("expected ComponentVal layout, got ${el?.javaClass}")
+                GpuHandle(item.asU32().toInt())
+            }
+            return PipelineLayoutDescriptor(
+                bindGroupLayouts = layouts,
                 label = parseOptionalString(fields.getValue("label")),
             )
         }
@@ -371,6 +466,34 @@ class WasmtimeCmLinker(
                 ),
             )
         })
+        define(AbiCm.Func.DEVICE_CREATE_TEXTURE, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.deviceCreateTexture(
+                    paramU32(params, 0),
+                    parseTextureDescriptor(params[1]),
+                ),
+            )
+        })
+        define(AbiCm.Func.DEVICE_CREATE_SAMPLER, ComponentHostFunction.singleValue { params ->
+            val descVal = params[1]
+            val desc = if (descVal.isOption) {
+                descVal.asSome().map { parseSamplerDescriptor(it) }.orElse(SamplerDescriptor())
+            } else {
+                parseSamplerDescriptor(descVal)
+            }
+            u32(bindings.deviceCreateSampler(paramU32(params, 0), desc))
+        })
+        define(
+            AbiCm.Func.DEVICE_CREATE_PIPELINE_LAYOUT,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreatePipelineLayout(
+                        paramU32(params, 0),
+                        parsePipelineLayoutDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
         define(
             AbiCm.Func.DEVICE_CREATE_COMPUTE_PIPELINE,
             ComponentHostFunction.singleValue { params ->
@@ -443,6 +566,9 @@ class WasmtimeCmLinker(
                 u32(bindings.deviceCreateCommandEncoder(paramU32(params, 0)))
             },
         )
+        define(AbiCm.Func.TEXTURE_CREATE_VIEW, ComponentHostFunction.singleValue { params ->
+            u32(bindings.textureCreateView(paramU32(params, 0)))
+        })
         define(AbiCm.Func.SURFACE_CONFIGURE, ComponentHostFunction.singleValue { params ->
             u32(
                 bindings.surfaceConfigure(

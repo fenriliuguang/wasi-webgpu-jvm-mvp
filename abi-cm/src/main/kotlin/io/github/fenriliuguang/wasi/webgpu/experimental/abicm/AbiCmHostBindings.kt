@@ -12,9 +12,12 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDesc
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
@@ -77,6 +80,15 @@ class AbiCmHostBindings(
     fun deviceCreateBindGroup(device: Int, descriptor: BindGroupDescriptor): Int =
         host.deviceCreateBindGroup(GpuHandle(device), descriptor).raw
 
+    fun deviceCreateTexture(device: Int, descriptor: TextureDescriptor): Int =
+        host.deviceCreateTexture(GpuHandle(device), descriptor).raw
+
+    fun deviceCreateSampler(device: Int, descriptor: SamplerDescriptor = SamplerDescriptor()): Int =
+        host.deviceCreateSampler(GpuHandle(device), descriptor).raw
+
+    fun deviceCreatePipelineLayout(device: Int, descriptor: PipelineLayoutDescriptor): Int =
+        host.deviceCreatePipelineLayout(GpuHandle(device), descriptor).raw
+
     fun deviceCreateComputePipeline(device: Int, descriptor: ComputePipelineDescriptor): Int =
         host.deviceCreateComputePipeline(GpuHandle(device), descriptor).raw
 
@@ -106,20 +118,28 @@ class AbiCmHostBindings(
             ),
         ).raw
 
-    /** @deprecated Prefer [deviceCreateComputePipeline] with a descriptor (slice C). */
+    /**
+     * Deprecated (slice C/D): builds a 1×BGL pipeline-layout then create-compute-pipeline.
+     * Prefer explicit [deviceCreatePipelineLayout] + [deviceCreateComputePipeline].
+     */
     fun deviceCreateComputePipelineBgl(
         device: Int,
         layout: Int,
         shader: Int,
         entryPoint: String,
-    ): Int =
-        host.deviceCreateComputePipeline(
+    ): Int {
+        val pipelineLayout = host.deviceCreatePipelineLayout(
+            GpuHandle(device),
+            PipelineLayoutDescriptor(bindGroupLayouts = listOf(GpuHandle(layout))),
+        )
+        return host.deviceCreateComputePipeline(
             GpuHandle(device),
             ComputePipelineDescriptor(
-                layout = GpuHandle(layout),
+                layout = pipelineLayout,
                 compute = ProgrammableStage(module = GpuHandle(shader), entryPoint = entryPoint),
             ),
         ).raw
+    }
 
     fun deviceCreateRenderPipelineTriangle(device: Int, shader: Int, format: Int): Int =
         host.deviceCreateRenderPipelineTriangle(
@@ -143,6 +163,9 @@ class AbiCmHostBindings(
 
     fun deviceCreateCommandEncoder(device: Int): Int =
         host.deviceCreateCommandEncoder(GpuHandle(device)).raw
+
+    fun textureCreateView(texture: Int): Int =
+        host.textureCreateView(GpuHandle(texture)).raw
 
     fun surfaceConfigure(surface: Int, device: Int, adapter: Int, width: Int, height: Int): Int =
         host.surfaceConfigure(

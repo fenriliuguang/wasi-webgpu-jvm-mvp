@@ -4,7 +4,7 @@
 
 Experimental **Component Model** Guest for vector-add.
 
-- Imports `experimental:webgpu-cm/host@0.5.0`（WIT resources + methods；pinned in `wit/`）
+- Imports `experimental:webgpu-cm/host@0.6.0`（WIT resources + methods；pinned in `wit/`）
 - **Not** compliant `wasi:webgpu`
 - Export: `run-vector-add(a, b) -> result<list<f32>, string>`
 

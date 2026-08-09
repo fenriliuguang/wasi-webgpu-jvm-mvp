@@ -4,7 +4,7 @@
 
 > **状态：** 切片 A 方法级补全（2026-08-09）；钉定 [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)。  
 > **钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（tag `v0.3.0-rc.2`）  
-> **现状包：** `experimental:webgpu-cm@0.5.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
+> **现状包：** `experimental:webgpu-cm@0.6.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
 > **阶段计划：** [`docs/scheme/compliant-world.md`](../scheme/compliant-world.md)  
 > **方法数：** 224（resource × method；见 [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json)）
 
@@ -191,13 +191,13 @@
 | `gpu-device.queue` | ✅ | B/C | experimental get-queue |
 | `gpu-device.destroy` | ❌ | G | 可 Unsupported |
 | `gpu-device.create-buffer` | ✅ | C | buffer-descriptor 已对齐 |
-| `gpu-device.create-texture` | ❌ | D |  |
-| `gpu-device.create-sampler` | ❌ | D |  |
-| `gpu-device.create-bind-group-layout` | ⚠️ | C | 特化 create-bind-group-layout-storage3 |
-| `gpu-device.create-pipeline-layout` | ❌ | D |  |
-| `gpu-device.create-bind-group` | ⚠️ | C | 特化 create-bind-group3 |
+| `gpu-device.create-texture` | ✅ | D | experimental + L2/Dawn/Cpu |
+| `gpu-device.create-sampler` | ✅ | D | experimental + L2/Dawn/Cpu（descriptor 最小/可 option） |
+| `gpu-device.create-pipeline-layout` | ✅ | D | experimental + L2/Dawn/Cpu |
+| `gpu-device.create-bind-group-layout` | ✅ | C/D | 标准 descriptor；含 sampler/texture 条目（D） |
+| `gpu-device.create-bind-group` | ✅ | C/D | 标准 descriptor；含 sampler/texture-view（D）；嵌套 borrow 仍受 .so 限制 |
 | `gpu-device.create-shader-module` | ⚠️ | C | 仅 WGSL code 字符串，非完整 descriptor |
-| `gpu-device.create-compute-pipeline` | ⚠️ | C | layout+shader+entry 便捷形 |
+| `gpu-device.create-compute-pipeline` | ✅ | C/D | layout 为 pipeline-layout（D）；deprecated BGL helper 仍在 |
 | `gpu-device.create-render-pipeline` | ⚠️ | E | 特化 *-triangle* helpers |
 | `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
 | `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
@@ -229,8 +229,8 @@
 
 | 上游方法 | 现状 | 切片 | 备注 |
 |----------|------|------|------|
-| `gpu-pipeline-layout.label` | ❌ | D/G | 可 Unsupported |
-| `gpu-pipeline-layout.set-label` | ❌ | D/G | 可 Unsupported |
+| `gpu-pipeline-layout.label` | ❌ | D/G | 显式 Unsupported |
+| `gpu-pipeline-layout.set-label` | ❌ | D/G | 显式 Unsupported |
 
 ## `gpu-query-set`
 
@@ -318,8 +318,8 @@
 
 | 上游方法 | 现状 | 切片 | 备注 |
 |----------|------|------|------|
-| `gpu-sampler.label` | ❌ | D/G | 可 Unsupported |
-| `gpu-sampler.set-label` | ❌ | D/G | 可 Unsupported |
+| `gpu-sampler.label` | ❌ | D/G | 显式 Unsupported |
+| `gpu-sampler.set-label` | ❌ | D/G | 显式 Unsupported |
 
 ## `gpu-shader-module`
 
@@ -380,19 +380,19 @@
 
 | 上游方法 | 现状 | 切片 | 备注 |
 |----------|------|------|------|
-| `gpu-texture.create-view` | ⚠️ | D/E | 仅 surface 路径 textureCreateView |
-| `gpu-texture.destroy` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.width` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.height` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.depth-or-array-layers` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.mip-level-count` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.sample-count` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.dimension` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.format` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.usage` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.texture-binding-view-dimension` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.label` | ❌ | D/G | 可 Unsupported |
-| `gpu-texture.set-label` | ❌ | D/G | 可 Unsupported |
+| `gpu-texture.create-view` | ✅ | D | create-texture 路径 + surface 路径；无 descriptor 形 |
+| `gpu-texture.destroy` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.width` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.height` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.depth-or-array-layers` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.mip-level-count` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.sample-count` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.dimension` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.format` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.usage` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.texture-binding-view-dimension` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.label` | ❌ | D/G | 显式 Unsupported |
+| `gpu-texture.set-label` | ❌ | D/G | 显式 Unsupported |
 
 ## `gpu-texture-view`
 

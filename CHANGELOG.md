@@ -5,6 +5,13 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice D — texture / sampler / pipeline-layout
+
+- `experimental:webgpu-cm` **0.5.0 → 0.6.0**: `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG sampler·texture entries; `compute-pipeline.layout` → pipeline-layout
+- L2 + Dawn + Cpu stubs; AbiCm / WasmtimeCmLinker parsers; Cpu unit test for create/view/sampler/pipeline-layout + sampler/texture bind-group
+- Gap matrix D primary paths ✅; attribute/label rows explicit Unsupported
+- Guests rebuilt for package bump (vector-add still uses top-level helpers for nested borrow)
+
 ### Compliant-world slice C — compute de-specialize
 
 - `experimental:webgpu-cm` **0.4.0 → 0.5.0**: standard `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`; keep deprecated `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`

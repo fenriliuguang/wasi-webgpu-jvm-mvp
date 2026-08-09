@@ -31,6 +31,96 @@ object GpuMapMode {
     const val WRITE: Int = 1 shl 1
 }
 
+/** WebGPU GPUTextureUsage bitfield (same bits as wasi:webgpu / Dawn TextureUsage). */
+object GpuTextureUsage {
+    const val COPY_SRC: Int = 1 shl 0
+    const val COPY_DST: Int = 1 shl 1
+    const val TEXTURE_BINDING: Int = 1 shl 2
+    const val STORAGE_BINDING: Int = 1 shl 3
+    const val RENDER_ATTACHMENT: Int = 1 shl 4
+}
+
+/**
+ * Dawn / WebGPU TextureDimension ordinals used by L2 (pass-through to androidx.webgpu).
+ * Prefer [D2] for slice D create-texture.
+ */
+object GpuTextureDimension {
+    const val D1: Int = 0x00000001
+    const val D2: Int = 0x00000002
+    const val D3: Int = 0x00000003
+}
+
+/**
+ * Common Dawn TextureFormat values (pass-through).
+ * [RGBA8_UNORM] is enough for Cpu / create-texture smoke tests.
+ */
+object GpuTextureFormat {
+    /** `androidx.webgpu.TextureFormat.RGBA8Unorm` */
+    const val RGBA8_UNORM: Int = 0x00000012
+}
+
+/** SamplerBindingType ordinals (wasi enum order). */
+object GpuSamplerBindingType {
+    const val FILTERING: Int = 0
+    const val NON_FILTERING: Int = 1
+    const val COMPARISON: Int = 2
+}
+
+/** TextureSampleType ordinals (wasi enum order). */
+object GpuTextureSampleType {
+    const val FLOAT: Int = 0
+    const val UNFILTERABLE_FLOAT: Int = 1
+    const val DEPTH: Int = 2
+    const val SINT: Int = 3
+    const val UINT: Int = 4
+}
+
+/** TextureViewDimension ordinals (wasi enum order; d2 default). */
+object GpuTextureViewDimension {
+    const val D1: Int = 0
+    const val D2: Int = 1
+    const val D2_ARRAY: Int = 2
+    const val CUBE: Int = 3
+    const val CUBE_ARRAY: Int = 4
+    const val D3: Int = 5
+}
+
+data class Extent3D(
+    val width: Int,
+    val height: Int = 1,
+    val depthOrArrayLayers: Int = 1,
+)
+
+data class TextureDescriptor(
+    val size: Extent3D,
+    val format: Int,
+    val usage: Int,
+    val mipLevelCount: Int = 1,
+    val sampleCount: Int = 1,
+    val dimension: Int = GpuTextureDimension.D2,
+    val label: String? = null,
+)
+
+/** Minimal sampler descriptor (defaults match WebGPU); labels only for now. */
+data class SamplerDescriptor(
+    val label: String? = null,
+)
+
+data class PipelineLayoutDescriptor(
+    val bindGroupLayouts: List<GpuHandle>,
+    val label: String? = null,
+)
+
+data class SamplerBindingLayout(
+    val type: Int = GpuSamplerBindingType.FILTERING,
+)
+
+data class TextureBindingLayout(
+    val sampleType: Int = GpuTextureSampleType.FLOAT,
+    val viewDimension: Int = GpuTextureViewDimension.D2,
+    val multisampled: Boolean = false,
+)
+
 data class RequestAdapterOptions(
     val powerPreference: PowerPreference = PowerPreference.Undefined,
     val forceFallbackAdapter: Boolean = false,
@@ -101,6 +191,8 @@ data class BindGroupLayoutEntry(
     val binding: Int,
     val visibility: Int,
     val buffer: BufferBindingLayout? = null,
+    val sampler: SamplerBindingLayout? = null,
+    val texture: TextureBindingLayout? = null,
 )
 
 data class BindGroupLayoutDescriptor(
@@ -114,10 +206,19 @@ data class BufferBinding(
     val size: Long? = null,
 )
 
+/** One of buffer / sampler / texture-view (WebGPU GPUBindingResource subset). */
+sealed class BindingResource {
+    data class Buffer(val binding: BufferBinding) : BindingResource()
+    data class Sampler(val sampler: GpuHandle) : BindingResource()
+    data class TextureView(val view: GpuHandle) : BindingResource()
+}
+
 data class BindGroupEntry(
     val binding: Int,
-    val resource: BufferBinding,
-)
+    val resource: BindingResource,
+) {
+    constructor(binding: Int, buffer: BufferBinding) : this(binding, BindingResource.Buffer(buffer))
+}
 
 data class BindGroupDescriptor(
     val layout: GpuHandle,
@@ -130,6 +231,10 @@ data class ProgrammableStage(
     val entryPoint: String? = null,
 )
 
+/**
+ * [layout] is a [ResourceKind.PipelineLayout] handle (slice D).
+ * Pass null only if the backend supports auto layout (this repo does not).
+ */
 data class ComputePipelineDescriptor(
     val compute: ProgrammableStage,
     val layout: GpuHandle? = null,

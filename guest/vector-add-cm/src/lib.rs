@@ -92,6 +92,8 @@ impl Guest for Component {
                         has_dynamic_offset: false,
                         min_binding_size: 4,
                     }),
+                    sampler: None,
+                    texture: None,
                 },
                 BindGroupLayoutEntry {
                     binding: 1,
@@ -101,6 +103,8 @@ impl Guest for Component {
                         has_dynamic_offset: false,
                         min_binding_size: 4,
                     }),
+                    sampler: None,
+                    texture: None,
                 },
                 BindGroupLayoutEntry {
                     binding: 2,
@@ -110,6 +114,8 @@ impl Guest for Component {
                         has_dynamic_offset: false,
                         min_binding_size: 4,
                     }),
+                    sampler: None,
+                    texture: None,
                 },
             ],
             label: None,

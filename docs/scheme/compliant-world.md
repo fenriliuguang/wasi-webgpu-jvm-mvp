@@ -2,9 +2,9 @@
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–C 已完成**（vendor + 双轨 Linker + compute 去特化）。  
+> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–D 已完成**（vendor + 双轨 Linker + compute 去特化 + texture/sampler/pipeline-layout）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
 
 ## 一句话
 
@@ -60,9 +60,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### D — Texture / Sampler / PipelineLayout
 
-- [ ] L2 + Dawn（及 Cpu stub）覆盖 texture / sampler / pipeline-layout 主路径（可不上屏验收）
-- [ ] 缺口矩阵对应行标 ✅ 或显式 ❌/`Unsupported`
-- [ ] 映射文档增量（可扩 `compute-subset` / 新小节，或并入 gap）
+- [x] L2 + Dawn（及 Cpu stub）覆盖 texture / sampler / pipeline-layout 主路径（可不上屏验收）
+- [x] 缺口矩阵对应行标 ✅ 或显式 ❌/`Unsupported`
+- [x] 映射文档增量（[`compute-subset.md`](../mapping/compute-subset.md) + gap）；`experimental:webgpu-cm@0.6.0`；compute-pipeline.layout → pipeline-layout
 
 ### E — 通用 Render（无 gfx）
 

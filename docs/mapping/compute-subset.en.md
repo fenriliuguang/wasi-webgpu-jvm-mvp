@@ -61,7 +61,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 | Texture / sampler / query set | ⚠️ Swapchain texture/view only (render-subset); no sampler/query |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌ (explicit layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.5.0` (still not compliant wasi:webgpu; slice C standard bind/compute descriptors) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.6.0` (still not compliant wasi:webgpu; slice D adds texture/sampler/pipeline-layout) |
 | Full `result` error lifting | ⚠️ currently Kotlin exceptions; see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)
@@ -70,4 +70,5 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 2. **Mapped range:** WIT `get-with-copy` ↔ Host returns a copied `ByteArray`.  
 3. **Auto layout:** Not implemented; `deviceCreateComputePipeline` requires a layout handle.  
 4. **Dawn ≠ wgpu:** Validation failure messages/timing may differ from `wasi-webgpu-wasmtime`; this table + unit tests are authoritative.  
-5. **Slice C:** Host/WIT standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` wired; Guest on device: layout descriptor + nested-borrow helpers `*3` / `*-bgl` / `submit1` until `cm-resources` recursive patch rebuilds `.so`. `compute-pipeline.layout` is still a **bind-group-layout** (not wasi `pipeline-layout` — slice D).
+5. **Slice C:** Host/WIT standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` wired; Guest on device: layout descriptor + nested-borrow helpers `*3` / `*-bgl` / `submit1` until `cm-resources` recursive patch rebuilds `.so`.
+6. **Slice D:** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG support sampler·texture entries; `compute-pipeline.layout` is **pipeline-layout**. storage-texture / write-texture / texture attributes remain Unsupported.
