@@ -60,14 +60,25 @@ $env:ANDROID_NDK_ROOT = $Ndk
 if (-not $env:RUSTUP_TOOLCHAIN) {
     $env:RUSTUP_TOOLCHAIN = "1.97.1"
 }
+# Windows host + aarch64/x86_64-linux-android: rustc 1.97.1 ACCESS_VIOLATION at opt-level>=1
+# (serde_core etc.). Force opt-level=0 for release profile unless caller overrides.
+if (($IsWindows -or $env:OS -eq "Windows_NT") -and -not $env:CARGO_PROFILE_RELEASE_OPT_LEVEL) {
+    $env:CARGO_PROFILE_RELEASE_OPT_LEVEL = "0"
+    Write-Host "Note: CARGO_PROFILE_RELEASE_OPT_LEVEL=0 (Windows Android cross-compile rustc workaround)"
+}
 $env:CARGO_TARGET_AARCH64_LINUX_ANDROID_RUSTFLAGS = "-Lnative=$Stubs"
 $env:CARGO_TARGET_X86_64_LINUX_ANDROID_RUSTFLAGS = "-Lnative=$Stubs"
 
 Push-Location (Join-Path $Deps "wasmtime4j-native")
 try {
     # Match Maven wasmtime4j-native defaults (excludes wasi-nn). jni-bindings alone does not compile.
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
     cargo ndk -t arm64-v8a -t x86_64 -o $Out --platform $ApiLevel -- `
         build --release --locked
+    $cargoExit = $LASTEXITCODE
+    $ErrorActionPreference = $prevEap
+    if ($cargoExit -ne 0) { throw "cargo ndk build failed: $cargoExit" }
 } finally {
     Pop-Location
 }

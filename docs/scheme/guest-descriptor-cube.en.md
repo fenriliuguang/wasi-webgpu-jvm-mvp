@@ -2,9 +2,9 @@
 
 [中文](guest-descriptor-cube.md) | **English**
 
-> **Status: docs-locked (2026-08-09).** Implementation not started.  
+> **Status: in progress (2026-08-09).** Slice **A complete**; B–D not started.  
 > Continues from: compliant-world A–G archive ([`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md)).  
-> Composition: natives unlock (A) → Guest standard descriptors + cube demo (B) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
+> Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
 
 ## One-liner
 
@@ -40,10 +40,10 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (16 �
 
 ### A — Android CM natives unlock
 
-- [ ] Rebuild via [`android-wasmtime.en.md`](../android-wasmtime.en.md) §6 / [`patches/`](../../patches/) (`scripts/build-wasmtime4j-android.ps1`); replace Bionic `.so` under `runtime-wasmtime/android-natives/jniLibs/` with **recursive** `cm-resources`
-- [ ] Document patch set, build command, `.so` paths; note desktop CM natives if the same patch applies
-- [ ] Smoke: nested-borrow paths no longer require top-level helpers (desktop and/or instrumented); existing two-wave instrumented tests do not regress
-- [ ] CHANGELOG notes natives rebuild (no product API work)
+- [x] Rebuild via [`android-wasmtime.en.md`](../android-wasmtime.en.md) §6 / [`patches/`](../../patches/) (`scripts/build-wasmtime4j-android.ps1`); replace Bionic `.so` under `runtime-wasmtime/android-natives/jniLibs/` with **recursive** `cm-resources`
+- [x] Document patch set, build command, `.so` paths; desktop CM natives share `cm-resources` (`build-wasmtime4j-desktop-cm.ps1`, honors `CARGO_TARGET_DIR`); Windows Android cross-compile rustc AV at `opt-level>=1` → script defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0`
+- [x] Smoke: `vector-add-cm` on nested standard descriptors; desktop `:runtime-wasmtime:test` (WasmtimeCmVectorAddTest) green; device two-wave instrumented regression deferred to hand-check / later slices
+- [x] CHANGELOG notes natives rebuild + Guest nested-path smoke
 
 ### B — Guest standard descriptors + rotating textured cube
 

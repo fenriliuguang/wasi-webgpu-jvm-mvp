@@ -63,7 +63,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 ## Status
 
 - **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md)
-- **Next phase**: **docs-locked** — [Guest standard descriptors on device + rotating textured cube (A–D)](docs/scheme/guest-descriptor-cube.en.md); no wasi-gfx / compliance marketing / true CM async / upstream PRs; Maven / `abi-mvp` render / perf still deferred
+- **Next phase**: **in progress** — [Guest standard descriptors on device + rotating textured cube (A–D)](docs/scheme/guest-descriptor-cube.en.md) (**A ✅**); no wasi-gfx / compliance marketing / true CM async / upstream PRs; Maven / `abi-mvp` render / perf still deferred
 
 ## References
 

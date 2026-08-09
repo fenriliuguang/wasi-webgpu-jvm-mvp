@@ -24,6 +24,8 @@ Requires: Rust **≥ 1.94** (1.97+ recommended), `cargo-ndk`, Android NDK, targe
 ./scripts/build-wasmtime4j-android.ps1
 ```
 
+On **Windows**, rustc 1.97.1 may `STATUS_ACCESS_VIOLATION` when cross-compiling Android targets at `opt-level>=1`. The script defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0` unless overridden (larger `.so`; strip afterward).
+
 Version pin matches `gradle/libs.versions.toml` (`wasmtime4j`). Source checkout lives under `.deps/wasmtime4j` (gitignored).
 
 The build script `git apply`s (in order):
@@ -32,6 +34,6 @@ The build script `git apply`s (in order):
    - `JNI_OnLoad` → `JNI_VERSION_1_6` (ART rejects `1_8` / `65544`)
    - `memory.rs` handle checks use unsigned compare (MTE/TBI tagged pointers)
 2. [`patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch`](../../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) (default; skip with `-SkipCmResourcesPatch`):
-   - WIT resource ↔ `U32(rep)` marshalling for Android CM instrumented tests
+   - WIT resource ↔ `U32(rep)` marshalling for Android CM (**recursive** inside lists/records)
 
 Progress, pitfalls, and Java-side Validation shim: [`docs/android-wasmtime.md`](../../docs/android-wasmtime.md).

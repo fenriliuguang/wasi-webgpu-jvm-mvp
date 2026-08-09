@@ -7,6 +7,7 @@ Experimental **Component Model** Guest for vector-add.
 - Imports `experimental:webgpu-cm/host@0.7.0`（WIT resources + methods；pinned in `wit/`）
 - **Not** compliant `wasi:webgpu`
 - Export: `run-vector-add(a, b) -> result<list<f32>, string>`
+- **guest-descriptor-cube A：** 标准 descriptor（含嵌套 borrow：`create-bind-group` / `pipeline-layout` / `create-compute-pipeline` / `queue.submit(list)`）；需递归 `cm-resources` 补丁 natives
 
 ## Rebuild
 

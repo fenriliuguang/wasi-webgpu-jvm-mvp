@@ -104,7 +104,9 @@ ARM64 堆指针 / TBI / PAC 高位 bit-cast 成 signed `long` 可为负；句柄
 WIT resources（`own`/`borrow` ↔ `U32(rep)`）编组与进程级 resource registry 在 native 侧。  
 仅 android 补丁的 `.so` 不够跑 CM Guest；`build-wasmtime4j-android.ps1` 默认再 apply [`cm-resources.patch`](../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch)。
 
-**嵌套 resource：** 旧补丁只把**顶层** `Val::Resource` 转成 `U32(rep)`；record/list 内的 borrow 若走 `val_to_component_value` 会变成 opaque `Own`/`Borrow` 句柄，Java 侧 `asU32()` 期望的是 Host table rep → trap。补丁现已 **递归** 转换；须重跑 `build-wasmtime4j-android.ps1` 替换 `jniLibs` 后，Guest 才能安全调用 `create-bind-group(descriptor)` / `queue.submit(list)` 等。未重编前 `vector-add-cm` 对嵌套路径暂用 `create-bind-group3` / `create-compute-pipeline-bgl` / `submit1`。
+**嵌套 resource：** 旧补丁只把**顶层** `Val::Resource` 转成 `U32(rep)`；record/list 内的 borrow 若走 `val_to_component_value` 会变成 opaque `Own`/`Borrow` 句柄，Java 侧 `asU32()` 期望的是 Host table rep → trap。补丁现已 **递归** 转换。
+
+**guest-descriptor-cube A（2026-08-09）：** 已重跑 `build-wasmtime4j-android.ps1` 替换 `jniLibs`；桌面 CM 冒烟：`vector-add-cm` 已改走标准 `create-bind-group` / `create-pipeline-layout` / `create-compute-pipeline` / `queue.submit(list)`（`:runtime-wasmtime:test` WasmtimeCmVectorAddTest 绿灯）。Windows 交叉编译若遇 rustc `STATUS_ACCESS_VIOLATION`（`opt-level>=1`），脚本默认 `CARGO_PROFILE_RELEASE_OPT_LEVEL=0`（`.so` 更大，可 `llvm-strip`）。
 
 ### 7. Studio / Gradle UTP：`Process crashed` / `No UID for androidx.test.services` · **外围**
 

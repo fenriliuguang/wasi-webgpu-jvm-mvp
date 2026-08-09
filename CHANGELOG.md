@@ -5,9 +5,16 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### guest-descriptor-cube slice A — Android CM natives unlock
+
+- Rebuilt `runtime-wasmtime/android-natives/jniLibs` with recursive `cm-resources` (+ android) patches via `scripts/build-wasmtime4j-android.ps1`
+- Desktop CM natives: `build-wasmtime4j-desktop-cm.ps1` honors `CARGO_TARGET_DIR`; Android script fails hard on cargo ndk errors; Windows cross-compile defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0` (rustc AV at opt≥1)
+- Smoke: `vector-add-cm` migrates to nested standard descriptors (`create-bind-group` / pipeline-layout / `create-compute-pipeline` / `queue.submit`); desktop `WasmtimeCmVectorAddTest` green
+- Docs: [`guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) A checked; [`android-wasmtime.md`](docs/android-wasmtime.md) §6
+
 ### Planning
 
-- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Implementation not started; primary acceptance remains experimental
+- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A complete** (see above)
 
 ### Docs sync
 

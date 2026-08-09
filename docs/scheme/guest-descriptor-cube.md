@@ -2,9 +2,9 @@
 
 **中文** | [English](guest-descriptor-cube.en.md)
 
-> **状态：已锁定（文档，2026-08-09）。** 实现未开始。  
+> **状态：进行中（2026-08-09）。** 切片 **A 已完成**；B–D 未开始。  
 > 承接：合规 World A–G 归档（[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)）。  
-> 组合：Natives 解锁（A）→ Guest 标准 descriptor + 立方体 Demo（B）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
+> 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
 
 ## 一句话
 
@@ -40,10 +40,10 @@ A 重编 Android CM natives（嵌套 borrow）
 
 ### A — Android CM natives 解锁
 
-- [ ] 按 [`android-wasmtime.md`](../android-wasmtime.md) §6 / [`patches/`](../../patches/) 重跑 `scripts/build-wasmtime4j-android.ps1`，替换 `runtime-wasmtime/android-natives/jniLibs/` 中带 **递归** `cm-resources` 的 Bionic `.so`
-- [ ] 文档钉定：补丁集合、构建命令、`.so` 替换路径；桌面 CM natives 若需同源补丁则一并说明
-- [ ] 冒烟：嵌套 borrow 路径不再强制顶层 helpers（至少桌面或仪器其一可证）；既有两波仪器不因换 `.so` 回归
-- [ ] CHANGELOG 记录 natives 重建（不实现业务 API）
+- [x] 按 [`android-wasmtime.md`](../android-wasmtime.md) §6 / [`patches/`](../../patches/) 重跑 `scripts/build-wasmtime4j-android.ps1`，替换 `runtime-wasmtime/android-natives/jniLibs/` 中带 **递归** `cm-resources` 的 Bionic `.so`
+- [x] 文档钉定：补丁集合、构建命令、`.so` 替换路径；桌面 CM natives 同源 `cm-resources` 补丁（`build-wasmtime4j-desktop-cm.ps1`，尊重 `CARGO_TARGET_DIR`）；Windows Android 交叉编译 `opt-level>=1` rustc AV → 脚本默认 `CARGO_PROFILE_RELEASE_OPT_LEVEL=0`
+- [x] 冒烟：`vector-add-cm` 改走嵌套标准 descriptor；桌面 `:runtime-wasmtime:test`（WasmtimeCmVectorAddTest）绿灯；仪器两波真机回归移交手测 / 后续切片
+- [x] CHANGELOG 记录 natives 重建 + Guest 嵌套路径冒烟
 
 ### B — Guest 标准 descriptor + 旋转纹理立方体
 

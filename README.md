@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)；**合规 wasi:webgpu World（无 gfx，A–G，2026-08-09）**→ [归档](docs/scheme/archive-compliant-world-dod.md)
-- **下一阶段：** **已锁定** — [Guest 标准 descriptor 真机 + 旋转纹理立方体（A–D）](docs/scheme/guest-descriptor-cube.md)；不做 wasi-gfx / 合规宣传 / 真 CM async / 上游 PR；Maven / `abi-mvp` render / perf 仍移交
+- **下一阶段：** **进行中** — [Guest 标准 descriptor 真机 + 旋转纹理立方体（A–D）](docs/scheme/guest-descriptor-cube.md)（**A ✅**）；不做 wasi-gfx / 合规宣传 / 真 CM async / 上游 PR；Maven / `abi-mvp` render / perf 仍移交
 
 ## 参考
 

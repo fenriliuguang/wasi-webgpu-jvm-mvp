@@ -1,8 +1,8 @@
 //! Experimental Component Model guest for vector-add.
 //! Imports experimental:webgpu-cm/host — NOT compliant wasi:webgpu.
 //! Handles are WIT resources (not flat u32).
-//! Slice C: standard bind-group-layout descriptor; bind-group / pipeline / submit
-//! use top-level resource helpers until wasmtime4j nest Resource→U32 (see patches/).
+//! guest-descriptor-cube A: standard descriptors with nested borrow
+//! (needs recursive Resource→U32 in cm-resources–patched natives).
 
 #![no_main]
 
@@ -45,8 +45,9 @@ struct Component;
 impl Guest for Component {
     fn run_vector_add(a: Vec<f32>, b: Vec<f32>) -> Result<Vec<f32>, String> {
         use experimental::webgpu_cm::host::{
-            self, BindGroupLayoutDescriptor, BindGroupLayoutEntry, BufferBindingLayout,
-            BufferDescriptor,
+            self, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
+            BindGroupLayoutEntry, BufferBinding, BufferBindingLayout, BufferDescriptor,
+            ComputePipelineDescriptor, PipelineLayoutDescriptor, ProgrammableStage,
         };
 
         if a.is_empty() || a.len() != b.len() {
@@ -81,7 +82,6 @@ impl Guest for Component {
         queue.write_buffer(&buf_b, 0, &floats_to_bytes(&b));
 
         let shader = device.create_shader_module(SHADER);
-        // Standard-shaped layout descriptor (scalars / records only — no nested resources).
         let layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
             entries: vec![
                 BindGroupLayoutEntry {
@@ -120,10 +120,54 @@ impl Guest for Component {
             ],
             label: None,
         });
-        // Nested borrow-in-record / list<borrow> needs recursive Resource→U32 in
-        // wasmtime4j cm-resources patch; until Android .so is rebuilt, use helpers.
-        let bind_group = device.create_bind_group3(&layout, &buf_a, &buf_b, &buf_out);
-        let pipeline = device.create_compute_pipeline_bgl(&layout, &shader, "main");
+        let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            bind_group_layouts: vec![&layout],
+            label: None,
+        });
+        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+            layout: &layout,
+            entries: vec![
+                BindGroupEntry {
+                    binding: 0,
+                    buffer: Some(BufferBinding {
+                        buffer: &buf_a,
+                        offset: 0,
+                        size: None,
+                    }),
+                    sampler: None,
+                    texture_view: None,
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    buffer: Some(BufferBinding {
+                        buffer: &buf_b,
+                        offset: 0,
+                        size: None,
+                    }),
+                    sampler: None,
+                    texture_view: None,
+                },
+                BindGroupEntry {
+                    binding: 2,
+                    buffer: Some(BufferBinding {
+                        buffer: &buf_out,
+                        offset: 0,
+                        size: None,
+                    }),
+                    sampler: None,
+                    texture_view: None,
+                },
+            ],
+            label: None,
+        });
+        let pipeline = device.create_compute_pipeline(&ComputePipelineDescriptor {
+            compute: ProgrammableStage {
+                module: &shader,
+                entry_point: Some("main".to_string()),
+            },
+            layout: &pipeline_layout,
+            label: None,
+        });
 
         let encoder = device.create_command_encoder();
         let pass = encoder.begin_compute_pass();
@@ -135,7 +179,7 @@ impl Guest for Component {
 
         encoder.copy_buffer_to_buffer(&buf_out, 0, &buf_read, 0, bytes);
         let cmd = encoder.finish();
-        queue.submit1(cmd);
+        queue.submit(&[&cmd]);
 
         buf_read.map_async(MAP_MODE_READ, 0, bytes);
         let mapped = buf_read.get_mapped_range(0, bytes);

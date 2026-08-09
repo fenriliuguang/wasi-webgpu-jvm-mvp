@@ -45,9 +45,10 @@ try {
     Pop-Location
 }
 
-# Workspace cargo target lives at .deps/wasmtime4j/target.
+# Prefer CARGO_TARGET_DIR when set (e.g. CI / sandbox); else workspace .deps/wasmtime4j/target.
 $os = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
 $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+$TargetRoot = if ($env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR } else { Join-Path $Deps "target" }
 
 $platform = $null
 $libName = $null
@@ -56,24 +57,24 @@ if ($IsWindows -or $env:OS -eq "Windows_NT") {
     if ($arch -match "X64|Amd64") {
         $platform = "windows-x86_64"
         $libName = "wasmtime4j.dll"
-        $built = Join-Path $Deps "target\release\wasmtime4j.dll"
+        $built = Join-Path $TargetRoot "release\wasmtime4j.dll"
     }
 } elseif ($IsMacOS) {
     if ($arch -match "Arm64") {
         $platform = "darwin-aarch64"
         $libName = "libwasmtime4j.dylib"
-        $built = Join-Path $Deps "target\release\libwasmtime4j.dylib"
+        $built = Join-Path $TargetRoot "release\libwasmtime4j.dylib"
     }
 } else {
     # Linux
     if ($arch -match "Arm64") {
         $platform = "linux-aarch64"
         $libName = "libwasmtime4j.so"
-        $built = Join-Path $Deps "target\release\libwasmtime4j.so"
+        $built = Join-Path $TargetRoot "release\libwasmtime4j.so"
     } else {
         $platform = "linux-x86_64"
         $libName = "libwasmtime4j.so"
-        $built = Join-Path $Deps "target\release\libwasmtime4j.so"
+        $built = Join-Path $TargetRoot "release\libwasmtime4j.so"
     }
 }
 

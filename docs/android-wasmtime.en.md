@@ -104,7 +104,9 @@ Fix: build script rewrites to `(memory_ptr as u64) < 0x1000` (`table_ptr` likewi
 WIT resource (`own`/`borrow` ↔ `U32(rep)`) marshalling and the process-wide resource registry live in native code.  
 An android-only-patched `.so` cannot run the CM Guest; `build-wasmtime4j-android.ps1` also applies [`cm-resources.patch`](../patches/wasmtime4j-v47.0.2-1.5.0-cm-resources.patch) by default.
 
-**Nested resources:** older patch only mapped **top-level** `Val::Resource` to `U32(rep)`; borrow-inside-record/list via `val_to_component_value` becomes opaque `Own`/`Borrow` handles, while Java `asU32()` expects host table reps → trap. Patch now **recurses**; rebuild with `build-wasmtime4j-android.ps1` and replace `jniLibs` before Guest can safely call `create-bind-group(descriptor)` / `queue.submit(list)`. Until then `vector-add-cm` uses `create-bind-group3` / `create-compute-pipeline-bgl` / `submit1` for nested paths.
+**Nested resources:** older patch only mapped **top-level** `Val::Resource` to `U32(rep)`; borrow-inside-record/list via `val_to_component_value` becomes opaque `Own`/`Borrow` handles, while Java `asU32()` expects host table reps → trap. Patch now **recurses**.
+
+**guest-descriptor-cube A (2026-08-09):** rebuilt via `build-wasmtime4j-android.ps1` and replaced `jniLibs`; desktop CM smoke: `vector-add-cm` uses standard `create-bind-group` / `create-pipeline-layout` / `create-compute-pipeline` / `queue.submit(list)` (`:runtime-wasmtime:test` WasmtimeCmVectorAddTest green). On Windows, if rustc hits `STATUS_ACCESS_VIOLATION` at `opt-level>=1`, the script defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0` (larger `.so`; strip with `llvm-strip`).
 
 ### 7. Studio / Gradle UTP: `Process crashed` / `No UID for androidx.test.services` · **Peripheral**
 
