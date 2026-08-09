@@ -16,8 +16,8 @@
 | **Guest CM 上屏（triangle-cm）** | **完成**（2026-08-06）— 详见 [`archive-guest-onscreen-cm-dod.md`](archive-guest-onscreen-cm-dod.md) |
 | **Demo CM 稳性 + 帧循环** | **完成**（2026-08-07）— 详见 [`archive-demo-cm-stability-dod.md`](archive-demo-cm-stability-dod.md) |
 | **Demo CM 真机稳性回归** | **完成**（2026-08-08，V2458A，D1–D6）— 见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) |
-| **语义加固与工程清债（本阶段）** | **进行中** — A records → B 析构 → C 上游 → D D7 → E Guest demo；见 [`semantic-hardening.md`](semantic-hardening.md) |
-| **更远（本阶段不做）** | wasi-gfx / 合规全量 world；Maven Central；`abi-mvp` 扁平 render（均未锁定） |
+| **语义加固与工程清债** | **完成**（2026-08-09）— 详见 [`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)；计划页 [`semantic-hardening.md`](semantic-hardening.md) |
+| **下一阶段** | **未锁定** — 候选：wasi-gfx / 合规全量 world；Maven Central；`abi-mvp` 扁平 render；可选 perf |
 
 ## 硬原则（摘录）
 

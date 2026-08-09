@@ -1,8 +1,8 @@
-# 语义加固与工程清债（semantic-hardening）— 本阶段
+# 语义加固与工程清债（semantic-hardening）— 已完成
 
 **中文** | [English](semantic-hardening.en.md)
 
-> **状态：进行中（本阶段已锁定，2026-08-08）。**  
+> **状态：已完成（2026-08-09）。** DoD 归档：[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)。  
 > 承接：真机稳性 D1–D6 收口（[`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)）。  
 > 组合：语义加固（A+B）→ 工程清债（C+D）→ Demo 深化（E）。
 
@@ -81,7 +81,7 @@ A WIT records（render / pipeline 等）
 2. **B** destructor → Host drop；稳性回归  
 3. **C** / **D** 工程清债（可与 1–2 交错）  
 4. **E** Guest demo 深化 + 仪器/手点验收  
-5. 文档收口：本页 DoD 勾选 → 归档页；根 README / scheme / CHANGELOG
+5. 文档收口：本页 DoD 勾选 → [`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)；根 README / scheme / CHANGELOG
 
 ## 链接
 

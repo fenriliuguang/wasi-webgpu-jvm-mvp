@@ -62,9 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH)
-- **Current phase**: semantic hardening & engineering debt (A WIT records → B destructors → C upstream gap notes — no upstream PRs → D D7 instrumented → E richer Guest demo) → [plan](docs/scheme/semantic-hardening.en.md)
-- **Unlocked (out of this phase)**: wasi-gfx / full compliant world; Maven Central; `abi-mvp` flat render
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md)
+- **Next phase**: unlocked (candidates: wasi-gfx / full compliant world; Maven Central; `abi-mvp` flat render; optional perf)
 
 ## References
 
@@ -78,7 +77,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Root README | [README.en.md](README.en.md) |
 | Demo CM stability DoD archive | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
 | Demo CM device stability regression blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) (ZH) |
-| Current phase: semantic hardening & engineering debt | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
+| Semantic hardening DoD archive | [docs/scheme/archive-semantic-hardening-dod.en.md](docs/scheme/archive-semantic-hardening-dod.en.md) |
+| Semantic hardening plan (complete) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
 | Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |

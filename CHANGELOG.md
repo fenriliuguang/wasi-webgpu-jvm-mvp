@@ -5,6 +5,11 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Semantic hardening — DoD complete 2026-08-09
+
+- Archived A–E DoD: [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
+- Root README / scheme: phase marked done; next phase unlocked (no new lock)
+
 ### Semantic hardening — device instrumented re-check + D7
 
 - V2458A：`scripts/run-android-instrumented.ps1` 两波全绿（compute → CM triangle；波间 force-stop）
@@ -45,9 +50,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Current phase locked** (2026-08-08): semantic hardening & engineering debt — A WIT records → B resource destructors → C upstream brief → D D7 instrumented → E richer Guest demo; plan [`docs/scheme/semantic-hardening.md`](docs/scheme/semantic-hardening.md)
+- **Semantic hardening complete** (2026-08-09): A–E archived; next phase unlocked — see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
-- Explicitly out of this phase: wasi-gfx / full compliant world / Maven Central / `abi-mvp` flat render
+- Explicitly unlocked candidates: wasi-gfx / full compliant world / Maven Central / `abi-mvp` flat render / optional perf
 
 ### Demo CM stability + frame loop — DoD complete 2026-08-07
 

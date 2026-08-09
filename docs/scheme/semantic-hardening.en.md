@@ -1,8 +1,8 @@
-# Semantic hardening & engineering debt (semantic-hardening) — current phase
+# Semantic hardening & engineering debt (semantic-hardening) — complete
 
 [中文](semantic-hardening.md) | **English**
 
-> **Status: in progress (locked as current phase, 2026-08-08).**  
+> **Status: complete (2026-08-09).** DoD archive: [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md).  
 > Continues: device stability D1–D6 closed ([`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) ZH).  
 > Packages: semantic hardening (A+B) → engineering debt (C+D) → Demo deepening (E).
 
@@ -81,7 +81,7 @@ A WIT records (render / pipeline, …)
 2. **B** destructor → Host drop; stability regression  
 3. **C** / **D** engineering debt (may interleave with 1–2)  
 4. **E** Guest demo deepening + instrumented / manual acceptance  
-5. Docs wrap-up: check DoD here → archive page; root README / scheme / CHANGELOG
+5. Docs wrap-up: check DoD here → [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md); root README / scheme / CHANGELOG
 
 ## Links
 
