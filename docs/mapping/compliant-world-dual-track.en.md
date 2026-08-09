@@ -14,7 +14,7 @@ Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** 
 | Track | Import interface | Module | Guest status |
 |-------|------------------|--------|--------------|
 | experimental | `experimental:webgpu-cm/host@0.6.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **stay here** (C de-specialized descriptors) |
-| Standard | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered, funcs **Unsupported stubs** (wire in C+) |
+| Standard | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **result methods** stub → `ComponentVal.err` (slice F); other funcs throw **Unsupported**; wire in later slices |
 
 ## Linker behavior
 
@@ -23,7 +23,7 @@ Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** 
 1. `registerExperimentalResources` (`AbiCm.Resource.ALL`)
 2. `registerWasiResources` (`AbiWasi.Resource.ALL`, 33)
 3. `registerExperimentalImports` (existing L2 wiring)
-4. `registerWasiImportStubs` (`AbiWasi.Func.ALL` → `HostException.Unsupported`)
+4. `registerWasiImportStubs` (result methods → `ComponentVal.err`; others → `HostException.Unsupported`)
 
 Old Guests only resolve experimental paths and are unaffected by wasi stubs.
 

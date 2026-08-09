@@ -72,9 +72,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### F — result / error-kind lift
 
-- [ ] Map standard WIT `result` / error-kind onto the Host error surface (see [`errors-async.en.md`](../mapping/errors-async.en.md))
-- [ ] Async methods stay sync-compat wrappers; document deviation from upstream async/p3
-- [ ] Close F columns in the gap matrix
+- [x] Map standard WIT `result` / error-kind onto the Host error surface (see [`errors-async.en.md`](../mapping/errors-async.en.md); `HostErrorMapping` + wasi stub → `ComponentVal.err`)
+- [x] Async methods stay sync-compat wrappers; document deviation from upstream async/p3
+- [x] Close F columns in the gap matrix (experimental still traps; wasi result stubs lifted)
 
 ### G — Long-tail coverage close-out
 

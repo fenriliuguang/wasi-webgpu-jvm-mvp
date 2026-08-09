@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice F — result / error-kind lift
+
+- `HostErrorMapping` + WIT error-kind mirrors (`WasiWebGpuError.kt`); wasi result stubs return `ComponentVal.err` via `WasiResultCodec` / `AbiWasiResults`
+- experimental track unchanged (throw → trap); async remains sync-compat
+- Docs: [`errors-async.md`](docs/mapping/errors-async.md); gap F rows; plan DoD F checked
+
 ### Compliant-world slice E — generic render (no gfx)
 
 - `experimental:webgpu-cm` **0.6.0 → 0.7.0**: `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`; deprecate `*-triangle*` / `begin-render-pass-clear`

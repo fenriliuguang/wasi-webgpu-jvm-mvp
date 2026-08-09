@@ -14,7 +14,7 @@
 | 轨 | Import interface | 模块 | Guest 现状 |
 |----|------------------|------|------------|
 | experimental | `experimental:webgpu-cm/host@0.6.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **仍走此轨**（C 已去特化 descriptor） |
-| 标准包 | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | 尚无 Guest；资源已注册，函数 **Unsupported stub**（C+ 接线） |
+| 标准包 | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | 尚无 Guest；资源已注册；**result 方法** stub → `ComponentVal.err`（切片 F）；其余 **Unsupported** throw；接线见后续切片 |
 
 ## Linker 行为
 
@@ -23,7 +23,7 @@
 1. `registerExperimentalResources`（`AbiCm.Resource.ALL`）
 2. `registerWasiResources`（`AbiWasi.Resource.ALL`，33 个）
 3. `registerExperimentalImports`（现有 L2 接线）
-4. `registerWasiImportStubs`（`AbiWasi.Func.ALL` → `HostException.Unsupported`）
+4. `registerWasiImportStubs`（result 方法 → `ComponentVal.err`；其余 → `HostException.Unsupported`）
 
 旧 Guest 只解析 experimental 路径，不受 wasi stub 影响。
 

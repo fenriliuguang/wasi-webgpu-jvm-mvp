@@ -63,7 +63,7 @@
 | `gpu-adapter.features` | ❌ | G | 可 Unsupported |
 | `gpu-adapter.limits` | ❌ | G | 可 Unsupported |
 | `gpu-adapter.info` | ❌ | G | 可 Unsupported |
-| `gpu-adapter.request-device` `async` | ⚠️ | C/F | 无完整 device descriptor；async→sync |
+| `gpu-adapter.request-device` `async` | ⚠️ | C/F | 无完整 device descriptor；async→sync；wasi result Err 已抬升（stub） |
 
 ## `gpu-adapter-info`
 
@@ -98,8 +98,8 @@
 | `gpu-buffer.size` | ❌ | C/G | 属性/destroy 未暴露；可 Unsupported |
 | `gpu-buffer.usage` | ❌ | C/G | 属性/destroy 未暴露；可 Unsupported |
 | `gpu-buffer.map-state` | ❌ | C/G | 属性/destroy 未暴露；可 Unsupported |
-| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync 等待；result 未抬升 |
-| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray 拷贝 |
+| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync 等待；wasi result Err 已抬升（stub）；experimental 仍 trap |
+| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray 拷贝；wasi result Err 已抬升（stub） |
 | `gpu-buffer.unmap` | ✅ | C |  |
 | `gpu-buffer.destroy` | ❌ | C/G | 属性/destroy 未暴露；可 Unsupported |
 | `gpu-buffer.label` | ❌ | G | 可 Unsupported |
@@ -199,8 +199,8 @@
 | `gpu-device.create-shader-module` | ⚠️ | C | 仅 WGSL code 字符串，非完整 descriptor |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout 为 pipeline-layout（D）；deprecated BGL helper 仍在 |
 | `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor；`*-triangle*` helpers deprecated |
-| `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
-| `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | 本阶段 sync-compat；可先 Unsupported |
+| `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat；wasi stub → create-pipeline-error result Err |
+| `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat；wasi stub → create-pipeline-error result Err |
 | `gpu-device.create-command-encoder` | ✅ | C |  |
 | `gpu-device.create-render-bundle-encoder` | ❌ | G | 可 Unsupported |
 | `gpu-device.create-query-set` | ❌ | G | 可 Unsupported |

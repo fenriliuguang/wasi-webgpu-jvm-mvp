@@ -73,9 +73,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### F — result / error-kind 抬升
 
-- [ ] 标准 WIT `result` / error-kind 映射到 Host 错误面（对照 [`errors-async.md`](../mapping/errors-async.md)）
-- [ ] Async 方法仍 sync-compat 包装；文档标明与上游 async/p3 的偏差
-- [ ] 缺口矩阵 F 列收口
+- [x] 标准 WIT `result` / error-kind 映射到 Host 错误面（对照 [`errors-async.md`](../mapping/errors-async.md)；`HostErrorMapping` + wasi stub → `ComponentVal.err`）
+- [x] Async 方法仍 sync-compat 包装；文档标明与上游 async/p3 的偏差
+- [x] 缺口矩阵 F 列收口（experimental 仍 trap；wasi result stub 已抬升）
 
 ### G — 长尾覆盖率关门
 

@@ -63,7 +63,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-adapter.features` | ❌ | G | Unsupported OK |
 | `gpu-adapter.limits` | ❌ | G | Unsupported OK |
 | `gpu-adapter.info` | ❌ | G | Unsupported OK |
-| `gpu-adapter.request-device` `async` | ⚠️ | C/F | no full device descriptor; async→sync |
+| `gpu-adapter.request-device` `async` | ⚠️ | C/F | no full device descriptor; async→sync; wasi result Err lifted (stub) |
 
 ## `gpu-adapter-info`
 
@@ -98,8 +98,8 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-buffer.size` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
 | `gpu-buffer.usage` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
 | `gpu-buffer.map-state` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
-| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync wait; result not lifted |
-| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray copy |
+| `gpu-buffer.map-async` `async` | ⚠️ | C/F | L2 sync wait; wasi result Err lifted (stub); experimental still traps |
+| `gpu-buffer.get-mapped-range-get-with-copy` | ⚠️ | C/F | experimental get-mapped-range → ByteArray copy; wasi result Err lifted (stub) |
 | `gpu-buffer.unmap` | ✅ | C |  |
 | `gpu-buffer.destroy` | ❌ | C/G | props/destroy not exposed; Unsupported OK |
 | `gpu-buffer.label` | ❌ | G | Unsupported OK |
@@ -199,8 +199,8 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 | `gpu-device.create-shader-module` | ⚠️ | C | WGSL code string only, not full descriptor |
 | `gpu-device.create-compute-pipeline` | ✅ | C/D | layout is pipeline-layout (D); deprecated BGL helper kept |
 | `gpu-device.create-render-pipeline` | ✅ | E | experimental descriptor; `*-triangle*` helpers deprecated |
-| `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
-| `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat this phase; Unsupported first OK |
+| `gpu-device.create-compute-pipeline-async` `async` | ⚠️ | F | sync-compat; wasi stub → create-pipeline-error result Err |
+| `gpu-device.create-render-pipeline-async` `async` | ⚠️ | F | sync-compat; wasi stub → create-pipeline-error result Err |
 | `gpu-device.create-command-encoder` | ✅ | C |  |
 | `gpu-device.create-render-bundle-encoder` | ❌ | G | Unsupported OK |
 | `gpu-device.create-query-set` | ❌ | G | Unsupported OK |

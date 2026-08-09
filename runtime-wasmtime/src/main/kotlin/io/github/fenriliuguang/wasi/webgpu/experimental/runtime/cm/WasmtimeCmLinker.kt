@@ -15,6 +15,7 @@ import ai.tegmentum.wasmtime4j.factory.WasmRuntimeFactory
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCm
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCmHostBindings
 import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasi
+import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasiResults
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupEntry
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
@@ -118,17 +119,26 @@ class WasmtimeCmLinker(
     }
 
     /**
-     * Stub every wasi:webgpu import so a Guest that resolves the standard package gets a clear
-     * [HostException.Unsupported] instead of a missing-import link error. Real wiring is C+.
+     * Stub wasi:webgpu imports. Non-result methods throw [HostException.Unsupported];
+     * result-returning methods return `ComponentVal.err` with a mapped error record (slice F)
+     * so Guests get WIT `result` Err instead of a trap.
      */
     private fun registerWasiImportStubs(linker: ComponentLinker<Any>) {
-        val stub = ComponentHostFunction.singleValue { _ ->
+        val throwStub = ComponentHostFunction.singleValue { _ ->
             throw HostException.Unsupported(
                 "wasi:webgpu@${AbiWasi.VERSION} import not wired yet " +
-                    "(compliant-world slice B stub; wire in C+)",
+                    "(compliant-world stub; wire in later slices)",
             )
         }
         for (func in AbiWasi.Func.ALL) {
+            val shape = AbiWasiResults.BY_FUNC[func]
+            val stub = if (shape != null) {
+                ComponentHostFunction.singleValue { _ ->
+                    WasiResultCodec.unsupportedResult(func, shape)
+                }
+            } else {
+                throwStub
+            }
             linker.defineFunction("${AbiWasi.IMPORT_INTERFACE}#$func", stub)
         }
     }

@@ -1,8 +1,11 @@
 package io.github.fenriliuguang.wasi.webgpu.experimental.host
 
 /**
- * Host-side failures. P0 maps these to Kotlin exceptions;
- * P1+ may lift selected cases into WIT `result` payloads.
+ * Host-side failures as Kotlin exceptions.
+ *
+ * - **experimental:webgpu-cm** callbacks: still throw → CM trap.
+ * - **wasi:webgpu** result-returning methods: map via [HostErrorMapping] into WIT `result` Err
+ *   (compliant-world slice F; see `WasiResultCodec` in runtime-wasmtime).
  */
 sealed class HostException(message: String, cause: Throwable? = null) :
     RuntimeException(message, cause) {
