@@ -61,7 +61,7 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 | Texture / sampler / query set | ⚠️ Swapchain texture/view only (render-subset); no sampler/query |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌ (explicit layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.4.0` (still not compliant wasi:webgpu) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.5.0` (still not compliant wasi:webgpu; slice C standard bind/compute descriptors) |
 | Full `result` error lifting | ⚠️ currently Kotlin exceptions; see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)
@@ -69,4 +69,5 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 1. **Async:** Several WIT methods are async; P0 Host blocks synchronously (≤30s).  
 2. **Mapped range:** WIT `get-with-copy` ↔ Host returns a copied `ByteArray`.  
 3. **Auto layout:** Not implemented; `deviceCreateComputePipeline` requires a layout handle.  
-4. **Dawn ≠ wgpu:** Validation failure messages/timing may differ from `wasi-webgpu-wasmtime`; this table + unit tests are authoritative.
+4. **Dawn ≠ wgpu:** Validation failure messages/timing may differ from `wasi-webgpu-wasmtime`; this table + unit tests are authoritative.  
+5. **Slice C:** CM Guests use standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit`; `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` remain but deprecated. `compute-pipeline.layout` is still a **bind-group-layout** (not wasi `pipeline-layout` — slice D).

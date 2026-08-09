@@ -13,7 +13,7 @@
 
 | 轨 | Import interface | 模块 | Guest 现状 |
 |----|------------------|------|------------|
-| experimental | `experimental:webgpu-cm/host@0.4.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **仍走此轨** |
+| experimental | `experimental:webgpu-cm/host@0.5.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **仍走此轨**（C 已去特化 descriptor） |
 | 标准包 | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | 尚无 Guest；资源已注册，函数 **Unsupported stub**（C+ 接线） |
 
 ## Linker 行为

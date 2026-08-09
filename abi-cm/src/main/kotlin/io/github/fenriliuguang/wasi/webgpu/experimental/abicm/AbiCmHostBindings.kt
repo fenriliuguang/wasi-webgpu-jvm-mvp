@@ -71,6 +71,16 @@ class AbiCmHostBindings(
             ShaderModuleDescriptor(code = code),
         ).raw
 
+    fun deviceCreateBindGroupLayout(device: Int, descriptor: BindGroupLayoutDescriptor): Int =
+        host.deviceCreateBindGroupLayout(GpuHandle(device), descriptor).raw
+
+    fun deviceCreateBindGroup(device: Int, descriptor: BindGroupDescriptor): Int =
+        host.deviceCreateBindGroup(GpuHandle(device), descriptor).raw
+
+    fun deviceCreateComputePipeline(device: Int, descriptor: ComputePipelineDescriptor): Int =
+        host.deviceCreateComputePipeline(GpuHandle(device), descriptor).raw
+
+    /** @deprecated Prefer [deviceCreateBindGroupLayout] with a descriptor (slice C). */
     fun deviceCreateBindGroupLayoutStorage3(device: Int): Int {
         val layout = BindGroupLayoutDescriptor(
             entries = listOf(
@@ -82,6 +92,7 @@ class AbiCmHostBindings(
         return host.deviceCreateBindGroupLayout(GpuHandle(device), layout).raw
     }
 
+    /** @deprecated Prefer [deviceCreateBindGroup] with a descriptor (slice C). */
     fun deviceCreateBindGroup3(device: Int, layout: Int, b0: Int, b1: Int, b2: Int): Int =
         host.deviceCreateBindGroup(
             GpuHandle(device),
@@ -95,7 +106,8 @@ class AbiCmHostBindings(
             ),
         ).raw
 
-    fun deviceCreateComputePipeline(
+    /** @deprecated Prefer [deviceCreateComputePipeline] with a descriptor (slice C). */
+    fun deviceCreateComputePipelineBgl(
         device: Int,
         layout: Int,
         shader: Int,
@@ -260,6 +272,11 @@ class AbiCmHostBindings(
     fun commandEncoderFinish(encoder: Int): Int =
         host.commandEncoderFinish(GpuHandle(encoder)).raw
 
+    fun queueSubmit(queue: Int, commandBuffers: List<Int>) {
+        host.queueSubmit(GpuHandle(queue), commandBuffers.map { GpuHandle(it) })
+    }
+
+    /** @deprecated Prefer [queueSubmit] (slice C). */
     fun queueSubmit1(queue: Int, commandBuffer: Int) {
         host.queueSubmit(GpuHandle(queue), listOf(GpuHandle(commandBuffer)))
     }

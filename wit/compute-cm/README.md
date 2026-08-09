@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.4.0
+# experimental:webgpu-cm@0.5.0
 
 **中文** | [English](README.en.md)
 
@@ -8,13 +8,13 @@ Component Model compute + 最小 surface/render 切片。
 - 方法名向 `wasi:webgpu@0.3.0-rc.2` 相关路径靠
 - 句柄为 WIT `resource` + method（内部仍映射到 L2 `GpuHandle`）
 - async WIT → 同步（与 L2 一致）
-- bind-group helpers 仍是 vector-add 特化
 - **0.2.0：** `buffer-descriptor` + `buffer-usage-flags` / `map-mode-flags`（u32 别名）；`create-buffer(descriptor)`；`map-async(mode, …)` 取代 `map-read`
 - **0.3.0：** Android native-window `surface` + triangle 形 `render-pipeline` / `render-pass`
 - **0.4.0：** `vertex-attribute` / `vertex-buffer-layout`；`set-vertex-buffer`；`create-render-pipeline-triangle-buffers`
+- **0.5.0（slice C）：** 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`；保留 `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`（deprecated）。`compute-pipeline.layout` 仍为 bind-group-layout（L2；wasi pipeline-layout → D）
 - World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`（Host 注入 native window）
 
-Guest：`guest/vector-add-cm/`、`guest/triangle-cm/`  
+Guest：`guest/vector-add-cm/`（已迁标准 descriptor）、`guest/triangle-cm/`  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 

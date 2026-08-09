@@ -1,6 +1,7 @@
 //! Experimental Component Model guest for vector-add.
 //! Imports experimental:webgpu-cm/host — NOT compliant wasi:webgpu.
 //! Handles are WIT resources (not flat u32).
+//! Slice C: standard bind-group / compute-pipeline descriptors + queue.submit.
 
 #![no_main]
 
@@ -32,12 +33,21 @@ const USAGE_STORAGE: u32 = 0x8c;
 const USAGE_MAP_READ: u32 = 0x09;
 /// GpuMapMode::READ
 const MAP_MODE_READ: u32 = 0x01;
+/// GpuShaderStage::COMPUTE
+const STAGE_COMPUTE: u32 = 0x04;
+/// BufferBindingType ordinals (L2 / WIT u32 alias)
+const BINDING_READ_ONLY_STORAGE: u32 = 2;
+const BINDING_STORAGE: u32 = 1;
 
 struct Component;
 
 impl Guest for Component {
     fn run_vector_add(a: Vec<f32>, b: Vec<f32>) -> Result<Vec<f32>, String> {
-        use experimental::webgpu_cm::host::{self, BufferDescriptor};
+        use experimental::webgpu_cm::host::{
+            self, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
+            BindGroupLayoutEntry, BufferBindingLayout, BufferDescriptor,
+            ComputePipelineDescriptor, ProgrammableStage,
+        };
 
         if a.is_empty() || a.len() != b.len() {
             return Err("a/b length mismatch or empty".into());
@@ -71,9 +81,70 @@ impl Guest for Component {
         queue.write_buffer(&buf_b, 0, &floats_to_bytes(&b));
 
         let shader = device.create_shader_module(SHADER);
-        let layout = device.create_bind_group_layout_storage3();
-        let bind_group = device.create_bind_group3(&layout, &buf_a, &buf_b, &buf_out);
-        let pipeline = device.create_compute_pipeline(&layout, &shader, "main");
+        let layout = device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+            entries: vec![
+                BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: STAGE_COMPUTE,
+                    buffer: Some(BufferBindingLayout {
+                        type_: BINDING_READ_ONLY_STORAGE,
+                        has_dynamic_offset: false,
+                        min_binding_size: 4,
+                    }),
+                },
+                BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: STAGE_COMPUTE,
+                    buffer: Some(BufferBindingLayout {
+                        type_: BINDING_READ_ONLY_STORAGE,
+                        has_dynamic_offset: false,
+                        min_binding_size: 4,
+                    }),
+                },
+                BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: STAGE_COMPUTE,
+                    buffer: Some(BufferBindingLayout {
+                        type_: BINDING_STORAGE,
+                        has_dynamic_offset: false,
+                        min_binding_size: 4,
+                    }),
+                },
+            ],
+            label: None,
+        });
+        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+            layout: &layout,
+            entries: vec![
+                BindGroupEntry {
+                    binding: 0,
+                    buffer: &buf_a,
+                    offset: 0,
+                    size: None,
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    buffer: &buf_b,
+                    offset: 0,
+                    size: None,
+                },
+                BindGroupEntry {
+                    binding: 2,
+                    buffer: &buf_out,
+                    offset: 0,
+                    size: None,
+                },
+            ],
+            label: None,
+        });
+        let pipeline = device.create_compute_pipeline(&ComputePipelineDescriptor {
+            compute: ProgrammableStage {
+                module: &shader,
+                entry_point: Some("main".into()),
+            },
+            layout: &layout,
+            label: None,
+        });
 
         let encoder = device.create_command_encoder();
         let pass = encoder.begin_compute_pass();
@@ -85,7 +156,7 @@ impl Guest for Component {
 
         encoder.copy_buffer_to_buffer(&buf_out, 0, &buf_read, 0, bytes);
         let cmd = encoder.finish();
-        queue.submit1(cmd);
+        queue.submit(&[&cmd]);
 
         buf_read.map_async(MAP_MODE_READ, 0, bytes);
         let mapped = buf_read.get_mapped_range(0, bytes);

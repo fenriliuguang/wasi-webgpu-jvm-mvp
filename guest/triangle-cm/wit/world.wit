@@ -5,7 +5,6 @@
 /// - package remains experimental
 /// - handles are WIT resources (not the full wasi:webgpu resource surface)
 /// - async WIT methods are sync (matching L2)
-/// - bind-group helpers are vector-add shaped
 /// - surface/render helpers are triangle-demo shaped (Android native window)
 ///
 /// 0.2.0: buffer-descriptor + buffer-usage/map-mode flag aliases (u32),
@@ -13,14 +12,22 @@
 /// 0.3.0: surface + render-pipeline / render-pass (Android native window; no Guest canvas).
 /// 0.4.0: vertex-buffer-layout records + set-vertex-buffer +
 /// create-render-pipeline-triangle-buffers (slice A / E vertex-buffer path).
+/// 0.5.0: standard bind-group-layout / bind-group / compute-pipeline descriptors +
+/// queue.submit(list); keep *storage3 / *3 / submit1 / create-compute-pipeline-bgl deprecated
+/// (compliant-world slice C). compute-pipeline.layout is still bind-group-layout (L2);
+/// wasi pipeline-layout lands in slice D.
 
-package experimental:webgpu-cm@0.4.0;
+package experimental:webgpu-cm@0.5.0;
 
 interface host {
   /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
   type buffer-usage-flags = u32;
   /// WebGPU GPUMapMode bitfield (same bit values as L2 GpuMapMode).
   type map-mode-flags = u32;
+  /// WebGPU GPUShaderStage bitfield (VERTEX=1, FRAGMENT=2, COMPUTE=4).
+  type shader-stage-flags = u32;
+  /// 0=uniform, 1=storage, 2=read-only-storage (L2 BufferBindingType ordinal).
+  type buffer-binding-type = u32;
   /// Dawn / WebGPU texture format enum value (u32).
   type texture-format = u32;
   /// Dawn / WebGPU GPUVertexFormat enum value (u32); e.g. float32x2.
@@ -47,6 +54,49 @@ interface host {
     attributes: list<vertex-attribute>,
   }
 
+  record buffer-binding-layout {
+    %type: buffer-binding-type,
+    has-dynamic-offset: bool,
+    min-binding-size: u64,
+  }
+
+  record bind-group-layout-entry {
+    binding: u32,
+    visibility: shader-stage-flags,
+    buffer: option<buffer-binding-layout>,
+  }
+
+  record bind-group-layout-descriptor {
+    entries: list<bind-group-layout-entry>,
+    label: option<string>,
+  }
+
+  /// Buffer-only bind-group entry (compute subset; no sampler/texture variants yet).
+  record bind-group-entry {
+    binding: u32,
+    buffer: borrow<buffer>,
+    offset: u64,
+    size: option<u64>,
+  }
+
+  record bind-group-descriptor {
+    layout: borrow<bind-group-layout>,
+    entries: list<bind-group-entry>,
+    label: option<string>,
+  }
+
+  record programmable-stage {
+    module: borrow<shader-module>,
+    entry-point: option<string>,
+  }
+
+  record compute-pipeline-descriptor {
+    compute: programmable-stage,
+    /// L2: bind-group-layout (not wasi pipeline-layout — slice D).
+    layout: borrow<bind-group-layout>,
+    label: option<string>,
+  }
+
   resource adapter {
     request-device: func() -> device;
   }
@@ -55,15 +105,23 @@ interface host {
     get-queue: func() -> queue;
     create-buffer: func(descriptor: buffer-descriptor) -> buffer;
     create-shader-module: func(code: string) -> shader-module;
-    /// Fixed 3× storage layout: binding0/1 read-only-storage, binding2 storage.
+    /// Standard-shaped bind-group-layout (wasi-aligned records; buffer entries only).
+    create-bind-group-layout: func(descriptor: bind-group-layout-descriptor) -> bind-group-layout;
+    /// Standard-shaped bind-group (buffer entries only).
+    create-bind-group: func(descriptor: bind-group-descriptor) -> bind-group;
+    /// Standard-shaped compute-pipeline descriptor.
+    create-compute-pipeline: func(descriptor: compute-pipeline-descriptor) -> compute-pipeline;
+    /// Deprecated (slice C): fixed 3× storage layout helper.
     create-bind-group-layout-storage3: func() -> bind-group-layout;
+    /// Deprecated (slice C): three-buffer bind-group helper.
     create-bind-group3: func(
       layout: borrow<bind-group-layout>,
       b0: borrow<buffer>,
       b1: borrow<buffer>,
       b2: borrow<buffer>,
     ) -> bind-group;
-    create-compute-pipeline: func(
+    /// Deprecated (slice C): layout+shader+entry helper; prefer create-compute-pipeline.
+    create-compute-pipeline-bgl: func(
       layout: borrow<bind-group-layout>,
       shader: borrow<shader-module>,
       entry-point: string,
@@ -85,6 +143,9 @@ interface host {
 
   resource queue {
     write-buffer: func(buffer: borrow<buffer>, offset: u64, data: list<u8>);
+    /// Standard-shaped submit (list); prefer over submit1.
+    submit: func(command-buffers: list<borrow<command-buffer>>);
+    /// Deprecated (slice C): single command-buffer submit.
     submit1: func(command-buffer: command-buffer);
   }
 

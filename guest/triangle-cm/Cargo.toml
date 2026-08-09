@@ -9,7 +9,7 @@ description = "Experimental CM guest for on-screen red triangle (NOT compliant w
 crate-type = ["cdylib"]
 
 [dependencies]
-# Keep in lockstep with guest/vector-add-cm (wit-bindgen-rust-macro on crates.io).
+# Keep in lockstep with guest/vector-add-cm.
 wit-bindgen = "0.55.0"
 
 [profile.release]

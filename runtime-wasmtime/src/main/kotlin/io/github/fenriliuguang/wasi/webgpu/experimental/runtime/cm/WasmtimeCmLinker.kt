@@ -15,7 +15,17 @@ import ai.tegmentum.wasmtime4j.factory.WasmRuntimeFactory
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCm
 import io.github.fenriliuguang.wasi.webgpu.experimental.abicm.AbiCmHostBindings
 import io.github.fenriliuguang.wasi.webgpu.experimental.abiwasi.AbiWasi
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupEntry
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BindGroupLayoutEntry
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBinding
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingLayout
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexAttribute
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
@@ -66,8 +76,8 @@ class WasmtimeCmLinker(
 
     private fun registerExperimentalResources(linker: ComponentLinker<Any>) {
         // wasmtime4j 47.0.2 JNI builds the linker instance path as "{namespace}/{interfaceName}".
-        // With PACKAGE "experimental:webgpu-cm" + "host@0.4.0" that yields
-        // "experimental:webgpu-cm/host@0.4.0" — matching defineFunction / guest import.
+        // With PACKAGE "experimental:webgpu-cm" + "host@0.5.0" that yields
+        // "experimental:webgpu-cm/host@0.5.0" — matching defineFunction / guest import.
         val ns = AbiCm.PACKAGE
         val iface = "${AbiCm.INTERFACE}@${AbiCm.VERSION}"
         for (name in AbiCm.Resource.ALL) {
@@ -174,6 +184,124 @@ class WasmtimeCmLinker(
             }
         }
 
+        fun parseOptionalString(val_: ComponentVal): String? = when {
+            val_.isOption -> val_.asSome().map { it.asString() }.orElse(null)
+            val_.isString -> val_.asString()
+            else -> null
+        }
+
+        fun parseBufferBindingType(val_: ComponentVal): BufferBindingType {
+            val ordinal = val_.asU32().toInt()
+            return BufferBindingType.entries.getOrNull(ordinal)
+                ?: error("unknown buffer-binding-type ordinal: $ordinal")
+        }
+
+        fun parseBufferBindingLayout(val_: ComponentVal): BufferBindingLayout {
+            require(val_.isRecord) { "expected buffer-binding-layout record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            return BufferBindingLayout(
+                type = parseBufferBindingType(fields.getValue("type")),
+                hasDynamicOffset = fields.getValue("has-dynamic-offset").asBool(),
+                minBindingSize = fields.getValue("min-binding-size").asU64(),
+            )
+        }
+
+        fun parseBindGroupLayoutEntry(val_: ComponentVal): BindGroupLayoutEntry {
+            require(val_.isRecord) { "expected bind-group-layout-entry record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val bufferVal = fields.getValue("buffer")
+            val buffer = if (bufferVal.isOption) {
+                bufferVal.asSome().map { parseBufferBindingLayout(it) }.orElse(null)
+            } else if (bufferVal.isRecord) {
+                parseBufferBindingLayout(bufferVal)
+            } else {
+                null
+            }
+            return BindGroupLayoutEntry(
+                binding = fields.getValue("binding").asU32().toInt(),
+                visibility = fields.getValue("visibility").asU32().toInt(),
+                buffer = buffer,
+            )
+        }
+
+        fun parseBindGroupLayoutDescriptor(val_: ComponentVal): BindGroupLayoutDescriptor {
+            require(val_.isRecord) { "expected bind-group-layout-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val entriesVal = fields.getValue("entries")
+            require(entriesVal.isList) { "expected entries list, got ${entriesVal.type}" }
+            val entries = entriesVal.asList().map { el ->
+                val entry = el as? ComponentVal
+                    ?: error("expected ComponentVal entry, got ${el?.javaClass}")
+                parseBindGroupLayoutEntry(entry)
+            }
+            return BindGroupLayoutDescriptor(
+                entries = entries,
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseBindGroupEntry(val_: ComponentVal): BindGroupEntry {
+            require(val_.isRecord) { "expected bind-group-entry record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val sizeVal = fields.getValue("size")
+            val size = if (sizeVal.isOption) {
+                sizeVal.asSome().map { it.asU64() }.orElse(null)
+            } else {
+                runCatching { sizeVal.asU64() }.getOrNull()
+            }
+            return BindGroupEntry(
+                binding = fields.getValue("binding").asU32().toInt(),
+                resource = BufferBinding(
+                    buffer = GpuHandle(fields.getValue("buffer").asU32().toInt()),
+                    offset = fields.getValue("offset").asU64(),
+                    size = size,
+                ),
+            )
+        }
+
+        fun parseBindGroupDescriptor(val_: ComponentVal): BindGroupDescriptor {
+            require(val_.isRecord) { "expected bind-group-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val entriesVal = fields.getValue("entries")
+            require(entriesVal.isList) { "expected entries list, got ${entriesVal.type}" }
+            val entries = entriesVal.asList().map { el ->
+                val entry = el as? ComponentVal
+                    ?: error("expected ComponentVal entry, got ${el?.javaClass}")
+                parseBindGroupEntry(entry)
+            }
+            return BindGroupDescriptor(
+                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
+                entries = entries,
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseComputePipelineDescriptor(val_: ComponentVal): ComputePipelineDescriptor {
+            require(val_.isRecord) { "expected compute-pipeline-descriptor record, got ${val_.type}" }
+            val fields = val_.asRecord()
+            val computeVal = fields.getValue("compute")
+            require(computeVal.isRecord) { "expected programmable-stage record, got ${computeVal.type}" }
+            val computeFields = computeVal.asRecord()
+            val entry = parseOptionalString(computeFields.getValue("entry-point"))
+            return ComputePipelineDescriptor(
+                compute = ProgrammableStage(
+                    module = GpuHandle(computeFields.getValue("module").asU32().toInt()),
+                    entryPoint = entry,
+                ),
+                layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
+                label = parseOptionalString(fields.getValue("label")),
+            )
+        }
+
+        fun parseCommandBufferList(val_: ComponentVal): List<Int> {
+            require(val_.isList) { "expected list<command-buffer>, got ${val_.type}" }
+            return val_.asList().map { el ->
+                val item = el as? ComponentVal
+                    ?: error("expected ComponentVal command-buffer, got ${el?.javaClass}")
+                item.asU32().toInt()
+            }
+        }
+
         define(AbiCm.Func.REQUEST_ADAPTER, ComponentHostFunction.singleValue {
             u32(bindings.requestAdapter())
         })
@@ -225,6 +353,36 @@ class WasmtimeCmLinker(
             u32(bindings.deviceCreateShaderModule(paramU32(params, 0), params[1].asString()))
         })
         define(
+            AbiCm.Func.DEVICE_CREATE_BIND_GROUP_LAYOUT,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateBindGroupLayout(
+                        paramU32(params, 0),
+                        parseBindGroupLayoutDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(AbiCm.Func.DEVICE_CREATE_BIND_GROUP, ComponentHostFunction.singleValue { params ->
+            u32(
+                bindings.deviceCreateBindGroup(
+                    paramU32(params, 0),
+                    parseBindGroupDescriptor(params[1]),
+                ),
+            )
+        })
+        define(
+            AbiCm.Func.DEVICE_CREATE_COMPUTE_PIPELINE,
+            ComponentHostFunction.singleValue { params ->
+                u32(
+                    bindings.deviceCreateComputePipeline(
+                        paramU32(params, 0),
+                        parseComputePipelineDescriptor(params[1]),
+                    ),
+                )
+            },
+        )
+        define(
             AbiCm.Func.DEVICE_CREATE_BIND_GROUP_LAYOUT_STORAGE3,
             ComponentHostFunction.singleValue { params ->
                 u32(bindings.deviceCreateBindGroupLayoutStorage3(paramU32(params, 0)))
@@ -242,10 +400,10 @@ class WasmtimeCmLinker(
             )
         })
         define(
-            AbiCm.Func.DEVICE_CREATE_COMPUTE_PIPELINE,
+            AbiCm.Func.DEVICE_CREATE_COMPUTE_PIPELINE_BGL,
             ComponentHostFunction.singleValue { params ->
                 u32(
-                    bindings.deviceCreateComputePipeline(
+                    bindings.deviceCreateComputePipelineBgl(
                         paramU32(params, 0),
                         paramU32(params, 1),
                         paramU32(params, 2),
@@ -414,6 +572,12 @@ class WasmtimeCmLinker(
         define(AbiCm.Func.COMMAND_ENCODER_FINISH, ComponentHostFunction.singleValue { params ->
             u32(bindings.commandEncoderFinish(paramU32(params, 0)))
         })
+        define(
+            AbiCm.Func.QUEUE_SUBMIT,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.queueSubmit(paramU32(params, 0), parseCommandBufferList(params[1]))
+            },
+        )
         define(
             AbiCm.Func.QUEUE_SUBMIT1,
             ComponentHostFunction.voidFunctionWithParams { params ->

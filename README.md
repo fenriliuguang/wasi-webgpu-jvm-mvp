@@ -11,7 +11,7 @@
 
 - **L2 Host**：`WasiWebGpuHost`（compute + 最小 Android surface/render）+ 桌面 `CpuWasiWebGpuHost`
 - **L3 Dawn**：`DawnWasiWebGpuHost`（Android / androidx.webgpu）
-- **Runtime**：Wasmtime4j — **abi-mvp**（core wasm）与 **abi-cm**（Component Model / `experimental:webgpu-cm@0.4.0`）
+- **Runtime**：Wasmtime4j — **abi-mvp**（core wasm）与 **abi-cm**（Component Model / `experimental:webgpu-cm@0.5.0`）
 - **Guest**：向量加（abi-mvp + CM）；红三角双路：Kotlin `SurfaceView` 经 L2 Host→Dawn，CM Guest（triangle-cm）经 abi-cm→同一 L2→Dawn
 - **工程**：多模块 Gradle、CI（JVM 单测 + `assembleDebug`）、Bionic / 桌面 CM-patched natives 脚本
 

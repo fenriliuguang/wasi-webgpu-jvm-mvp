@@ -2,9 +2,9 @@
 
 [中文](compliant-world.md) | **English**
 
-> **Status: in progress (locked 2026-08-09).** Slices **A–B complete** (vendor + dual-track Linker stubs).  
+> **Status: in progress (locked 2026-08-09).** Slices **A–C complete** (vendor + dual-track Linker + compute de-specialize).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D) → generic render (E) → error lift (F) → long-tail close (G).
 
 ## One-liner
 
@@ -52,10 +52,10 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### C — Compute de-specialize
 
-- [ ] Wire standard `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor paths
-- [ ] Retire Guest dependence on `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` (Host helpers may remain, marked deprecated)
-- [ ] `vector-add-cm` on standard descriptors; instrumented / desktop tests green
-- [ ] Update [`compute-subset.en.md`](../mapping/compute-subset.en.md)
+- [x] Standard `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor paths wired (`experimental:webgpu-cm@0.5.0` → L2)
+- [x] Retire Guest dependence on `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` (Host helpers kept, deprecated; old 3-arg pipeline renamed `create-compute-pipeline-bgl`)
+- [x] `vector-add-cm` on standard descriptors; desktop `:runtime-wasmtime:test` green (instrumented re-check nice-to-have)
+- [x] Update [`compute-subset.en.md`](../mapping/compute-subset.en.md); triangle Guest rebuilt for package bump only
 
 ### D — Texture / Sampler / PipelineLayout
 

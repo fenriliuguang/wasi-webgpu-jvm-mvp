@@ -61,7 +61,7 @@
 | Texture / sampler / query set | ⚠️ 仅 swapchain texture/view（render-subset）；无 sampler/query |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌（显式 layout） |
-| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.4.0`（仍非合规 wasi:webgpu） |
+| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.5.0`（仍非合规 wasi:webgpu；slice C 标准 bind/compute descriptor） |
 | 完整错误 `result` 抬升 | ⚠️ 现为 Kotlin 异常；见 [errors-async.md](errors-async.md) / [EN](errors-async.en.md) |
 
 ## 偏差列表（摘要）
@@ -69,4 +69,5 @@
 1. **Async：** WIT 若干方法为 async；P0 Host 同步阻塞等待（≤30s）。  
 2. **Mapped range：** WIT `get-with-copy` ↔ Host 返回拷贝后的 `ByteArray`。  
 3. **Auto layout：** 未实现；`deviceCreateComputePipeline` 要求 layout handle。  
-4. **Dawn ≠ wgpu：** 校验失败消息/时机可能与 `wasi-webgpu-wasmtime` 不同，以本表 + 单测为准。
+4. **Dawn ≠ wgpu：** 校验失败消息/时机可能与 `wasi-webgpu-wasmtime` 不同，以本表 + 单测为准。  
+5. **Slice C：** CM Guest 走标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit`；`*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` 仍保留但 deprecated。`compute-pipeline.layout` 仍是 **bind-group-layout**（非 wasi `pipeline-layout`，见切片 D）。

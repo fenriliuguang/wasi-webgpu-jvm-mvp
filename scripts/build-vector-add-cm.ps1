@@ -1,15 +1,19 @@
 # Rebuild experimental CM guest (vector-add-cm).
 # Requires: rustc/cargo (wasm32-unknown-unknown), wasm-tools.
+# On rustc 1.86 + wit-bindgen 0.55: pass --ignore-rust-version (crate MSRV 1.87).
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $Root = Split-Path -Parent $PSScriptRoot
 $Guest = Join-Path $Root "guest\vector-add-cm"
+$env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
 
 Push-Location $Guest
 try {
-    cargo build --target wasm32-unknown-unknown --release 2>&1 | Out-Host
+    cargo build --target wasm32-unknown-unknown --release --ignore-rust-version
     if ($LASTEXITCODE -ne 0) { throw "cargo build failed: $LASTEXITCODE" }
-    $core = Join-Path $Guest "target\wasm32-unknown-unknown\release\vector_add_cm.wasm"
+    $meta = cargo metadata --no-deps --format-version 1 | ConvertFrom-Json
+    $core = Join-Path $meta.target_directory "wasm32-unknown-unknown\release\vector_add_cm.wasm"
+    if (-not (Test-Path $core)) { throw "missing core wasm: $core" }
     $out = Join-Path $Guest "vector_add_cm.wasm"
     wasm-tools component new $core -o $out
     if ($LASTEXITCODE -ne 0) { throw "wasm-tools component new failed: $LASTEXITCODE" }

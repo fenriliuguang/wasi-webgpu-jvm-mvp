@@ -2,9 +2,9 @@
 
 **中文** | [English](compliant-world.en.md)
 
-> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–B 已完成**（vendor + 双轨 Linker stub）。  
+> **状态：进行中（已锁定 2026-08-09）。** 切片 **A–C 已完成**（vendor + 双轨 Linker + compute 去特化）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D）→ 通用 Render（E）→ 错误抬升（F）→ 长尾关门（G）。
 
 ## 一句话
 
@@ -52,10 +52,10 @@ A 上游钉定说明 + 缺口矩阵
 
 ### C — Compute 去特化
 
-- [ ] 标准 `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor 路径接线
-- [ ] 淘汰 Guest 对 `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` 等特化依赖（可暂留 Host 便捷，标 deprecated）
-- [ ] `vector-add-cm` 改走标准 descriptor；仪器 / 桌面单测绿灯
-- [ ] 更新 [`compute-subset.md`](../mapping/compute-subset.md)
+- [x] 标准 `bind-group-layout` / `bind-group` / `compute-pipeline` descriptor 路径接线（`experimental:webgpu-cm@0.5.0` → L2）
+- [x] 淘汰 Guest 对 `create-bind-group-layout-storage3` / `create-bind-group3` / `submit1` 等特化依赖（Host 便捷保留并标 deprecated；旧三参 pipeline 改名为 `create-compute-pipeline-bgl`）
+- [x] `vector-add-cm` 改走标准 descriptor；桌面 `:runtime-wasmtime:test` 绿灯（仪器建议抽空复验）
+- [x] 更新 [`compute-subset.md`](../mapping/compute-subset.md) / EN；triangle Guest 仅 bump 包版本重建
 
 ### D — Texture / Sampler / PipelineLayout
 

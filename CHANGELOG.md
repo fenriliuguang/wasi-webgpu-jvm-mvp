@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Compliant-world slice C — compute de-specialize
+
+- `experimental:webgpu-cm` **0.4.0 → 0.5.0**: standard `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`; keep deprecated `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`
+- `vector-add-cm` Guest migrated to descriptors; triangle Guest rebuilt for package bump; AbiCm + WasmtimeCmLinker parsers wired
+- Docs: compute-subset + wit/compute-cm READMEs; plan DoD C checked
+
 ### Compliant-world slice B — dual-track Linker
 
 - New `:abi-wasi` module: `AbiWasi` constants for `wasi:webgpu/webgpu@0.3.0-rc.2` (33 resources / 224 funcs; `scripts/gen-abi-wasi-constants.py`)
