@@ -4,7 +4,7 @@
 
 Experimental **Component Model** Guest：上屏红三角（one-shot + 宿主驱动帧循环）。
 
-- Imports `experimental:webgpu-cm/host@0.6.0`（WIT resources + methods；钉在 `wit/`）
+- Imports `experimental:webgpu-cm/host@0.7.0`（WIT resources + methods；钉在 `wit/`）
 - **Not** compliant `wasi:webgpu` / wasi-gfx
 - Exports:
   - `run-triangle` — 单次 configure → draw → present → unconfigure

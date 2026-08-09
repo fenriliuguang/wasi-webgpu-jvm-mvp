@@ -3,7 +3,7 @@
 **中文** | [English](archive-baseline-dod.en.md)
 
 > 自根 README 迁出的**已完成**验收清单归档。  
-> 现行阶段见根 [`README.md`](../../README.md) 与 [`demo-cm-stability.md`](demo-cm-stability.md)。
+> 现行阶段见根 [`README.md`](../../README.md)（下一阶段未锁定）。
 
 归档对应提交约至：Surface/render 抬升进 L2 + `experimental:webgpu-cm@0.3.0`（Kotlin demo 经 Host）。
 

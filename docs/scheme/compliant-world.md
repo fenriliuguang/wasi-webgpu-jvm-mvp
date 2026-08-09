@@ -9,7 +9,7 @@
 
 ## 一句话
 
-在 **不推进 wasi-gfx** 的前提下，把 CM 主线从 `experimental:webgpu-cm@0.4.0` 子集，推进到钉定并接线标准包 `wasi:webgpu/webgpu@0.3.0-rc.2` 的 **全量 interface 覆盖**（方法级矩阵：实现或显式 `Unsupported`），现有 vector-add / triangle Guest 改走标准 descriptor API；上屏仍靠 Host 注入 Android native window。
+在 **不推进 wasi-gfx** 的前提下，把 CM 主线从当时的 `experimental:webgpu-cm@0.4.0` 子集推进到钉定标准包 `wasi:webgpu/webgpu@0.3.0-rc.2` 的 **全量 interface 覆盖**（方法级矩阵：实现或显式 `Unsupported`），并在 experimental 轨上把 Guest 改走标准形 descriptor API（现包 **`@0.7.0`**，主验收仍在 experimental）；上屏仍靠 Host 注入 Android native window。
 
 ```text
 A 上游钉定说明 + 缺口矩阵
@@ -31,9 +31,9 @@ A 上游钉定说明 + 缺口矩阵
 | 本阶段主线 | 合规 `wasi:webgpu` **全量 interface 覆盖**（方法级矩阵：实现或显式 `Unsupported` 可关门） |
 | gfx | **不做** wasi-gfx / canvas；上屏继续 **Host 注入** Android native window |
 | WIT 钉定 | `wasi:webgpu@0.3.0-rc.2`（与 [`wit/README.md`](../../wit/README.md) 一致）；升级须先改 PIN + 缺口矩阵 |
-| 迁移策略 | **双轨**：保留 `experimental:webgpu-cm@0.4.0` 直至 Guest 迁完；新路径走标准包 |
+| 迁移策略 | **双轨**：保留 experimental 轨直至 Guest 迁到标准包（计划锁定时为 `@0.4.0`，关门后现行 **`@0.7.0`** 仍为主验收）；标准包为 stub 并存 |
 | Async | 仍 **sync-compat**（与 L2 / [`errors-async.md`](../mapping/errors-async.md) 一致）；真 CM async 不阻塞本阶段 |
-| 合规宣称 | 矩阵关门前包名/README 仍 `experimental`；不得宣传已合规 |
+| 合规宣称 | 包名/README 保持 `experimental`；矩阵关门后**仍**不得宣传已合规产品 |
 | 明确移交 | Maven Central、`abi-mvp` 扁平 render、可选 perf、对 wasmtime4j 提 PR — 均不做 |
 | 验收形态 | 桌面单测（有 natives）+ Android 仪器（现有 vector-add / triangle 路径不回归）+ 缺口矩阵勾选；每子切片文档 / CHANGELOG |
 
@@ -47,9 +47,9 @@ A 上游钉定说明 + 缺口矩阵
 
 ### B — 双轨包身份 / Linker
 
-- [x] 标准包 import 路径（`wasi:webgpu/webgpu@0.3.0-rc.2`）与 `experimental:webgpu-cm@0.4.0` 可并存于 Linker（[`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt)）
-- [x] ABI 常量 / 资源名映射文档化：[`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)；旧 Guest 仍走 experimental 直至 C/E
-- [x] 文档标明：双轨是迁移手段，关门后以标准包为主验收路径；标准包函数暂 **Unsupported stub**（C+ 接线）
+- [x] 标准包 import 路径（`wasi:webgpu/webgpu@0.3.0-rc.2`）与 experimental 轨可并存于 Linker（[`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt)；现行 experimental `@0.7.0`）
+- [x] ABI 常量 / 资源名映射文档化：[`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md)；Guest 仍走 experimental（主验收轨）
+- [x] 文档标明：双轨是迁移手段；矩阵关门后 **主验收仍在 experimental**；标准包为 **Unsupported / result stub**（尚未迁 Guest）
 
 ### C — Compute 去特化
 

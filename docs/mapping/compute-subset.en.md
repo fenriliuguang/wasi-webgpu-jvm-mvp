@@ -2,11 +2,12 @@
 
 [中文](compute-subset.md) | **English**
 
-> **Status:** experimental / host-only  
+> **Status:** experimental (P0 table is host path; CM Guests below)  
 > **WIT pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (see [`wit/`](../../wit/))  
-> **Dawn:** `androidx.webgpu:webgpu:1.0.0-alpha05`
+> **Dawn:** `androidx.webgpu:webgpu:1.0.0-alpha05`  
+> **Current CM package:** `experimental:webgpu-cm@0.7.0` (primary acceptance)
 
-This table covers only methods needed for the P0 acceptance path. Full WebGPU / rendering / on-screen is **out of scope**.
+This table centers on the P0 acceptance path. Later-slice (C/D, …) capabilities are in the notes and gap matrix; full WebGPU / wasi-gfx is **out of scope**.
 
 ## Legend
 
@@ -30,8 +31,8 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 |-----|----|------|-------|
 | `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags align with WebGPU; CM `0.2.0` passes `buffer-descriptor` (mapped/label) |
 | `gpu-device.create-shader-module` | `deviceCreateShaderModule` | `GPUDevice.createShaderModule` + WGSL | ✅ WGSL only |
-| `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ buffer binding only |
-| `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ buffer resources only |
+| `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ P0: buffer; from slice D also sampler·texture entries |
+| `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ P0: buffer; from slice D also sampler·texture |
 | `gpu-device.create-compute-pipeline` | `deviceCreateComputePipeline` | `createComputePipeline` | ⚠️ P0 requires explicit layout (no auto) |
 | `gpu-device.create-command-encoder` | `deviceCreateCommandEncoder` | `createCommandEncoder` | ✅ |
 
@@ -57,12 +58,12 @@ This table covers only methods needed for the P0 acceptance path. Full WebGPU / 
 
 | Area | Status |
 |------|--------|
-| Render pass / surface / canvas | ⚠️ See [render-subset.en.md](render-subset.en.md) (experimental; not Guest/wasi-gfx) |
-| Texture / sampler / query set | ⚠️ Swapchain texture/view only (render-subset); no sampler/query |
+| Render pass / surface / canvas | ⚠️ See [render-subset.en.md](render-subset.en.md) (experimental; Guest CM on-screen working; no wasi-gfx) |
+| Texture / sampler / query set | ⚠️ slice D: `create-texture` / `create-sampler` / `create-view` wired; query-set still Unsupported; swapchain in render-subset |
 | Indirect dispatch | ❌ |
-| Pipeline layout auto | ❌ (explicit layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.7.0` (still not compliant wasi:webgpu; slice D adds texture/sampler/pipeline-layout) |
-| Full `result` error lifting | ⚠️ currently Kotlin exceptions; see [errors-async.en.md](errors-async.en.md) |
+| Pipeline layout auto | ❌ (explicit layout; from slice D layout is pipeline-layout) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.7.0` (still not compliant wasi:webgpu; primary acceptance) |
+| Full `result` error lifting | ⚠️ experimental track mostly Kotlin exceptions / traps; wasi track result stubs → `ComponentVal.err` (slice F); see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)
 

@@ -35,7 +35,7 @@ MainActivity「CM 三角」
 ## 本切片不做
 
 - wasi-gfx canvas 抽象、合规全量 `wasi:webgpu` world
-- 更多 WIT records、Maven Central、`abi-mvp` 扁平 render（已移交本阶段 [`semantic-hardening.md`](semantic-hardening.md) / 更远未锁定项）
+- 更多 WIT records、Maven Central、`abi-mvp` 扁平 render（已移交并完成于 [`semantic-hardening.md`](semantic-hardening.md) / 合规 World；更远项见根 README「下一阶段未锁定」）
 
 ## 落地顺序（已完成）
 

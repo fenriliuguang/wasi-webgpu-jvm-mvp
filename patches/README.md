@@ -13,7 +13,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 源码检出目录 `.deps/wasmtime4j` **不入库**（见根 `.gitignore`）。  
 补丁本身入库；构建脚本 clone tag 后 `git apply`。
 
-上游缺口备忘（本阶段 C；**不对上游提 PR**）：[`UPSTREAM.md`](UPSTREAM.md) / [EN](UPSTREAM.en.md) — ConcurrentCallCodec u64、Validation、destructor 与本地 overlay。
+上游缺口备忘（**semantic-hardening slice C**，2026-08-08；**不对上游提 PR**）：[`UPSTREAM.md`](UPSTREAM.md) / [EN](UPSTREAM.en.md) — ConcurrentCallCodec u64、Validation、destructor 与本地 overlay。
 
 ## 应用
 
@@ -50,4 +50,4 @@ python ./scripts/export-wasmtime4j-patches.py
 1. Host callback：`Resource` ↔ `U32(rep)` 编组（`vals_to_host_params` / `host_results_to_vals`；**递归**进 list/record/option/…）
 2. 同一 interface 多 `resource` 注册（`allow_shadowing` + 批量重挂）
 3. 进程级 resource registry，供 `add_registered_host_functions_to_linker` 在 fresh linker 上重放（上游 `nativeInstantiateWithLinker` 不用 caller linker）
-4. JNI `defineResource` 的 interface path 使用 `"{ns}/{iface}"`（与 guest import `experimental:webgpu-cm/host@0.2.0` 一致）
+4. JNI `defineResource` 的 interface path 使用 `"{ns}/{iface}"`（与 guest import `experimental:webgpu-cm/host@0.7.0` 一致）

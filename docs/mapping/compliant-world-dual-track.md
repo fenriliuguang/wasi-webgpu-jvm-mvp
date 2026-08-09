@@ -1,24 +1,24 @@
-# 合规 world 双轨包身份（slice B）
+# 合规 world 双轨包身份
 
 **中文** | [English](compliant-world-dual-track.en.md)
 
-> **状态：** 切片 B（2026-08-09）— Linker 并存；标准包函数多为 stub。  
-> 计划：[`compliant-world.md`](../scheme/compliant-world.md) · PIN：[`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)
+> **状态：** 切片 B–G 关门后现行双轨（2026-08-09）— Linker 并存；标准包多为 stub；**主验收 / Guest 仍走 experimental**。  
+> 计划：[`compliant-world.md`](../scheme/compliant-world.md) · PIN：[`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md) · 归档：[`archive-compliant-world-dod.md`](../scheme/archive-compliant-world-dod.md)
 
 ## 一句话
 
-同一 `WasmtimeCmLinker` 上注册两套 CM import：**experimental**（现有 Guest）与 **wasi:webgpu**（标准包骨架）；双轨是迁移手段，矩阵关门后以标准包为主验收。
+同一 `WasmtimeCmLinker` 上注册两套 CM import：**experimental**（现有 Guest 与主验收轨）与 **wasi:webgpu**（标准包骨架 / stub）。双轨是迁移手段；矩阵关门 = 方法级齐套，**不等于**已把 Guest 迁到标准包，也**不等于**可宣传合规产品。
 
 ## 包身份
 
 | 轨 | Import interface | 模块 | Guest 现状 |
 |----|------------------|------|------------|
-| experimental | `experimental:webgpu-cm/host@0.6.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **仍走此轨**（C 已去特化 descriptor） |
-| 标准包 | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | 尚无 Guest；资源已注册；**result 方法** stub → `ComponentVal.err`（切片 F）；其余 **Unsupported** throw；接线见后续切片 |
+| experimental（主轨） | `experimental:webgpu-cm/host@0.7.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **仍走此轨**（C–E 已去特化 descriptor；真机嵌套 borrow 仍用顶层 helpers） |
+| 标准包（双轨 stub） | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | 尚无 Guest；资源已注册；**result 方法** stub → `ComponentVal.err`（切片 F）；其余 **Unsupported** throw；**尚未**成为主验收路径 |
 
 ## Linker 行为
 
-[`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt) `instantiate`：
+[`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt) `instantiate`:
 
 1. `registerExperimentalResources`（`AbiCm.Resource.ALL`）
 2. `registerWasiResources`（`AbiWasi.Resource.ALL`，33 个）

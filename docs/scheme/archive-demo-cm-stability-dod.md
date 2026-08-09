@@ -7,7 +7,7 @@
 
 归档对应提交约至：`b5e6212`（Host/L2 resume）→ `654896a`（Session）→ `110944d`（仪器重复）→ `841b55c`（三段式帧循环）+ 本文档收口（2026-08-07）。
 
-> **后续回归（不改写本 DoD）**：真机手点路径曾再现 `WINDOW_IN_USE`；2026-08-08 起 Demo 改为每次 CM 完整 Host+Session teardown（`96d594f`）。现行对策与剩余项见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)。仪器「复用 Session」验收仍有效。
+> **后续回归（不改写本 DoD）**：真机手点曾再现 `WINDOW_IN_USE`；`96d594f` 曾短暂改为每次 CM 完整 Host+Session teardown。随后 D1–D6 收口为 **复用 Host+Session** + `releaseAllGpuObjects`（见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md)）。仪器「复用 Session」验收始终有效。
 
 ## DoD
 

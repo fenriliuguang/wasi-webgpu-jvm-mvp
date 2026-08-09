@@ -5,10 +5,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
-### Compliant-world slice G — long-tail close-out
+### Docs sync
 
-- Gap matrix: remaining ❌ rows marked explicit Unsupported (wasi stub / long-tail); no dangling “missing”
-- DoD archived: [`docs/scheme/archive-compliant-world-dod.md`](docs/scheme/archive-compliant-world-dod.md); plan A–G complete; **still no** compliance-product marketing
+- Cross-doc consistency pass: primary acceptance remains experimental `@0.7.0`; matrix close-out ≠ compliance marketing; Guest/dual-track versions; android-wasmtime / compute+render subset tables; archive-demo Session footnote vs D6 reuse; scheme/CHANGELOG unlocked status
 
 ### Compliant-world slice F — result / error-kind lift
 
@@ -51,9 +50,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 - Method-level gap matrix (224 rows): [`docs/mapping/compliant-world-gap.md`](docs/mapping/compliant-world-gap.md); regen via `scripts/gen-wasi-webgpu-inventory.py` + `scripts/gen-compliant-world-gap.py`
 - wit-lock dual-track notes; plan DoD A checked; still **no** Host/ABI/Guest wiring (slice B+)
 
-### Planning
+### Planning (historical)
 
-- **Compliant wasi:webgpu world (no gfx) locked** (2026-08-09): [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); slices A–G; **no** wasi-gfx / Maven / `abi-mvp` render / perf
+- **Compliant wasi:webgpu world (no gfx) was docs-locked** (2026-08-09) then **completed A–G** the same day: [`docs/scheme/compliant-world.md`](docs/scheme/compliant-world.md) / [EN](docs/scheme/compliant-world.en.md); archive [`archive-compliant-world-dod.md`](docs/scheme/archive-compliant-world-dod.md). **Current status:** next phase **unlocked** (root README); **no** wasi-gfx / Maven / `abi-mvp` render / perf; still **no** compliance-product marketing; primary acceptance remains `experimental:webgpu-cm@0.7.0`
 - **Semantic hardening complete** (2026-08-09): A–E archived; see [`docs/scheme/archive-semantic-hardening-dod.md`](docs/scheme/archive-semantic-hardening-dod.md)
 - Prior locked slices archived (baseline / Guest CM on-screen / Demo CM stability + frame loop / device stability regression)
 

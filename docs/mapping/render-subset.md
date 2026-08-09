@@ -24,7 +24,7 @@ Guest 上屏：[`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCmTr
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
 | `render-pass-encoder.end` | `renderPassEnd` | `end` | |
 
-Records（`@0.4.0`）：`vertex-attribute` / `vertex-buffer-layout`；flag 别名 `vertex-format` / `vertex-step-mode`（与 `androidx.webgpu` 枚举数值一致，见 L2 `GpuVertexFormat`）。Guest 顶点缓冲验收属本阶段 E，见 [`semantic-hardening.md`](../scheme/semantic-hardening.md)。
+Records（`@0.4.0`）：`vertex-attribute` / `vertex-buffer-layout`；flag 别名 `vertex-format` / `vertex-step-mode`（与 `androidx.webgpu` 枚举数值一致，见 L2 `GpuVertexFormat`）。Guest 顶点缓冲验收见已完成的 [`semantic-hardening.md`](../scheme/semantic-hardening.md) 切片 E。
 
 ## Guest CM 上屏路径（已通）
 
@@ -50,7 +50,8 @@ guest/triangle-cm（triangle_cm.wasm，world triangle）
 |------|------|
 | Guest CM 上屏（triangle-cm 单次 draw） | ✅ 已通（见上节） |
 | wasi-gfx 上屏 | ❌ |
-| 通用 render-pipeline descriptor / MSAA / depth | ❌ |
+| 通用 `create-render-pipeline` / `begin-render-pass` descriptor | ✅ `@0.7.0`（无 MSAA / depth） |
+| MSAA / depth | ❌ |
 | Canvas / 多 window 抽象 | ❌ |
 | `abi-mvp` 扁平 render import | ❌（P1 仍仅 compute） |
 

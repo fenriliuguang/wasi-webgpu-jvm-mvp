@@ -2,11 +2,12 @@
 
 **中文** | [English](compute-subset.en.md)
 
-> **状态：** experimental / host-only  
+> **状态：** experimental（P0 表为 host 路径；CM Guest 见下）  
 > **WIT 钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（见 [`wit/`](../../wit/)）  
 > **Dawn：** `androidx.webgpu:webgpu:1.0.0-alpha05`
+> **现行 CM 包：** `experimental:webgpu-cm@0.7.0`（主验收轨）
 
-本表只覆盖 P0 验收路径所需方法。完整 WebGPU / 渲染 / 上屏 **不在范围**。
+本表以 P0 验收路径为主。后续切片（C/D 等）能力见文末备注与缺口矩阵；完整 WebGPU / wasi-gfx **不在范围**。
 
 ## 图例
 
@@ -30,8 +31,8 @@
 |-----|----|------|------|
 | `gpu-device.create-buffer` | `deviceCreateBuffer` | `GPUDevice.createBuffer` | ✅ usage flags 对齐 WebGPU；CM `0.2.0` 传 `buffer-descriptor`（含 mapped/label） |
 | `gpu-device.create-shader-module` | `deviceCreateShaderModule` | `GPUDevice.createShaderModule` + WGSL | ✅ 仅 WGSL |
-| `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ buffer binding only |
-| `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ buffer resources only |
+| `gpu-device.create-bind-group-layout` | `deviceCreateBindGroupLayout` | `createBindGroupLayout` | ✅ P0：buffer；slice D 起亦支持 sampler·texture 条目 |
+| `gpu-device.create-bind-group` | `deviceCreateBindGroup` | `createBindGroup` | ✅ P0：buffer；slice D 起亦支持 sampler·texture |
 | `gpu-device.create-compute-pipeline` | `deviceCreateComputePipeline` | `createComputePipeline` | ⚠️ P0 要求显式 layout（不做 auto） |
 | `gpu-device.create-command-encoder` | `deviceCreateCommandEncoder` | `createCommandEncoder` | ✅ |
 
@@ -57,12 +58,12 @@
 
 | 区域 | 状态 |
 |------|------|
-| Render pass / surface / canvas | ⚠️ 见 [render-subset.md](render-subset.md)（experimental；非 Guest/wasi-gfx） |
-| Texture / sampler / query set | ⚠️ 仅 swapchain texture/view（render-subset）；无 sampler/query |
+| Render pass / surface / canvas | ⚠️ 见 [render-subset.md](render-subset.md)（experimental；Guest CM 上屏已通；无 wasi-gfx） |
+| Texture / sampler / query set | ⚠️ slice D：`create-texture` / `create-sampler` / `create-view` 已接线；query-set 仍 Unsupported；swapchain 见 render-subset |
 | Indirect dispatch | ❌ |
-| Pipeline layout auto | ❌（显式 layout） |
-| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.7.0`（仍非合规 wasi:webgpu；slice D 含 texture/sampler/pipeline-layout） |
-| 完整错误 `result` 抬升 | ⚠️ 现为 Kotlin 异常；见 [errors-async.md](errors-async.md) / [EN](errors-async.en.md) |
+| Pipeline layout auto | ❌（显式 layout；slice D 起 layout 为 pipeline-layout） |
+| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.7.0`（仍非合规 wasi:webgpu；主验收轨） |
+| 完整错误 `result` 抬升 | ⚠️ experimental 轨仍多为 Kotlin 异常 / trap；wasi 轨 result stub → `ComponentVal.err`（切片 F）；见 [errors-async.md](errors-async.md) |
 
 ## 偏差列表（摘要）
 

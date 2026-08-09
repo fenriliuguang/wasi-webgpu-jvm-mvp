@@ -1,4 +1,4 @@
-# Guest CM 上屏（triangle-cm）— 已定计划
+# Guest CM 上屏（triangle-cm）— 已完成
 
 **中文** | [English](guest-onscreen-cm.en.md)
 

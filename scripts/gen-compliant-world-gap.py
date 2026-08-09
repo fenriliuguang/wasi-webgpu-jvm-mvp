@@ -299,12 +299,12 @@ def emit(lang: str) -> tuple[str, dict]:
         a("**中文** | [English](compliant-world-gap.en.md)")
         a("")
         a(
-            "> **状态：** 切片 A 方法级补全（2026-08-09）；钉定 "
-            "[`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)。  "
+            "> **状态：** 切片 G 关门（2026-08-09）；DoD "
+            "[`archive-compliant-world-dod.md`](../scheme/archive-compliant-world-dod.md)。  "
         )
         a("> **钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（tag `v0.3.0-rc.2`）  ")
         a(
-            "> **现状包：** `experimental:webgpu-cm@0.4.0`"
+            "> **现状包：** `experimental:webgpu-cm@0.7.0`"
             "（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  "
         )
         a("> **阶段计划：** [`docs/scheme/compliant-world.md`](../scheme/compliant-world.md)  ")
@@ -325,7 +325,7 @@ def emit(lang: str) -> tuple[str, dict]:
         a("|------|------|")
         a("| ✅ | 已有可对齐路径（experimental 或 L2） |")
         a("| ⚠️ | 有路径但特化 / 形状偏差 / sync 包装 |")
-        a("| ❌ | 本仓尚无；目标切片内实现或标 Unsupported |")
+        a("| ❌ | 显式 `Unsupported` / wasi stub（G 关门后可关门；非悬空「无」） |")
         a("| — | 本阶段明确不做（如 wasi-gfx） |")
         a("")
         a("| 列 | 含义 |")
@@ -344,7 +344,7 @@ def emit(lang: str) -> tuple[str, dict]:
             f"{sum(counts.values())} |"
         )
         a("")
-        a("## 已知特化 API（须在 C/E 迁出 Guest 依赖）")
+        a("## 已知特化 API（Host 已提供标准替代；Guest 真机待 `.so` 后迁完）")
         a("")
         a("| experimental API | 替代方向 | 切片 |")
         a("|------------------|----------|------|")
@@ -374,12 +374,12 @@ def emit(lang: str) -> tuple[str, dict]:
         a("[中文](compliant-world-gap.md) | **English**")
         a("")
         a(
-            "> **Status:** slice A method-level fill (2026-08-09); pin "
-            "[`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md).  "
+            "> **Status:** slice G close-out (2026-08-09); DoD "
+            "[`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md).  "
         )
         a("> **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  ")
         a(
-            "> **Current package:** `experimental:webgpu-cm@0.4.0` "
+            "> **Current package:** `experimental:webgpu-cm@0.7.0` "
             "([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  "
         )
         a(
@@ -403,7 +403,7 @@ def emit(lang: str) -> tuple[str, dict]:
         a("|------|---------|")
         a("| ✅ | Usable aligned path (experimental or L2) |")
         a("| ⚠️ | Path exists but specialized / shape skew / sync wrap |")
-        a("| ❌ | Missing; implement or mark Unsupported in target slice |")
+        a("| ❌ | Explicit `Unsupported` / wasi stub (closes a row after G; not a dangling miss) |")
         a("| — | Explicitly out of this phase (e.g. wasi-gfx) |")
         a("")
         a("| Column | Meaning |")
@@ -422,7 +422,7 @@ def emit(lang: str) -> tuple[str, dict]:
             f"{sum(counts.values())} |"
         )
         a("")
-        a("## Known specialized APIs (Guest must leave in C/E)")
+        a("## Known specialized APIs (Host has standard replacements; device Guests migrate after `.so` rebuild)")
         a("")
         a("| experimental API | Replacement | Slice |")
         a("|------------------|-------------|-------|")

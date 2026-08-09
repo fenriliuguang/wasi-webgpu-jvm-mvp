@@ -9,7 +9,7 @@
 
 ## One-liner
 
-Without advancing wasi-gfx, move the CM mainline from the `experimental:webgpu-cm@0.4.0` subset to a pinned, wired standard package `wasi:webgpu/webgpu@0.3.0-rc.2` with **full interface coverage** (method-level matrix: implement or explicit `Unsupported`), migrate vector-add / triangle Guests to standard descriptor APIs, and keep on-screen via Host-injected Android native window.
+Without advancing wasi-gfx, move the CM mainline from the then-current `experimental:webgpu-cm@0.4.0` subset to a pinned standard package `wasi:webgpu/webgpu@0.3.0-rc.2` with **full interface coverage** (method-level matrix: implement or explicit `Unsupported`), and on the experimental track migrate Guests to standard-shaped descriptor APIs (current package **`@0.7.0`**, primary acceptance still experimental); keep on-screen via Host-injected Android native window.
 
 ```text
 A Upstream pin notes + gap matrix
@@ -31,9 +31,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 | Phase mainline | Full compliant `wasi:webgpu` **interface coverage** (method matrix: implement or explicit `Unsupported` closes a row) |
 | gfx | **No** wasi-gfx / canvas; on-screen stays **Host-injected** Android native window |
 | WIT pin | `wasi:webgpu@0.3.0-rc.2` (same as [`wit/README.en.md`](../../wit/README.en.md)); bump only after PIN + gap matrix |
-| Migration | **Dual-track**: keep `experimental:webgpu-cm@0.4.0` until Guests migrate; new path uses the standard package |
+| Migration | **Dual-track**: keep the experimental track until Guests move to the standard package (plan lock started at `@0.4.0`; after close-out current **`@0.7.0`** remains primary acceptance); standard package coexists as stubs |
 | Async | Stay **sync-compat** (L2 / [`errors-async.en.md`](../mapping/errors-async.en.md)); true CM async does not block this phase |
-| Compliance claims | Package / README stay `experimental` until matrix close-out; do not advertise compliance |
+| Compliance claims | Package / README stay `experimental`; after matrix close-out still do **not** advertise a compliant product |
 | Explicitly deferred | Maven Central, `abi-mvp` flat render, optional perf, PRs to wasmtime4j — all out |
 | Acceptance | Desktop unit tests (with natives) + Android instrumented (no regress on vector-add / triangle) + gap checkboxes; docs / CHANGELOG per sub-slice |
 
@@ -47,9 +47,9 @@ Gap matrix: [`docs/mapping/compliant-world-gap.en.md`](../mapping/compliant-worl
 
 ### B — Dual-track package identity / Linker
 
-- [x] Standard import path (`wasi:webgpu/webgpu@0.3.0-rc.2`) coexists with `experimental:webgpu-cm@0.4.0` on the Linker ([`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt))
-- [x] ABI constants / resource-name mapping documented: [`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md); old Guests stay on experimental until C/E
-- [x] Docs: dual-track is transitional; after close-out the standard package is the primary acceptance path; standard funcs are **Unsupported stubs** for now (wire in C+)
+- [x] Standard import path (`wasi:webgpu/webgpu@0.3.0-rc.2`) coexists with the experimental track on the Linker ([`WasmtimeCmLinker`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmLinker.kt); current experimental `@0.7.0`)
+- [x] ABI constants / resource-name mapping documented: [`abi-wasi`](../../abi-wasi/) `AbiWasi` + [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md); Guests stay on experimental (primary acceptance)
+- [x] Docs: dual-track is transitional; after close-out **primary acceptance remains experimental**; standard package is **Unsupported / result stubs** (Guests not migrated yet)
 
 ### C — Compute de-specialize
 

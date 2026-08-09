@@ -2,7 +2,7 @@
 
 **中文** | [English](UPSTREAM.en.md)
 
-> **本阶段 C（2026-08-08）**：本文为**本仓备忘**（对照上游缺口与本地 workaround）。  
+> **semantic-hardening slice C（2026-08-08）**：本文为**本仓备忘**（对照上游缺口与本地 workaround）。  
 > 对照实现仓：本仓库 `wasi-webgpu-jvm-mvp`；上游参考 [tegmentum/wasmtime4j](https://github.com/tegmentum/wasmtime4j)。  
 > 钉定版本：`v47.0.2-1.5.0`（`ai.tegmentum:wasmtime4j`）。
 

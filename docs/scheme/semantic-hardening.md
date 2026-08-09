@@ -67,10 +67,12 @@ A WIT records（render / pipeline 等）
 
 ## 本阶段不做
 
+> 下表为 **semantic-hardening 当时**阶段边界。其中「合规全量 world」后由 [`compliant-world.md`](compliant-world.md) A–G 承接并完成（矩阵关门；主验收仍 experimental；仍不宣传合规产品）。
+
 | ID | 项 |
 |----|-----|
-| F | wasi-gfx / canvas 抽象 |
-| G | 合规 `wasi:webgpu` 全量 world |
+| F | wasi-gfx / canvas 抽象（compliant-world 仍不做） |
+| G | 合规 `wasi:webgpu` 全量 world（当时不做；后见 compliant-world） |
 | H | Maven Central / 发包 |
 | I | `abi-mvp` 扁平 render import |
 | — | 多 window、MSAA/depth 全套（除非 A 的最小 records 必需） |

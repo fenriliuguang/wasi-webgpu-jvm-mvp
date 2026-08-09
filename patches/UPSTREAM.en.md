@@ -2,7 +2,7 @@
 
 [中文](UPSTREAM.md) | **English**
 
-> **Phase C (2026-08-08):** **in-repo notes** (upstream gaps + local workarounds).  
+> **semantic-hardening slice C (2026-08-08):** **in-repo notes** (upstream gaps + local workarounds).  
 > This repo: `wasi-webgpu-jvm-mvp`; upstream reference: [tegmentum/wasmtime4j](https://github.com/tegmentum/wasmtime4j).  
 > Pinned: `v47.0.2-1.5.0` (`ai.tegmentum:wasmtime4j`).
 

@@ -7,7 +7,7 @@
 
 Archive covers work through: `b5e6212` (Host / L2 resume) → `654896a` (Session) → `110944d` (instrumented repeat) → `841b55c` (three-part frame loop) + this docs wrap-up (2026-08-07).
 
-> **Follow-up regression (DoD text unchanged)**: manual Demo path later hit `WINDOW_IN_USE` again; from 2026-08-08 Demo tears down Host+Session every CM press (`96d594f`). Current mitigations and remaining items: [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH). Instrumented “reuse Session” acceptance remains valid.
+> **Follow-up regression (DoD text unchanged)**: manual Demo later hit `WINDOW_IN_USE` again; `96d594f` briefly tore down Host+Session every CM press. D1–D6 then closed on **reuse Host+Session** + `releaseAllGpuObjects` (see [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) ZH). Instrumented “reuse Session” acceptance remained valid throughout.
 
 ## DoD
 

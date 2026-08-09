@@ -67,10 +67,12 @@ A WIT records (render / pipeline, …)
 
 ## Out of scope (this phase)
 
+> Table below is the **semantic-hardening** phase boundary at the time. Full compliant world was later taken by [`compliant-world.en.md`](compliant-world.en.md) A–G (matrix close-out; primary acceptance still experimental; still no compliance marketing).
+
 | ID | Item |
 |----|------|
-| F | wasi-gfx / canvas abstraction |
-| G | Full compliant `wasi:webgpu` world |
+| F | wasi-gfx / canvas abstraction (still out in compliant-world) |
+| G | Full compliant `wasi:webgpu` world (out then; later see compliant-world) |
 | H | Maven Central / publishing |
 | I | `abi-mvp` flat render imports |
 | — | Multi-window, full MSAA/depth (unless minimally required by A records) |

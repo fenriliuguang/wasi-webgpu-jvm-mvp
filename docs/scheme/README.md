@@ -18,6 +18,7 @@
 | **Demo CM 真机稳性回归** | **完成**（2026-08-08，V2458A，D1–D6）— 见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) |
 | **语义加固与工程清债** | **完成**（2026-08-09）— 详见 [`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)；计划页 [`semantic-hardening.md`](semantic-hardening.md) |
 | **合规 wasi:webgpu World（无 gfx）** | **已完成（A–G）** — 计划 [`compliant-world.md`](compliant-world.md)；归档 [`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)；缺口 [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)。**不做** wasi-gfx；**不宣传**合规产品 |
+| **下一阶段** | **未锁定** — 见根 [`README.md`](../../README.md)；Maven / `abi-mvp` render / perf 仍移交 |
 
 ## 硬原则（摘录）
 

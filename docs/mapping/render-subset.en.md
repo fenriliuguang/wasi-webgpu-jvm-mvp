@@ -24,7 +24,7 @@ Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCm
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
 | `render-pass-encoder.end` | `renderPassEnd` | `end` | |
 
-Records (`@0.4.0`): `vertex-attribute` / `vertex-buffer-layout`; flag aliases `vertex-format` / `vertex-step-mode` (same numeric values as `androidx.webgpu`; see L2 `GpuVertexFormat`). Guest vertex-buffer acceptance is phase E — [`semantic-hardening.en.md`](../scheme/semantic-hardening.en.md).
+Records (`@0.4.0`): `vertex-attribute` / `vertex-buffer-layout`; flag aliases `vertex-format` / `vertex-step-mode` (same numeric values as `androidx.webgpu`; see L2 `GpuVertexFormat`). Guest vertex-buffer acceptance: completed slice E in [`semantic-hardening.en.md`](../scheme/semantic-hardening.en.md).
 
 ## Guest CM on-screen path (working)
 
@@ -38,7 +38,7 @@ guest/triangle-cm (triangle_cm.wasm, world triangle)
 
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
 - **One-shot** (`run-triangle`): configure → draw → present → unconfigure; default instrumented path
-- **Vertex buffer (phase E)**: Guest `create-buffer` + `write-buffer` → `create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`; shader `@location(0)`
+- **Vertex buffer (slice E):** Guest `create-buffer` + `write-buffer` → (on device) `create-render-pipeline-triangle-buffers` → `set-vertex-buffer` + `draw(3)`; Host already wires standard `create-render-pipeline` / `begin-render-pass` (Guest migrates after `.so` rebuild)
 - **Frame loop** (host-driven): `init-triangle` → loop `draw-frame` → `drop-triangle`; Demo `TriangleCmOneShot.runFrameLoopAndAwait` (reuse Session + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
 - **Acceptance**: instrumented one-shot + `cmGuestRepeatTriangleReusesSession`; Demo pause→CM→resume; device regression D1–D6 in [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md) (ZH)
 - **Desktop**: without an Android Surface, `CpuWasiWebGpuHost` → Unsupported and related unit tests skip (same gating as CM compute)
@@ -50,7 +50,8 @@ guest/triangle-cm (triangle_cm.wasm, world triangle)
 |------|--------|
 | Guest CM on-screen (triangle-cm one-shot draw) | ✅ working (see above) |
 | wasi-gfx on-screen | ❌ |
-| General render-pipeline descriptor / MSAA / depth | ❌ |
+| Generic `create-render-pipeline` / `begin-render-pass` descriptor | ✅ `@0.7.0` (no MSAA / depth) |
+| MSAA / depth | ❌ |
 | Canvas / multi-window abstraction | ❌ |
 | `abi-mvp` flat render imports | ❌ (P1 remains compute-only) |
 

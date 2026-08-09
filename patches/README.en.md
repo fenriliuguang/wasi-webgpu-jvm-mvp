@@ -13,7 +13,7 @@ Trackable unified diffs against upstream tag **`v47.0.2-1.5.0`**
 Source checkout under `.deps/wasmtime4j` is **not** committed (see root `.gitignore`).  
 Patches themselves are committed; build scripts clone the tag then `git apply`.
 
-Upstream gap notes (phase C; **do not open upstream PRs**): [`UPSTREAM.en.md`](UPSTREAM.en.md) — ConcurrentCallCodec u64, Validation, destructor gap, local overlays.
+Upstream gap notes (**semantic-hardening slice C**, 2026-08-08; **do not open upstream PRs**): [`UPSTREAM.en.md`](UPSTREAM.en.md) — ConcurrentCallCodec u64, Validation, destructor gap, local overlays.
 
 ## Apply
 
@@ -50,4 +50,4 @@ Then review with `git diff patches/` and commit.
 1. Host callback: `Resource` ↔ `U32(rep)` marshalling (`vals_to_host_params` / `host_results_to_vals`; **recursive** into list/record/option/…)
 2. Multiple `resource` registrations on the same interface (`allow_shadowing` + batch re-hang)
 3. Process-wide resource registry so `add_registered_host_functions_to_linker` can replay onto a fresh linker (upstream `nativeInstantiateWithLinker` does not use the caller linker)
-4. JNI `defineResource` interface path uses `"{ns}/{iface}"` (matches guest import `experimental:webgpu-cm/host@0.2.0`)
+4. JNI `defineResource` interface path uses `"{ns}/{iface}"` (matches guest import `experimental:webgpu-cm/host@0.7.0`)

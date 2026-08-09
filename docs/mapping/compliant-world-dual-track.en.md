@@ -1,20 +1,20 @@
-# Compliant-world dual-track package identity (slice B)
+# Compliant-world dual-track package identity
 
 [中文](compliant-world-dual-track.md) | **English**
 
-> **Status:** slice B (2026-08-09) — Linker coexistence; standard-package funcs mostly stubs.  
-> Plan: [`compliant-world.en.md`](../scheme/compliant-world.en.md) · PIN: [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md)
+> **Status:** post B–G close-out dual-track (2026-08-09) — Linker coexistence; standard package mostly stubs; **primary acceptance / Guests remain experimental**.  
+> Plan: [`compliant-world.en.md`](../scheme/compliant-world.en.md) · PIN: [`wit/deps/wasi-webgpu/PIN.md`](../../wit/deps/wasi-webgpu/PIN.md) · Archive: [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md)
 
 ## One-liner
 
-Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** (current Guests) and **wasi:webgpu** (standard skeleton). Dual-track is transitional; after matrix close-out the standard package is the primary acceptance path.
+Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** (current Guests and primary acceptance) and **wasi:webgpu** (standard skeleton / stubs). Dual-track is transitional; matrix close-out means method-level coverage is complete — **not** that Guests moved to the standard package, and **not** that compliance may be advertised.
 
 ## Package identity
 
 | Track | Import interface | Module | Guest status |
 |-------|------------------|--------|--------------|
-| experimental | `experimental:webgpu-cm/host@0.6.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **stay here** (C de-specialized descriptors) |
-| Standard | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **result methods** stub → `ComponentVal.err` (slice F); other funcs throw **Unsupported**; wire in later slices |
+| experimental (primary) | `experimental:webgpu-cm/host@0.7.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **stay here** (C–E de-specialized descriptors; device nested-borrow still uses top-level helpers) |
+| Standard (dual-track stub) | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **result methods** stub → `ComponentVal.err` (slice F); other funcs throw **Unsupported**; **not yet** the primary acceptance path |
 
 ## Linker behavior
 

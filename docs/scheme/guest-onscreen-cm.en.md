@@ -1,4 +1,4 @@
-# Guest CM on-screen (triangle-cm) — locked plan
+# Guest CM on-screen (triangle-cm) — complete
 
 [中文](guest-onscreen-cm.md) | **English**
 

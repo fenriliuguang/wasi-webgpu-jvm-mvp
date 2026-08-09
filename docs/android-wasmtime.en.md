@@ -3,7 +3,7 @@
 [中文](android-wasmtime.md) | **English**
 
 > experimental · Guest → Wasmtime (L1) → `WasiWebGpuHost` (L2) → `DawnWasiWebGpuHost`  
-> Acceptance: `WasmtimeVectorAddInstrumentedTest` (abi-mvp) + `WasmtimeCmVectorAddInstrumentedTest` (CM)
+> Acceptance: `WasmtimeVectorAddInstrumentedTest` (abi-mvp) + `WasmtimeCmVectorAddInstrumentedTest` (CM) + `WasmtimeCmTriangleInstrumentedTest` (Guest on-screen)
 
 ## Progress
 
@@ -16,7 +16,9 @@
 | Android: guest wasm in assets; instrumented vector-add (abi-mvp) | Done (green) |
 | Android CM: CM-patched `.so` + `vector_add_cm.wasm` instrumented test | Done (green) |
 | Desktop CM: `desktop-natives/` (no Gradle cache mutation) + CM test gate | Done |
-| On-screen | Demo: `TriangleRenderer` → L2 Host → Dawn (no Guest/wasi-gfx) |
+| On-screen (L2 Kotlin) | Demo: `TriangleRenderer` → L2 Host → Dawn ✅ |
+| On-screen (Guest CM) | `triangle-cm` → abi-cm → same L2 → Dawn ✅ (`WasmtimeCmTriangleInstrumentedTest`) |
+| wasi-gfx | ❌ out of phase |
 
 Path (abi-mvp):
 
@@ -45,6 +47,7 @@ Comparisons:
 - P1 desktop: `WasmtimeVectorAddTest` (Guest → CpuHost)
 - CM Android: `WasmtimeCmVectorAddInstrumentedTest` (CM Guest → Dawn)
 - CM desktop: `WasmtimeCmVectorAddTest` (CM Guest → CpuHost)
+- CM triangle Android: `WasmtimeCmTriangleInstrumentedTest` (Guest on-screen → Dawn)
 
 ## Pitfall relevance grades
 

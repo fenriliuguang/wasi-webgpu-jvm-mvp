@@ -20,8 +20,8 @@ Pin the upstream subset so the Host does not drift with WIT tip.
 
 ## Dual-track
 
-- **experimental**: current Guests (vector-add-cm / triangle-cm) and `abi-cm` / Linker stay on `experimental:webgpu-cm@0.7.0`.  
-- **Standard package**: vendored and pinned; Linker wiring is slice **B+**; do **not** advertise compliance before matrix close-out.  
+- **experimental (primary acceptance)**: current Guests (vector-add-cm / triangle-cm) and `abi-cm` / Linker stay on `experimental:webgpu-cm@0.7.0`.  
+- **Standard package (dual-track stubs)**: vendored and pinned; Linker registers resources + Unsupported / result stubs (slices B–G); **not yet** the primary Guest / acceptance path. Matrix close-out ≠ compliance product; still do **not** advertise compliance.  
 - **Upgrade**: update [`deps/wasi-webgpu/PIN.md`](deps/wasi-webgpu/PIN.md) → `python scripts/gen-wasi-webgpu-inventory.py` → `python scripts/gen-compliant-world-gap.py` → then Host / ABI.
 
 P0/P1 do **not** generate a full wit-bindgen host. The CM slice still pins this repo’s `wit/compute-cm/world.wit`.

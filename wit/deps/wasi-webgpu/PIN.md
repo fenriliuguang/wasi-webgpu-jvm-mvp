@@ -12,6 +12,6 @@
 | Pinned | 2026-08-09 (compliant-world slice A) |
 | Inventory | [`_inventory.json`](_inventory.json) (resource × method extract) |
 
-Do **not** replace these files with tip-of-main without bumping this PIN, regenerating `_inventory.json`, and updating [`docs/mapping/compliant-world-gap.md`](../../../docs/mapping/compliant-world-gap.md).
+Do **not** replace these files with tip-of-main without bumping this PIN, regenerating `_inventory.json`, and updating [`docs/mapping/compliant-world-gap.md`](../../../docs/mapping/compliant-world-gap.md) / [EN](../../../docs/mapping/compliant-world-gap.en.md).
 
-Phase plan: [`docs/scheme/compliant-world.md`](../../../docs/scheme/compliant-world.md).
+Phase plan: [`docs/scheme/compliant-world.md`](../../../docs/scheme/compliant-world.md) / [EN](../../../docs/scheme/compliant-world.en.md).

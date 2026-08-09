@@ -83,8 +83,8 @@ activity.getIntent()=…MAIN+LAUNCHER … bnds=[71,1363][323,1664]
 
 | 症状 | 对策（现行） |
 |------|------|
-| `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` | L2/CM 两侧完整 Host teardown + `releaseSurfaces`（卸 Texture/View）；见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) D2/D3 |
-| 同进程二次 CM `invalid handle` / trap | 仪器可复用 Session；Demo 手点每次新 Session（D6 仍开放） |
+| `VK_ERROR_NATIVE_WINDOW_IN_USE_KHR` | L2/CM：`releaseAllGpuObjects` 交还窗口（复用 Session；见 [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) D2/D3/D6） |
+| 同进程二次 CM `invalid handle` / trap | Demo / 仪器均复用 Session；trap 后再 recreate（D6 已收口） |
 | Host.close / Scudo | `eventPoller.shutdown`+`awaitTermination` 后再关 instance（勿 `shutdownNow` 打断 processEvents） |
 | 连点 | 按钮整段 disable 至 pause→CM→resume 结束 |
 

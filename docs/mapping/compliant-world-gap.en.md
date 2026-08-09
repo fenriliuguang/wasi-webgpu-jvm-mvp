@@ -16,7 +16,7 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 |------|---------|
 | ✅ | Usable aligned path (experimental or L2) |
 | ⚠️ | Path exists but specialized / shape skew / sync wrap |
-| ❌ | Missing; implement or mark Unsupported in target slice |
+| ❌ | Explicit `Unsupported` / wasi stub (closes a row after G; not a dangling miss) |
 | — | Explicitly out of this phase (e.g. wasi-gfx) |
 
 | Column | Meaning |
@@ -32,17 +32,17 @@ Contrasts the standard package with this repo’s experimental / L2 status. Clos
 |----|----|----|-------|
 | 16 | 17 | 191 | 224 |
 
-## Known specialized APIs (Guest must leave in C/E)
+## Known specialized APIs (Host has standard replacements; device Guests migrate after `.so` rebuild)
 
-| experimental API | Replacement | Slice |
-|------------------|-------------|-------|
+| experimental API | Replacement direction | Slice |
+|------------------|----------------------|-------|
 | `create-bind-group-layout-storage3` | standard bind-group-layout descriptor | C |
 | `create-bind-group3` | standard bind-group descriptor | C |
 | `submit1` | standard `queue.submit` (list) | C |
 | `create-render-pipeline-triangle` | standard render-pipeline descriptor | E |
-| `create-render-pipeline-triangle-buffers` | same (vertex layouts partly aligned) | E |
+| `create-render-pipeline-triangle-buffers` | same (vertex layouts partially aligned) | E |
 | `begin-render-pass-clear` | standard begin-render-pass + color attachment | E |
-| `create-surface-from-native-window` | keep Host inject (not gfx); or map to canvas-context subset | E |
+| `create-surface-from-native-window` | keep Host inject (not gfx); or map standard canvas-context subset | E |
 
 ## wasi-gfx
 
