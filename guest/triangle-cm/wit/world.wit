@@ -20,8 +20,10 @@
 /// compute-pipeline.layout is pipeline-layout (compliant-world slice D).
 /// 0.7.0: standard create-render-pipeline / begin-render-pass descriptors;
 /// deprecate *-triangle* / begin-render-pass-clear (compliant-world slice E).
+/// 0.8.0: write-texture, render-pass set-bind-group, depth-stencil, cube world
+/// (guest-descriptor-cube B).
 
-package experimental:webgpu-cm@0.7.0;
+package experimental:webgpu-cm@0.8.0;
 
 interface host {
   /// WebGPU GPUBufferUsage bitfield (same bit values as wasi:webgpu / L2 GpuBufferUsage).
@@ -187,11 +189,19 @@ interface host {
     topology: primitive-topology,
   }
 
+  record depth-stencil-state {
+    format: texture-format,
+    depth-write-enabled: bool,
+    /// Dawn CompareFunction pass-through (e.g. Less=2, Always=8).
+    depth-compare: u32,
+  }
+
   record render-pipeline-descriptor {
     vertex: vertex-state,
     fragment: fragment-state,
     layout: borrow<pipeline-layout>,
     primitive: option<primitive-state>,
+    depth-stencil: option<depth-stencil-state>,
     label: option<string>,
   }
 
@@ -202,8 +212,16 @@ interface host {
     store-op: store-op,
   }
 
+  record render-pass-depth-stencil-attachment {
+    view: borrow<texture-view>,
+    depth-clear-value: f32,
+    depth-load-op: load-op,
+    depth-store-op: store-op,
+  }
+
   record render-pass-descriptor {
     color-attachments: list<render-pass-color-attachment>,
+    depth-stencil-attachment: option<render-pass-depth-stencil-attachment>,
     label: option<string>,
   }
 
@@ -253,6 +271,14 @@ interface host {
 
   resource queue {
     write-buffer: func(buffer: borrow<buffer>, offset: u64, data: list<u8>);
+    /// Upload texel data to a 2D texture (origin 0,0; depth 1).
+    write-texture: func(
+      texture: borrow<texture>,
+      data: list<u8>,
+      width: u32,
+      height: u32,
+      bytes-per-row: u32,
+    );
     /// Standard-shaped submit (list); prefer over submit1.
     submit: func(command-buffers: list<borrow<command-buffer>>);
     /// Deprecated (slice C): single command-buffer submit.
@@ -323,6 +349,7 @@ interface host {
 
   resource render-pass-encoder {
     set-pipeline: func(pipeline: borrow<render-pipeline>);
+    set-bind-group: func(index: u32, bind-group: borrow<bind-group>);
     /// Bind a GPU buffer to a vertex slot (offset/size in bytes).
     set-vertex-buffer: func(
       slot: u32,
@@ -366,4 +393,22 @@ world triangle {
   export draw-frame: func() -> result<_, string>;
   /// Unconfigure + release guest-held GPU resources from init-triangle.
   export drop-triangle: func() -> result<_, string>;
+}
+
+/// Slow rotating textured cube (Host injects Android native window; no wasi-gfx).
+/// Same export shapes as triangle; separate wasm component from triangle-cm.
+world cube {
+  import host;
+  export run-cube: func(
+    window-handle: u64,
+    width: u32,
+    height: u32,
+  ) -> result<_, string>;
+  export init-cube: func(
+    window-handle: u64,
+    width: u32,
+    height: u32,
+  ) -> result<_, string>;
+  export draw-frame: func() -> result<_, string>;
+  export drop-cube: func() -> result<_, string>;
 }

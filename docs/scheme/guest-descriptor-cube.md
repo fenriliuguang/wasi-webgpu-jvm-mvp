@@ -2,13 +2,13 @@
 
 **中文** | [English](guest-descriptor-cube.en.md)
 
-> **状态：进行中（2026-08-09）。** 切片 **A 已完成**；B–D 未开始。  
+> **状态：进行中（2026-08-09）。** 切片 **A ✅ / B ✅**；C–D 未开始。  
 > 承接：合规 World A–G 归档（[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)）。  
-> 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
+> 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B ✅）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
 
 ## 一句话
 
-在 **不推进 wasi-gfx、不宣传合规产品** 的前提下：重编 Android CM `.so` 解锁嵌套 borrow；把 experimental Guest 真机验收从顶层 helpers 迁到标准 descriptor；用 **缓慢持续旋转、带开源图片纹理的正方体** 作主 Demo；并可选把已有 L2 路径接到 wasi 轨子集、加固资源生命周期。主验收仍在 `experimental:webgpu-cm`（现行 `@0.7.0`，本阶段若加 depth / 纹理上传可 bump）。
+在 **不推进 wasi-gfx、不宣传合规产品** 的前提下：重编 Android CM `.so` 解锁嵌套 borrow；把 experimental Guest 真机验收从顶层 helpers 迁到标准 descriptor；用 **缓慢持续旋转、带开源图片纹理的正方体** 作主 Demo；并可选把已有 L2 路径接到 wasi 轨子集、加固资源生命周期。主验收仍在 `experimental:webgpu-cm`（现行 `@0.8.0`：depth / `write-texture` / cube world）。
 
 ```text
 A 重编 Android CM natives（嵌套 borrow）
@@ -47,12 +47,12 @@ A 重编 Android CM natives（嵌套 borrow）
 
 ### B — Guest 标准 descriptor + 旋转纹理立方体
 
-- [ ] **迁移：** `vector-add-cm` /（若保留）`triangle-cm` 真机改走标准 descriptor（`create-bind-group` / pipeline / `queue.submit(list)` / 通用 render 等）；去掉对 deprecated helpers 的验收依赖
-- [ ] **新 Demo Guest**（建议目录 `guest/cube-cm/` 或扩展既有 render Guest）：缓慢绕轴（或 Y 轴为主）**持续旋转**的正方体；六面（或至少可见面）采样同一开源纹理
-- [ ] **素材：** 入库开源图片 + `ATTRIBUTION`（许可全文或链接、作者、来源 URL）；解码策略（Guest 内嵌 / 预解码 `.rgba` 进 assets）实现时二选一，须可离线复现
-- [ ] **Host/WIT 最小增量（若缺）：** depth-stencil（或等价深度测）、纹理上传、sampler+texture bind、MVP uniform 每帧 `write-buffer`；Surface 仍 **Host 注入** native window；沿用既有宿主帧循环
-- [ ] 仪器：立方体路径绿灯（可与 triangle 波次策略对齐；勿同进程背靠背冲突）；`run-android-instrumented.ps1` 更新或文档说明新用例
-- [ ] 更新 [`render-subset.md`](../mapping/render-subset.md) / EN + CHANGELOG；experimental 包版本若形状变化则 bump 并改 Guest
+- [x] **迁移：** `vector-add-cm` / `triangle-cm` 改走标准 descriptor（`create-bind-group` / pipeline / `queue.submit(list)` / 通用 render 等）；去掉对 deprecated helpers 的验收依赖
+- [x] **新 Demo Guest** `guest/cube-cm/`：缓慢绕 Y 轴**持续旋转**的正方体；六面采样同一开源纹理
+- [x] **素材：** 项目原创 CC0 64×64 棋盘格（Guest 内过程生成）+ [`ATTRIBUTION.md`](../../guest/cube-cm/ATTRIBUTION.md)；可离线复现
+- [x] **Host/WIT 最小增量：** `@0.8.0` depth-stencil、`write-texture`、render-pass `set-bind-group`、sampler+texture bind、MVP uniform 每帧 `write-buffer`；Surface 仍 **Host 注入**；宿主帧循环 `CubeCmOneShot`
+- [x] 仪器：`WasmtimeCmCubeInstrumentedTest` + `run-android-instrumented.ps1` **wave3**（与 triangle 分进程；勿同进程背靠背）
+- [x] 更新 [`render-subset.md`](../mapping/render-subset.md) / EN + CHANGELOG；`experimental:webgpu-cm` **0.7.0 → 0.8.0**
 
 ### C — wasi 主路径子集接线
 

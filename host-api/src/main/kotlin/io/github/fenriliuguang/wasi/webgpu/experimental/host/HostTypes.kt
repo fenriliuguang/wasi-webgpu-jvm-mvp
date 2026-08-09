@@ -52,11 +52,13 @@ object GpuTextureDimension {
 
 /**
  * Common Dawn TextureFormat values (pass-through).
- * [RGBA8_UNORM] is enough for Cpu / create-texture smoke tests.
+ * Values match `androidx.webgpu` 1.0.0-alpha05.
  */
 object GpuTextureFormat {
-    /** `androidx.webgpu.TextureFormat.RGBA8Unorm` */
-    const val RGBA8_UNORM: Int = 0x00000012
+    /** `androidx.webgpu.TextureFormat.RGBA8Unorm` (alpha05 = 0x16; older 0x12 was wrong). */
+    const val RGBA8_UNORM: Int = 0x00000016
+    /** `androidx.webgpu.TextureFormat.Depth24Plus` */
+    const val DEPTH24_PLUS: Int = 0x0000002e
 }
 
 /** SamplerBindingType ordinals (wasi enum order). */
@@ -146,6 +148,24 @@ data class BufferDescriptor(
 object GpuVertexFormat {
     /** `androidx.webgpu.VertexFormat.Float32x2` */
     const val FLOAT32X2: Int = 0x0000001d
+    /** `androidx.webgpu.VertexFormat.Float32x3` */
+    const val FLOAT32X3: Int = 0x0000001e
+}
+
+/**
+ * Dawn CompareFunction pass-through (`androidx.webgpu.CompareFunction`).
+ */
+object GpuCompareFunction {
+    const val LESS: Int = 0x00000002
+    const val ALWAYS: Int = 0x00000008
+}
+
+/**
+ * Dawn OptionalBool pass-through (`androidx.webgpu.OptionalBool`) for depthWriteEnabled.
+ */
+object GpuOptionalBool {
+    const val FALSE: Int = 0x00000000
+    const val TRUE: Int = 0x00000001
 }
 
 /**
@@ -315,12 +335,20 @@ data class PrimitiveState(
     val topology: Int = GpuPrimitiveTopology.TRIANGLE_LIST,
 )
 
+data class DepthStencilState(
+    val format: Int,
+    val depthWriteEnabled: Boolean = true,
+    /** Dawn CompareFunction pass-through ([GpuCompareFunction]). */
+    val depthCompare: Int = GpuCompareFunction.LESS,
+)
+
 data class RenderPipelineDescriptor(
     val vertex: VertexState,
     val fragment: FragmentState,
     /** [ResourceKind.PipelineLayout] handle. */
     val layout: GpuHandle,
     val primitive: PrimitiveState? = PrimitiveState(),
+    val depthStencil: DepthStencilState? = null,
     val label: String? = null,
 )
 
@@ -331,7 +359,15 @@ data class RenderPassColorAttachment(
     val storeOp: Int = GpuStoreOp.STORE,
 )
 
+data class RenderPassDepthStencilAttachment(
+    val view: GpuHandle,
+    val depthClearValue: Float = 1f,
+    val depthLoadOp: Int = GpuLoadOp.CLEAR,
+    val depthStoreOp: Int = GpuStoreOp.STORE,
+)
+
 data class RenderPassDescriptor(
     val colorAttachments: List<RenderPassColorAttachment>,
+    val depthStencilAttachment: RenderPassDepthStencilAttachment? = null,
     val label: String? = null,
 )

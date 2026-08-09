@@ -129,6 +129,13 @@ interface WasiWebGpuHost : AutoCloseable {
 
     fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle)
 
+    fun renderPassSetBindGroup(
+        pass: GpuHandle,
+        index: Int,
+        bindGroup: GpuHandle,
+        dynamicOffsets: IntArray = intArrayOf(),
+    )
+
     fun renderPassSetVertexBuffer(
         pass: GpuHandle,
         slot: Int,
@@ -190,6 +197,16 @@ interface WasiWebGpuHost : AutoCloseable {
         buffer: GpuHandle,
         bufferOffset: Long,
         data: ByteArray,
+    )
+
+    /** Upload 2D texel data (origin 0,0; depthOrArrayLayers=1). */
+    fun queueWriteTexture(
+        queue: GpuHandle,
+        texture: GpuHandle,
+        data: ByteArray,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
     )
 
     fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>)

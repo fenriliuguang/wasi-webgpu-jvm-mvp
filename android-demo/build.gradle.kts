@@ -5,6 +5,7 @@ plugins {
 val guestWasm = rootProject.file("guest/vector-add/vector_add.wasm")
 val guestCmWasm = rootProject.file("guest/vector-add-cm/vector_add_cm.wasm")
 val guestTriangleCmWasm = rootProject.file("guest/triangle-cm/triangle_cm.wasm")
+val guestCubeCmWasm = rootProject.file("guest/cube-cm/cube_cm.wasm")
 // Plain File (not Provider): AGP 9 rejects Provider in SourceSet.assets.srcDir.
 val generatedAssetsDir = layout.buildDirectory.get().asFile.resolve("generated/assets")
 
@@ -17,6 +18,9 @@ val syncGuestAssets by tasks.registering(Copy::class) {
     }
     from(guestTriangleCmWasm) {
         rename { "triangle_cm.wasm" }
+    }
+    from(guestCubeCmWasm) {
+        rename { "cube_cm.wasm" }
     }
     into(generatedAssetsDir.resolve("guest"))
 }

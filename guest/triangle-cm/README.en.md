@@ -4,13 +4,13 @@
 
 Experimental **Component Model** Guest: on-screen red triangle (one-shot + host-driven frame loop).
 
-- Imports `experimental:webgpu-cm/host@0.7.0` (WIT resources + methods; pinned under `wit/`)
+- Imports `experimental:webgpu-cm/host@0.8.0` (WIT resources + methods; pinned under `wit/`)
 - **Not** compliant `wasi:webgpu` / wasi-gfx
 - Exports:
   - `run-triangle` — one-shot configure → draw → present → unconfigure
   - `init-triangle` / `draw-frame` / `drop-triangle` — host-driven frame loop
 - Host injects Android native window; Guest **only holds** `surface`
-- Vertices via `create-buffer` + `write-buffer` + `set-vertex-buffer` (`create-render-pipeline-triangle-buffers` / `@location(0)`)
+- Vertices via `create-buffer` + `write-buffer` + `set-vertex-buffer`; standard `create-render-pipeline` / `begin-render-pass` / `queue.submit(list)`
 
 ## Rebuild
 

@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.7.0
+# experimental:webgpu-cm@0.8.0
 
 [中文](README.md) | **English**
 
@@ -14,9 +14,10 @@ Component Model compute + minimal surface/render slice.
 - **0.5.0 (slice C):** standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`; keep `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl` (deprecated)
 - **0.6.0 (slice D):** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG sampler·texture entries; `compute-pipeline.layout` → pipeline-layout
 - **0.7.0 (slice E):** `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`; `*-triangle*` / `begin-render-pass-clear` deprecated
-- World exports: `vector-add` → `run-vector-add`; `triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle` (Host injects native window)
+- **0.8.0 (guest-descriptor-cube B):** `write-texture`; render-pass `set-bind-group`; depth-stencil; `world cube`
+- World exports: `vector-add` → `run-vector-add`; `triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`; `cube` → `run-cube` / `init-cube` / `draw-frame` / `drop-cube` (Host injects native window)
 
-Guests: `guest/vector-add-cm/` (layout via standard descriptor; nested-borrow paths still use deprecated helpers until Android `.so` rebuild), `guest/triangle-cm/` (same; render standard APIs wired)  
+Guests: `guest/vector-add-cm/`, `guest/triangle-cm/`, `guest/cube-cm/` (standard descriptors; nested borrow needs recursive `cm-resources`-patched natives)  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  
 Wiring: `runtime-wasmtime` `runtime.cm` (`ComponentLinker` + `defineResource`)
 

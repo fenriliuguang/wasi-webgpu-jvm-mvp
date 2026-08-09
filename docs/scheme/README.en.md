@@ -18,7 +18,7 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **Demo CM device stability regression** | **Done** (2026-08-08, V2458A, D1–D6) — see [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH) |
 | **Semantic hardening & engineering debt** | **Done** (2026-08-09) — see [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md); plan [`semantic-hardening.en.md`](semantic-hardening.en.md) |
 | **Compliant wasi:webgpu world (no gfx)** | **Complete (A–G)** — plan [`compliant-world.en.md`](compliant-world.en.md); archive [`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md); gap [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md). **No** wasi-gfx; **no** compliance-product marketing |
-| **Guest standard descriptors + rotating textured cube** | **In progress** — [`guest-descriptor-cube.en.md`](guest-descriptor-cube.en.md); **A ✅** natives; B cube demo → C wasi subset wiring → D lifetime. Maven / `abi-mvp` render / perf still deferred |
+| **Guest standard descriptors + rotating textured cube** | **In progress** — [`guest-descriptor-cube.en.md`](guest-descriptor-cube.en.md); **A ✅ B ✅**; C wasi subset wiring → D lifetime. Maven / `abi-mvp` render / perf still deferred |
 
 ## Hard rules (excerpt)
 

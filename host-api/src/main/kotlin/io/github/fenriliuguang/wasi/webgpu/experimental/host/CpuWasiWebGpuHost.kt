@@ -20,7 +20,7 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     private class BindGroup(val buffers: List<GpuHandle>)
     private class PipelineLayout
     private class Sampler
-    private class Texture
+    private class Texture(var texels: ByteArray? = null)
     private class TextureView
     private class ComputePipeline(val shader: ShaderModule)
 
@@ -258,6 +258,24 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         System.arraycopy(data, 0, buf.data, offset, data.size)
     }
 
+    override fun queueWriteTexture(
+        queue: GpuHandle,
+        texture: GpuHandle,
+        data: ByteArray,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+    ) {
+        handles.get<Queue>(queue, ResourceKind.Queue)
+        val tex = handles.get<Texture>(texture, ResourceKind.Texture)
+        require(width > 0 && height > 0) { "invalid write-texture size ${width}x$height" }
+        require(bytesPerRow > 0) { "bytesPerRow must be > 0" }
+        require(data.size >= bytesPerRow * height) {
+            "write-texture data too small: ${data.size} < ${bytesPerRow * height}"
+        }
+        tex.texels = data.copyOf()
+    }
+
     override fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>) {
         handles.get<Queue>(queue, ResourceKind.Queue)
         for (cmdHandle in commandBuffers) {
@@ -353,6 +371,13 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
 
     override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) =
         throw HostException.Unsupported("render pass (Cpu host)")
+
+    override fun renderPassSetBindGroup(
+        pass: GpuHandle,
+        index: Int,
+        bindGroup: GpuHandle,
+        dynamicOffsets: IntArray,
+    ) = throw HostException.Unsupported("render pass (Cpu host)")
 
     override fun renderPassSetVertexBuffer(
         pass: GpuHandle,

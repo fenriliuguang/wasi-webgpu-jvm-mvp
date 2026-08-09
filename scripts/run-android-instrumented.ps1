@@ -2,9 +2,10 @@
 # Use when Studio/Gradle :connectedDebugAndroidTest reports "Process crashed"
 # while `am instrument` is green — common on vivo when UTP reinstall races.
 #
-# Default run uses two am-instrument waves with force-stop between them:
+# Default run uses three am-instrument waves with force-stop between them:
 # wasmtime4j CM host callbacks are process-global (D6) — closing one ComponentLinker
-# (vector-add or triangle) can trap the next instantiate in the same process.
+# (vector-add / triangle / cube) can trap the next instantiate in the same process.
+# Do NOT run triangle+cube back-to-back in one process.
 param(
     [string]$Class = "",
     [switch]$SkipAssemble
@@ -98,6 +99,8 @@ $wave1 = @(
 ) -join ","
 # Wave 2: CM triangle (needs a fresh process after any prior CM linker.close).
 $wave2 = "$pkg.WasmtimeCmTriangleInstrumentedTest"
+# Wave 3: CM cube (separate process from triangle — shared draw-frame name / CM registry).
+$wave3 = "$pkg.WasmtimeCmCubeInstrumentedTest"
 
 $code1 = Invoke-Instrument $wave1 "wave1 compute"
 if ($code1 -ne 0) {
@@ -107,7 +110,12 @@ if ($code1 -ne 0) {
 $code2 = Invoke-Instrument $wave2 "wave2 CM triangle"
 if ($code2 -ne 0) {
     Write-Host "wave2 failed with exit code $code2"
+    exit $code2
+}
+$code3 = Invoke-Instrument $wave3 "wave3 CM cube"
+if ($code3 -ne 0) {
+    Write-Host "wave3 failed with exit code $code3"
 } else {
     Write-Host "All instrumented waves OK"
 }
-exit $code2
+exit $code3

@@ -70,6 +70,24 @@ class AbiCmHostBindings(
         host.queueWriteBuffer(GpuHandle(queue), GpuHandle(buffer), offset, data)
     }
 
+    fun queueWriteTexture(
+        queue: Int,
+        texture: Int,
+        data: ByteArray,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+    ) {
+        host.queueWriteTexture(
+            GpuHandle(queue),
+            GpuHandle(texture),
+            data,
+            width,
+            height,
+            bytesPerRow,
+        )
+    }
+
     fun deviceCreateShaderModule(device: Int, code: String): Int =
         host.deviceCreateShaderModule(
             GpuHandle(device),
@@ -262,6 +280,10 @@ class AbiCmHostBindings(
 
     fun renderPassSetPipeline(pass: Int, pipeline: Int) {
         host.renderPassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))
+    }
+
+    fun renderPassSetBindGroup(pass: Int, index: Int, bindGroup: Int) {
+        host.renderPassSetBindGroup(GpuHandle(pass), index, GpuHandle(bindGroup))
     }
 
     fun renderPassSetVertexBuffer(pass: Int, slot: Int, buffer: Int, offset: Long, size: Long) {

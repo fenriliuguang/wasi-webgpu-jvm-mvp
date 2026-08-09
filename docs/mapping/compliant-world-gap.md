@@ -4,7 +4,7 @@
 
 > **状态：** 切片 G 关门（2026-08-09）；DoD [`archive-compliant-world-dod.md`](../scheme/archive-compliant-world-dod.md)。  
 > **钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（tag `v0.3.0-rc.2`）  
-> **现状包：** `experimental:webgpu-cm@0.7.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
+> **现状包：** `experimental:webgpu-cm@0.8.0`（[`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit)）  
 > **阶段计划：** [`docs/scheme/compliant-world.md`](../scheme/compliant-world.md)  
 > **方法数：** 224（resource × method；见 [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json)）
 

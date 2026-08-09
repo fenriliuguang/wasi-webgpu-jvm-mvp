@@ -106,6 +106,10 @@ tasks.test {
     inputs.file(guestTriangleCm)
     systemProperty("wasi.webgpu.guest.triangleCm", guestTriangleCm.absolutePath)
 
+    val guestCubeCm = rootProject.file("guest/cube-cm/cube_cm.wasm")
+    inputs.file(guestCubeCm)
+    systemProperty("wasi.webgpu.guest.cubeCm", guestCubeCm.absolutePath)
+
     // CM tests need patched natives under desktop-natives/ (or explicit force).
     systemProperty("wasi.webgpu.cm.natives", hasDesktopCmNatives.toString())
     if (desktopNativeFile != null) {

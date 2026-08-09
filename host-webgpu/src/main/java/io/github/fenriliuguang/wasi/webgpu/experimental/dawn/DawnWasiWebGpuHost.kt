@@ -25,6 +25,7 @@ import androidx.webgpu.GPUComputePassEncoder
 import androidx.webgpu.GPUComputePipeline
 import androidx.webgpu.GPUComputePipelineDescriptor
 import androidx.webgpu.GPUComputeState
+import androidx.webgpu.GPUDepthStencilState
 import androidx.webgpu.GPUDevice
 import androidx.webgpu.GPUDeviceDescriptor
 import androidx.webgpu.GPUExtent3D
@@ -35,10 +36,14 @@ import androidx.webgpu.GPUPipelineLayoutDescriptor
 import androidx.webgpu.GPUPrimitiveState
 import androidx.webgpu.GPUQueue
 import androidx.webgpu.GPURenderPassColorAttachment
+import androidx.webgpu.GPURenderPassDepthStencilAttachment
 import androidx.webgpu.GPURenderPassDescriptor
 import androidx.webgpu.GPURenderPassEncoder
 import androidx.webgpu.GPURenderPipeline
 import androidx.webgpu.GPURenderPipelineDescriptor
+import androidx.webgpu.GPUTexelCopyBufferLayout
+import androidx.webgpu.GPUTexelCopyTextureInfo
+import androidx.webgpu.OptionalBool
 import androidx.webgpu.GPURequestAdapterOptions
 import androidx.webgpu.GPURequestCallback
 import androidx.webgpu.GPUSampler
@@ -544,6 +549,17 @@ class DawnWasiWebGpuHost private constructor(
                 )
             }.toTypedArray()
             val topology = descriptor.primitive?.topology ?: GpuPrimitiveTopology.TRIANGLE_LIST
+            val depthStencil = descriptor.depthStencil?.let { ds ->
+                GPUDepthStencilState(
+                    format = ds.format,
+                    depthWriteEnabled = if (ds.depthWriteEnabled) {
+                        OptionalBool.True
+                    } else {
+                        OptionalBool.False
+                    },
+                    depthCompare = ds.depthCompare,
+                )
+            }
             val pipeline = gpuDevice.createRenderPipeline(
                 GPURenderPipelineDescriptor(
                     vertex = GPUVertexState(
@@ -553,6 +569,7 @@ class DawnWasiWebGpuHost private constructor(
                     ),
                     layout = pipelineLayout,
                     primitive = GPUPrimitiveState(topology = topology),
+                    depthStencil = depthStencil,
                     fragment = GPUFragmentState(
                         module = fragmentModule,
                         entryPoint = descriptor.fragment.entryPoint ?: "fs_main",
@@ -646,9 +663,19 @@ class DawnWasiWebGpuHost private constructor(
                     storeOp = attachment.storeOp,
                 )
             }.toTypedArray()
+            val depthAttachment = descriptor.depthStencilAttachment?.let { depth ->
+                val depthView = handles.get<GPUTextureView>(depth.view, ResourceKind.TextureView)
+                GPURenderPassDepthStencilAttachment(
+                    view = depthView,
+                    depthLoadOp = depth.depthLoadOp,
+                    depthStoreOp = depth.depthStoreOp,
+                    depthClearValue = depth.depthClearValue,
+                )
+            }
             val pass = commandEncoder.beginRenderPass(
                 GPURenderPassDescriptor(
                     colorAttachments = attachments,
+                    depthStencilAttachment = depthAttachment,
                     label = descriptor.label,
                 ),
             )
@@ -661,6 +688,19 @@ class DawnWasiWebGpuHost private constructor(
             val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
             val renderPipeline = handles.get<GPURenderPipeline>(pipeline, ResourceKind.RenderPipeline)
             renderPass.setPipeline(renderPipeline)
+        }
+    }
+
+    override fun renderPassSetBindGroup(
+        pass: GpuHandle,
+        index: Int,
+        bindGroup: GpuHandle,
+        dynamicOffsets: IntArray,
+    ) {
+        synchronized(gpuLock) {
+            val renderPass = handles.get<GPURenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+            val group = handles.get<GPUBindGroup>(bindGroup, ResourceKind.BindGroup)
+            renderPass.setBindGroup(index, group, dynamicOffsets)
         }
     }
 
@@ -778,6 +818,29 @@ class DawnWasiWebGpuHost private constructor(
         byteBuffer.put(data)
         byteBuffer.flip()
         gpuQueue.writeBuffer(gpuBuffer, bufferOffset, byteBuffer)
+    }
+
+    override fun queueWriteTexture(
+        queue: GpuHandle,
+        texture: GpuHandle,
+        data: ByteArray,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+    ) {
+        synchronized(gpuLock) {
+            val gpuQueue = handles.get<GPUQueue>(queue, ResourceKind.Queue)
+            val gpuTexture = handles.get<GPUTexture>(texture, ResourceKind.Texture)
+            val byteBuffer = ByteBuffer.allocateDirect(data.size).order(ByteOrder.nativeOrder())
+            byteBuffer.put(data)
+            byteBuffer.flip()
+            gpuQueue.writeTexture(
+                GPUTexelCopyTextureInfo(texture = gpuTexture),
+                byteBuffer,
+                GPUExtent3D(width = width, height = height, depthOrArrayLayers = 1),
+                GPUTexelCopyBufferLayout(bytesPerRow = bytesPerRow),
+            )
+        }
     }
 
     override fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>) {

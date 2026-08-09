@@ -4,7 +4,7 @@
 
 > **Status:** slice G close-out (2026-08-09); DoD [`archive-compliant-world-dod.en.md`](../scheme/archive-compliant-world-dod.en.md).  
 > **Pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (tag `v0.3.0-rc.2`)  
-> **Current package:** `experimental:webgpu-cm@0.7.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
+> **Current package:** `experimental:webgpu-cm@0.8.0` ([`wit/compute-cm/world.wit`](../../wit/compute-cm/world.wit))  
 > **Phase plan:** [`docs/scheme/compliant-world.en.md`](../scheme/compliant-world.en.md)  
 > **Methods:** 224 (resource × method; see [`_inventory.json`](../../wit/deps/wasi-webgpu/_inventory.json))
 

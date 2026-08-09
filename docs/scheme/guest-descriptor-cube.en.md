@@ -2,13 +2,13 @@
 
 [中文](guest-descriptor-cube.md) | **English**
 
-> **Status: in progress (2026-08-09).** Slice **A complete**; B–D not started.  
+> **Status: in progress (2026-08-09).** Slices **A ✅ / B ✅**; C–D not started.  
 > Continues from: compliant-world A–G archive ([`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md)).  
-> Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
+> Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B ✅) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
 
 ## One-liner
 
-Without **wasi-gfx** and without **compliance-product marketing**: rebuild the Android CM `.so` to unlock nested borrow; move experimental Guest device acceptance off top-level helpers onto standard descriptors; use a **slowly, continuously rotating cube with an open-licensed image texture** as the main demo; optionally wire existing L2 paths onto a wasi-track subset and harden resource lifetime. Primary acceptance stays on `experimental:webgpu-cm` (currently `@0.7.0`; bump allowed if depth / texture upload land).
+Without **wasi-gfx** and without **compliance-product marketing**: rebuild the Android CM `.so` to unlock nested borrow; move experimental Guest device acceptance off top-level helpers onto standard descriptors; use a **slowly, continuously rotating cube with an open-licensed image texture** as the main demo; optionally wire existing L2 paths onto a wasi-track subset and harden resource lifetime. Primary acceptance stays on `experimental:webgpu-cm` (currently `@0.8.0`: depth / `write-texture` / cube world).
 
 ```text
 A Rebuild Android CM natives (nested borrow)
@@ -47,12 +47,12 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (16 �
 
 ### B — Guest standard descriptors + rotating textured cube
 
-- [ ] **Migrate:** `vector-add-cm` / (if kept) `triangle-cm` on device to standard descriptors; drop deprecated helpers from acceptance paths
-- [ ] **New demo Guest** (suggested `guest/cube-cm/` or extend an existing render Guest): cube **continuously rotating** slowly (e.g. primarily about Y); faces sample the same open-licensed texture
-- [ ] **Asset:** vendored open image + `ATTRIBUTION` (license text/link, author, source URL); decode strategy (in-Guest vs predecoded `.rgba` in assets) chosen at implementation time; must be offline-reproducible
-- [ ] **Minimal Host/WIT adds (if missing):** depth-stencil (or equivalent), texture upload, sampler+texture bind, per-frame MVP `write-buffer`; Surface stays **Host-injected** native window; reuse host frame loop
-- [ ] Instrumented: cube path green (align wave strategy with triangle; no back-to-back same-process conflict); update `run-android-instrumented.ps1` or document the new case
-- [ ] Update [`render-subset.en.md`](../mapping/render-subset.en.md) + CHANGELOG; bump experimental package if shapes change and rebuild Guests
+- [x] **Migrate:** `vector-add-cm` / `triangle-cm` to standard descriptors; drop deprecated helpers from acceptance paths
+- [x] **New demo Guest** `guest/cube-cm/`: cube **continuously rotating** slowly about Y; all faces sample the same open-licensed texture
+- [x] **Asset:** original CC0 64×64 checkerboard (procedural in Guest) + [`ATTRIBUTION.md`](../../guest/cube-cm/ATTRIBUTION.md); offline-reproducible
+- [x] **Minimal Host/WIT adds:** `@0.8.0` depth-stencil, `write-texture`, render-pass `set-bind-group`, sampler+texture bind, per-frame MVP `write-buffer`; Surface stays **Host-injected**; host frame loop `CubeCmOneShot`
+- [x] Instrumented: `WasmtimeCmCubeInstrumentedTest` + `run-android-instrumented.ps1` **wave3** (separate process from triangle; no back-to-back)
+- [x] Update [`render-subset.en.md`](../mapping/render-subset.en.md) + CHANGELOG; `experimental:webgpu-cm` **0.7.0 → 0.8.0**
 
 ### C — wasi primary-path subset wiring
 

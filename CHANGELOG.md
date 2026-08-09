@@ -5,6 +5,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### guest-descriptor-cube slice B — rotating textured cube + depth / write-texture
+
+- `experimental:webgpu-cm` **0.7.0 → 0.8.0**: `queue.write-texture`, render-pass `set-bind-group`, `depth-stencil-state` / pass attachment, `world cube`
+- L2 + Dawn + Cpu stubs; AbiCm / WasmtimeCmLinker parsers; fix `GpuTextureFormat.RGBA8_UNORM` → `0x16` (alpha05)
+- New `guest/cube-cm/` (CC0 procedural checkerboard + ATTRIBUTION); migrate `triangle-cm` to standard descriptors; bump `vector-add-cm` / triangle wasm to `@0.8.0`
+- Runtime `WasmtimeCmCube` + Android Demo `CubeCmOneShot` button; instrumented `WasmtimeCmCubeInstrumentedTest`; `run-android-instrumented.ps1` wave3 (separate process from triangle)
+- Docs: render-subset + guest-descriptor-cube B checked
+
 ### guest-descriptor-cube slice A — Android CM natives unlock
 
 - Rebuilt `runtime-wasmtime/android-natives/jniLibs` with recursive `cm-resources` (+ android) patches via `scripts/build-wasmtime4j-android.ps1`
@@ -14,7 +22,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A complete** (see above)
+- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A ✅ / B ✅** (see above)
 
 ### Docs sync
 

@@ -13,7 +13,7 @@ Register both CM import tracks on the same `WasmtimeCmLinker`: **experimental** 
 
 | Track | Import interface | Module | Guest status |
 |-------|------------------|--------|--------------|
-| experimental (primary) | `experimental:webgpu-cm/host@0.7.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm **stay here** (C–E de-specialized descriptors; device nested-borrow still uses top-level helpers) |
+| experimental (primary) | `experimental:webgpu-cm/host@0.8.0` | [`abi-cm`](../../abi-cm/) `AbiCm` | vector-add-cm / triangle-cm / cube-cm **stay here** (standard descriptors; guest-descriptor-cube B) |
 | Standard (dual-track stub) | `wasi:webgpu/webgpu@0.3.0-rc.2` | [`abi-wasi`](../../abi-wasi/) `AbiWasi` | no Guest yet; resources registered; **result methods** stub → `ComponentVal.err` (slice F); other funcs throw **Unsupported**; **not yet** the primary acceptance path |
 
 ## Linker behavior

@@ -1,4 +1,4 @@
-# experimental:webgpu-cm@0.7.0
+# experimental:webgpu-cm@0.8.0
 
 **中文** | [English](README.en.md)
 
@@ -14,9 +14,10 @@ Component Model compute + 最小 surface/render 切片。
 - **0.5.0（slice C）：** 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit(list)`；保留 `*storage3` / `*3` / `submit1` / `create-compute-pipeline-bgl`（deprecated）
 - **0.6.0（slice D）：** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`；BGL/BG sampler·texture 条目；`compute-pipeline.layout` → pipeline-layout
 - **0.7.0（slice E）：** `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`；`*-triangle*` / `begin-render-pass-clear` deprecated
-- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`（Host 注入 native window）
+- **0.8.0（guest-descriptor-cube B）：** `write-texture`；render-pass `set-bind-group`；depth-stencil；`world cube`
+- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`；`cube` → `run-cube` / `init-cube` / `draw-frame` / `drop-cube`（Host 注入 native window）
 
-Guest：`guest/vector-add-cm/`（layout 走标准 descriptor；嵌套 borrow 路径暂用 deprecated helpers，待 Android `.so` 重编）、`guest/triangle-cm/`（同上；render 标准 API 已接线）  
+Guest：`guest/vector-add-cm/`、`guest/triangle-cm/`、`guest/cube-cm/`（标准 descriptor；嵌套 borrow 需递归 `cm-resources` 补丁 natives）  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 

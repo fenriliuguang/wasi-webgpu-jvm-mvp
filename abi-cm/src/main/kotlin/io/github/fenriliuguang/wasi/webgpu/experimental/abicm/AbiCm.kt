@@ -10,7 +10,7 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 object AbiCm {
     const val PACKAGE: String = "experimental:webgpu-cm"
     const val INTERFACE: String = "host"
-    const val VERSION: String = "0.7.0"
+    const val VERSION: String = "0.8.0"
 
     /** Full import interface id as emitted by wit-bindgen / wasm-tools. */
     const val IMPORT_INTERFACE: String = "$PACKAGE/$INTERFACE@$VERSION"
@@ -18,8 +18,12 @@ object AbiCm {
     const val EXPORT_RUN_VECTOR_ADD: String = "run-vector-add"
     const val EXPORT_RUN_TRIANGLE: String = "run-triangle"
     const val EXPORT_INIT_TRIANGLE: String = "init-triangle"
+    /** Shared export name on triangle / cube worlds (separate wasm components). */
     const val EXPORT_DRAW_FRAME: String = "draw-frame"
     const val EXPORT_DROP_TRIANGLE: String = "drop-triangle"
+    const val EXPORT_RUN_CUBE: String = "run-cube"
+    const val EXPORT_INIT_CUBE: String = "init-cube"
+    const val EXPORT_DROP_CUBE: String = "drop-cube"
 
     object Resource {
         const val ADAPTER = "adapter"
@@ -70,6 +74,7 @@ object AbiCm {
         const val DEVICE_GET_QUEUE = "[method]device.get-queue"
         const val DEVICE_CREATE_BUFFER = "[method]device.create-buffer"
         const val QUEUE_WRITE_BUFFER = "[method]queue.write-buffer"
+        const val QUEUE_WRITE_TEXTURE = "[method]queue.write-texture"
         const val DEVICE_CREATE_SHADER_MODULE = "[method]device.create-shader-module"
         const val DEVICE_CREATE_BIND_GROUP_LAYOUT = "[method]device.create-bind-group-layout"
         const val DEVICE_CREATE_BIND_GROUP = "[method]device.create-bind-group"
@@ -105,6 +110,7 @@ object AbiCm {
             "[method]compute-pass-encoder.dispatch-workgroups"
         const val COMPUTE_PASS_END = "[method]compute-pass-encoder.end"
         const val RENDER_PASS_SET_PIPELINE = "[method]render-pass-encoder.set-pipeline"
+        const val RENDER_PASS_SET_BIND_GROUP = "[method]render-pass-encoder.set-bind-group"
         const val RENDER_PASS_SET_VERTEX_BUFFER = "[method]render-pass-encoder.set-vertex-buffer"
         const val RENDER_PASS_DRAW = "[method]render-pass-encoder.draw"
         const val RENDER_PASS_END = "[method]render-pass-encoder.end"

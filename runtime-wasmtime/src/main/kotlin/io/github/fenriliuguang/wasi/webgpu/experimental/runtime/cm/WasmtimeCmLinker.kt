@@ -27,6 +27,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ColorTargetState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.DepthStencilState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.Extent3D
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.FragmentState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
@@ -35,6 +36,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescr
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PrimitiveState
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDepthStencilAttachment
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerBindingLayout
@@ -438,6 +440,15 @@ class WasmtimeCmLinker(
                 require(prim.isRecord) { "expected primitive-state record" }
                 PrimitiveState(topology = prim.asRecord().getValue("topology").asU32().toInt())
             }
+            val depthStencil = parseOptionalRecord(fields.getValue("depth-stencil"))?.let { ds ->
+                require(ds.isRecord) { "expected depth-stencil-state record" }
+                val dsFields = ds.asRecord()
+                DepthStencilState(
+                    format = dsFields.getValue("format").asU32().toInt(),
+                    depthWriteEnabled = dsFields.getValue("depth-write-enabled").asBool(),
+                    depthCompare = dsFields.getValue("depth-compare").asU32().toInt(),
+                )
+            }
             return RenderPipelineDescriptor(
                 vertex = VertexState(
                     module = GpuHandle(vertexFields.getValue("module").asU32().toInt()),
@@ -451,6 +462,7 @@ class WasmtimeCmLinker(
                 ),
                 layout = GpuHandle(fields.getValue("layout").asU32().toInt()),
                 primitive = primitive,
+                depthStencil = depthStencil,
                 label = parseOptionalString(fields.getValue("label")),
             )
         }
@@ -480,8 +492,19 @@ class WasmtimeCmLinker(
                     storeOp = attFields.getValue("store-op").asU32().toInt(),
                 )
             }
+            val depthAttachment = parseOptionalRecord(fields.getValue("depth-stencil-attachment"))?.let { depth ->
+                require(depth.isRecord) { "expected render-pass-depth-stencil-attachment record" }
+                val depthFields = depth.asRecord()
+                RenderPassDepthStencilAttachment(
+                    view = GpuHandle(depthFields.getValue("view").asU32().toInt()),
+                    depthClearValue = depthFields.getValue("depth-clear-value").asF32(),
+                    depthLoadOp = depthFields.getValue("depth-load-op").asU32().toInt(),
+                    depthStoreOp = depthFields.getValue("depth-store-op").asU32().toInt(),
+                )
+            }
             return RenderPassDescriptor(
                 colorAttachments = attachments,
+                depthStencilAttachment = depthAttachment,
                 label = parseOptionalString(fields.getValue("label")),
             )
         }
@@ -539,6 +562,19 @@ class WasmtimeCmLinker(
                     paramU32(params, 1),
                     paramU64(params, 2),
                     params[3].asByteArray(),
+                )
+            },
+        )
+        define(
+            AbiCm.Func.QUEUE_WRITE_TEXTURE,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.queueWriteTexture(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    params[2].asByteArray(),
+                    paramU32(params, 3),
+                    paramU32(params, 4),
+                    paramU32(params, 5),
                 )
             },
         )
@@ -776,6 +812,16 @@ class WasmtimeCmLinker(
             AbiCm.Func.RENDER_PASS_SET_PIPELINE,
             ComponentHostFunction.voidFunctionWithParams { params ->
                 bindings.renderPassSetPipeline(paramU32(params, 0), paramU32(params, 1))
+            },
+        )
+        define(
+            AbiCm.Func.RENDER_PASS_SET_BIND_GROUP,
+            ComponentHostFunction.voidFunctionWithParams { params ->
+                bindings.renderPassSetBindGroup(
+                    paramU32(params, 0),
+                    paramU32(params, 1),
+                    paramU32(params, 2),
+                )
             },
         )
         define(

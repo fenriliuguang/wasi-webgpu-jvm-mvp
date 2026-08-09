@@ -4,13 +4,13 @@
 
 Experimental **Component Model** Guest：上屏红三角（one-shot + 宿主驱动帧循环）。
 
-- Imports `experimental:webgpu-cm/host@0.7.0`（WIT resources + methods；钉在 `wit/`）
+- Imports `experimental:webgpu-cm/host@0.8.0`（WIT resources + methods；钉在 `wit/`）
 - **Not** compliant `wasi:webgpu` / wasi-gfx
 - Exports:
   - `run-triangle` — 单次 configure → draw → present → unconfigure
   - `init-triangle` / `draw-frame` / `drop-triangle` — 宿主驱动帧循环
 - Host 注入 Android native window；Guest **只持** `surface`
-- 顶点经 `create-buffer` + `write-buffer` + `set-vertex-buffer`（`create-render-pipeline-triangle-buffers` / `@location(0)`）
+- 顶点经 `create-buffer` + `write-buffer` + `set-vertex-buffer`；标准 `create-render-pipeline` / `begin-render-pass` / `queue.submit(list)`
 
 ## Rebuild
 
