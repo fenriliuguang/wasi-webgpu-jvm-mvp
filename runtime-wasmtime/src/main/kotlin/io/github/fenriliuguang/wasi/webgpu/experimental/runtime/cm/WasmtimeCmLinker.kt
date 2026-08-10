@@ -41,12 +41,15 @@ class WasmtimeCmLinker(
     private val componentEngine: ComponentEngine = runtime.createComponentEngine()
     private val engine: Engine = runtime.createEngine(ComponentEngineConfig().toEngineConfig())
     private val store: Store = runtime.createStore(engine)
+    private val bindings = AbiCmHostBindings(host)
+
+    /** Same bindings registered into the Component linker (lifetime safety nets / diagnostics). */
+    fun abiBindings(): AbiCmHostBindings = bindings
 
     fun instantiate(componentBytes: ByteArray): ComponentInstance {
         require(runtime.supportsComponentModel()) {
             "wasmtime4j runtime does not report Component Model support"
         }
-        val bindings = AbiCmHostBindings(host)
         val linker: ComponentLinker<Any> = runtime.createComponentLinker(engine)
         registerExperimentalResources(linker)
         registerWasiResources(linker)

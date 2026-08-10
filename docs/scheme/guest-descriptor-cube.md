@@ -2,9 +2,9 @@
 
 **中文** | [English](guest-descriptor-cube.en.md)
 
-> **状态：进行中（2026-08-10）。** 切片 **A ✅ / B ✅ / C ✅**；D 未开始。  
+> **状态：已完成（2026-08-10）。** 切片 **A–D ✅**；归档 [`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)。  
 > 承接：合规 World A–G 归档（[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)）。  
-> 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B ✅）→ wasi 主路径子集接线（C）→ 资源生命周期加固（D）。
+> 组合：Natives 解锁（A ✅）→ Guest 标准 descriptor + 立方体 Demo（B ✅）→ wasi 主路径子集接线（C ✅）→ 资源生命周期加固（D ✅，仍非真 WIT dtor）。
 
 ## 一句话
 
@@ -63,9 +63,9 @@ A 重编 Android CM natives（嵌套 borrow）
 
 ### D — 资源生命周期加固
 
-- [ ] 在 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) 约束下推进其一（或组合）：(1) rep-only destructor overlay / 本仓可维护接线；(2) 强化 View↔Texture `tryDrop` + 帧/Session 释放保险并 **明确文档化**与真 WIT dtor 的偏差
-- [ ] 立方体多帧旋转下无句柄泄漏症状（对照既有 D2/D3/D6 习惯：共享 Session、`releaseAllGpuObjects` 可留作交接保险）
-- [ ] **不对**上游提 PR；若仅文档收口亦须在本切片 DoD 勾选并写清「仍非真 dtor」
+- [x] 在 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) 约束下选 **(2)**：强化 View↔Texture `tryDrop` + 帧/Session 释放保险并 **明确文档化**与真 WIT dtor 的偏差；**(1) `JniComponentLinker` rep-only overlay 不做**（jni 私有路径维护成本高）
+- [x] 多帧：`AbiCmHostBindingsTest` Cpu fake surface ×60 帧无 Texture/View 累积；`releaseLifetimeSafetyNets` 挂在 `WasmtimeCmCube.Session`；Demo 仍可 `releaseAllGpuObjects` 交接（D2/D3/D6）
+- [x] **不对**上游提 PR；DoD 写明 **仍非真 WIT dtor**（`dropRep` 仅占位入口）
 
 ## 本阶段不做
 
@@ -88,7 +88,7 @@ A 重编 Android CM natives（嵌套 borrow）
 2. **B** Guest 标准 descriptor 迁移 + 开源纹理旋转立方体 + 映射/仪器  
 3. **C** wasi 主路径子集接线 + 双轨/缺口文档（不阻塞 B 关门亦可后置收口）  
 4. **D** 生命周期加固或偏差文档化  
-5. 文档收口：本页 DoD 全勾 → `archive-guest-descriptor-cube-dod.md`（届时新建）；根 README / scheme / CHANGELOG  
+5. 文档收口：本页 DoD 全勾 → [`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)；根 README / scheme / CHANGELOG  
 
 ## 链接
 

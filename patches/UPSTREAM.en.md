@@ -18,7 +18,7 @@ Rely on in-repo **overlay / filtered-jar / local patches** for the long term; dr
 | Native Android / CM resources patches | Diffs in-tree; build scripts `git apply` | `scripts/build-wasmtime4j-*.ps1` |
 | Java `ConcurrentCallCodec` unsigned-u64 | Not fixed upstream; primary note | android-demo filtered jar + local class |
 | Java `Validation` TBI handles | Not fixed upstream | same overlay |
-| CM resource destructor → Host `drop(rep)` | Gap recorded (phase B) | AbiCm View↔Texture pairing + `releaseFrame*` insurance |
+| CM resource destructor → Host `drop(rep)` | **Still not true dtor** (guest-descriptor-cube D, 2026-08-10) | Strengthened frame-equivalent nets (see §4); **no** full `JniComponentLinker` overlay / upstream PR |
 
 ---
 
@@ -106,13 +106,27 @@ This repo’s L1 treats WIT resource reps as **L2 `GpuHandle.raw` (u32)** and do
 
 So even with `.destructor { … }`:
 
-1. JNI `dispatchDestructor` does `resourceTable.delete(rep)` first
-2. Table miss → **Consumer never runs**
-3. Guest drops leave Dawn objects pinned in the Host table (Surface/Texture, …)
+1. JNI `JniComponentLinker.dispatchDestructorCallback` → `lambda$defineResource$1`
+2. `resourceTable.delete(rep)` first; table miss → **`Optional.ifPresent` skips the Consumer**
+3. Guest drops may leave Dawn objects pinned in the Host table (Surface/Device, …)
 
-In-repo mitigation (phase B): AbiCm **View↔Texture pairing** via `tryDrop` + `releaseFrameResources` / Demo `releaseAllGpuObjects` — **not** true WIT destructors.
+### guest-descriptor-cube D (2026-08-10) decision
 
-### Desired behavior (if upstream fixes on its own; we do not submit)
+| Option | Choice here |
+|--------|-------------|
+| (1) rep-only destructor overlay (change `JniComponentLinker` so miss still calls Host with rep) | **Skip** — class lives in `wasmtime4j-jni` with many natives / private lambdas; full overlay is brittle |
+| (2) Strengthen View↔Texture `tryDrop` + frame/Session nets and **document** the gap | **Done** — below |
+
+**Still not true WIT dtors.** `AbiCmHostBindings.dropRep` is the Host entry point for a future overlay; Guest `drop` does **not** reach it today.
+
+In-repo mitigation (frame-equivalent + handoff insurance):
+
+- AbiCm: `frameTextureByView` `tryDrop` on present / next acquire / `surfaceUnconfigure` / `releaseLifetimeSafetyNets`
+- `WasmtimeCmCube.Session`: call `releaseLifetimeSafetyNets` at end of `runCube` / `runFrameLoop` / `close`
+- Demo / instrumented: reuse Session + `releaseAllGpuObjects` to free ANativeWindow (D2/D3/D6; may remain as handoff insurance)
+- Unit: `AbiCmHostBindingsTest.multiFrameAcquirePresentDoesNotAccumulateSwapchainHandles` (Cpu fake surface ×60 frames)
+
+### Desired alignment (if upstream fixes on its own; we do not submit)
 
 **A (fits L2-rep hosts)**  
 On `resourceTable` miss, still invoke an optional `IntConsumer` / destructor with the **rep u32** (host maps into its own table).
@@ -120,7 +134,7 @@ On `resourceTable` miss, still invoke an optional `IntConsumer` / destructor wit
 **B**  
 Document that destructors only run when `.constructor` populated `resourceTable`; provide a “rep-only host resources” example.
 
-Related: existing CM resources native patch (§1). Plan: [`docs/scheme/semantic-hardening.en.md`](../docs/scheme/semantic-hardening.en.md) slice B.
+Related: existing CM resources native patch (§1). Plan: [`docs/scheme/guest-descriptor-cube.en.md`](../docs/scheme/guest-descriptor-cube.en.md) slice D.
 
 ---
 
@@ -130,6 +144,6 @@ Related: existing CM resources native patch (§1). Plan: [`docs/scheme/semantic-
 |-------|----------|-------------------------------------|
 | Native `.so` | Build-time `git apply` of in-tree patches | Bump dependency; drop matching patch hunks |
 | Java Validation / ConcurrentCallCodec | Filter Maven jar + same-package overlay in android-demo | Remove `filterWasmtime4jJar` excludes + local classes |
-| Frame Texture cleanup | AbiCm pairing + Host sweep | If §4A-like behavior appears, narrow sweep reliance |
+| Frame Texture cleanup | AbiCm pairing + Session `releaseLifetimeSafetyNets` + Demo `releaseAllGpuObjects` | If §4A-like behavior appears, narrow sweep reliance |
 
-**Phase C acceptance:** in-repo notes are enough; **do not open upstream issues/PRs**.
+**Acceptance:** in-repo notes + frame-equivalent nets are enough; **do not open upstream issues/PRs**. Still not true WIT dtor.

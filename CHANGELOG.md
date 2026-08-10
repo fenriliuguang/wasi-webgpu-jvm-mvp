@@ -5,6 +5,13 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### guest-descriptor-cube slice D — resource-lifetime hardening (still not true WIT dtor)
+
+- Chose frame-equivalent nets over `JniComponentLinker` rep-only overlay: AbiCm `dropRep` / `releaseLifetimeSafetyNets`; clear View↔Texture on present / next acquire / unconfigure; `WasmtimeCmCube.Session` calls nets after `runCube` / `runFrameLoop` / `close`
+- Cpu fake surface for desktop lifetime tests; `AbiCmHostBindingsTest` ×60 acquire/present with no Texture/View growth
+- Docs: UPSTREAM §4 decision; guest-descriptor-cube D checked + [`archive-guest-descriptor-cube-dod.md`](docs/scheme/archive-guest-descriptor-cube-dod.md); README / scheme / threading sync
+- **Still not true WIT dtor** (wasmtime4j `resourceTable` miss); no upstream PR; Demo `releaseAllGpuObjects` may remain as Session handoff insurance
+
 ### guest-descriptor-cube slice C — wasi primary-path subset wiring
 
 - `WasmtimeCmLinker`: after experimental imports, `registerWasiImports` wires ~33 `PRIMARY_PATH` wasi:webgpu methods onto the same `AbiCmHostBindings` / GpuHandle space; stubs skip wired names
@@ -36,7 +43,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Guest standard descriptors on device + rotating textured cube** docs-locked (2026-08-09): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / [EN](docs/scheme/guest-descriptor-cube.en.md) — slices A (Android CM natives) → B (standard descriptors + slow rotating open-licensed textured cube) → C (wasi primary-path subset wiring) → D (resource lifetime). **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌. Primary acceptance remains experimental; **A ✅ / B ✅ / C ✅** (see above)
+- **Guest standard descriptors on device + rotating textured cube** (2026-08-09→10): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / archive [`archive-guest-descriptor-cube-dod.md`](docs/scheme/archive-guest-descriptor-cube-dod.md) — slices A–D complete. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌, true WIT dtor overlay. Primary acceptance remains experimental CM cube
 
 ### Docs sync
 

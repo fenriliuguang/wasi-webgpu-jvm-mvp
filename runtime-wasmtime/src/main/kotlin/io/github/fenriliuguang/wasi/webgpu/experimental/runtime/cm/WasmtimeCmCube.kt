@@ -30,12 +30,16 @@ object WasmtimeCmCube {
             check(!closed) { "CM cube session is closed" }
             require(windowHandle != 0L) { "window-handle is null" }
             require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
-            invokeNamed(
-                AbiCm.EXPORT_RUN_CUBE,
-                ComponentVal.u64(windowHandle),
-                ComponentVal.u32(Integer.toUnsignedLong(width)),
-                ComponentVal.u32(Integer.toUnsignedLong(height)),
-            )
+            try {
+                invokeNamed(
+                    AbiCm.EXPORT_RUN_CUBE,
+                    ComponentVal.u64(windowHandle),
+                    ComponentVal.u32(Integer.toUnsignedLong(width)),
+                    ComponentVal.u32(Integer.toUnsignedLong(height)),
+                )
+            } finally {
+                runCatching { linker.abiBindings().releaseLifetimeSafetyNets() }
+            }
         }
 
         fun initCube(windowHandle: Long, width: Int, height: Int) {
@@ -81,6 +85,9 @@ object WasmtimeCmCube {
                 drawError = t
             } finally {
                 val dropResult = runCatching { dropCube() }
+                // guest-descriptor-cube D: clear View↔Texture map + encoder orphans before Demo
+                // releaseAllGpuObjects handoff (still not true WIT dtor — see patches/UPSTREAM.md §4).
+                runCatching { linker.abiBindings().releaseLifetimeSafetyNets() }
                 drawError?.let { throw it }
                 dropResult.getOrThrow()
             }
@@ -89,6 +96,7 @@ object WasmtimeCmCube {
         override fun close() {
             if (closed) return
             closed = true
+            runCatching { linker.abiBindings().releaseLifetimeSafetyNets() }
             runCatching { linker.close() }
             if (ownedHost) {
                 Thread.sleep(100)

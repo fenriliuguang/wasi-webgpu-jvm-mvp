@@ -23,6 +23,8 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     private class Texture(var texels: ByteArray? = null)
     private class TextureView
     private class ComputePipeline(val shader: ShaderModule)
+    /** Fake Android surface for AbiCm View↔Texture lifetime tests (not a real window). */
+    private class Surface(var configured: Boolean = false)
 
     private class CommandEncoder {
         val copies = ArrayList<CopyOp>()
@@ -312,8 +314,10 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         buf.mapped = false
     }
 
-    override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle =
-        throw HostException.Unsupported("Android surface (Cpu host)")
+    override fun instanceCreateSurfaceFromAndroidNativeWindow(nativeWindowHandle: Long): GpuHandle {
+        require(nativeWindowHandle != 0L) { "window-handle is null" }
+        return handles.insert(ResourceKind.Surface, Surface())
+    }
 
     override fun surfaceConfigure(
         surface: GpuHandle,
@@ -321,16 +325,40 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         adapter: GpuHandle,
         width: Int,
         height: Int,
-    ): Int = throw HostException.Unsupported("Android surface (Cpu host)")
+    ): Int {
+        require(width > 0 && height > 0) { "invalid surface size ${width}x$height" }
+        handles.get<Surface>(surface, ResourceKind.Surface).configured = true
+        handles.get<Device>(device, ResourceKind.Device)
+        handles.get<Adapter>(adapter, ResourceKind.Adapter)
+        return GpuTextureFormat.RGBA8_UNORM
+    }
 
-    override fun surfaceUnconfigure(surface: GpuHandle) =
-        throw HostException.Unsupported("Android surface (Cpu host)")
+    override fun surfaceUnconfigure(surface: GpuHandle) {
+        handles.get<Surface>(surface, ResourceKind.Surface).configured = false
+    }
 
-    override fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult =
-        throw HostException.Unsupported("Android surface (Cpu host)")
+    /**
+     * Allocates a fresh fake swapchain [ResourceKind.Texture] per acquire so AbiCm
+     * View↔Texture pairing / multi-frame leak tests can run on desktop without Dawn.
+     */
+    override fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult {
+        val s = handles.get<Surface>(surface, ResourceKind.Surface)
+        if (!s.configured) {
+            throw HostException.Validation("surface not configured")
+        }
+        val texture = handles.insert(ResourceKind.Texture, Texture())
+        return SurfaceTextureResult(SurfaceTextureStatus.SuccessOptimal, texture)
+    }
 
-    override fun surfacePresent(surface: GpuHandle) =
-        throw HostException.Unsupported("Android surface (Cpu host)")
+    override fun surfacePresent(surface: GpuHandle) {
+        handles.get<Surface>(surface, ResourceKind.Surface)
+    }
+
+    /** Test / diagnostics: live handle-table size. */
+    fun handleCount(): Int = handles.size()
+
+    /** Test / diagnostics: live handles of [kind]. */
+    fun handleCount(kind: ResourceKind): Int = handles.handlesOfKind(kind).size
 
     override fun deviceCreateRenderPipelineTriangle(
         device: GpuHandle,

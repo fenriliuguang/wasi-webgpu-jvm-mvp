@@ -62,8 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md)
-- **Next phase**: **in progress** — [Guest standard descriptors on device + rotating textured cube (A–D)](docs/scheme/guest-descriptor-cube.en.md) (**A ✅ B ✅**; C–D not started); **device acceptance baseline = CM cube** (vector-add / triangle demos removed); no wasi-gfx / compliance marketing / true CM async / upstream PRs; Maven / `abi-mvp` render / perf still deferred
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md); **Guest standard descriptors + rotating textured cube (A–D, 2026-08-10)** → [archive](docs/scheme/archive-guest-descriptor-cube-dod.en.md) (D: **still not true WIT dtor**)
+- **Next**: deferred — Maven / `abi-mvp` render / optional perf; **no** wasi-gfx / compliance marketing / true CM async / upstream PRs / true dtor overlay. **Device acceptance baseline = CM cube**
 
 ## References
 
@@ -81,7 +81,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Semantic hardening plan (complete) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
 | Compliant-world DoD archive (complete, no gfx) | [docs/scheme/archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |
 | Compliant-world plan (complete, no gfx) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
-| Guest standard descriptors + rotating textured cube (docs-locked) | [docs/scheme/guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
+| Guest standard descriptors + cube DoD archive (complete) | [docs/scheme/archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
+| Guest standard descriptors + rotating textured cube (plan, complete) | [docs/scheme/guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
 | Compliant-world gap matrix | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
 | Compliant-world dual-track | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
 | Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |

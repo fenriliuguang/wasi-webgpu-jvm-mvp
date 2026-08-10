@@ -46,9 +46,10 @@ guest/cube-cm (cube_cm.wasm, world cube) @0.8.0
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
 - **One-shot** (`run-triangle` / `run-cube`): configure → draw → present → unconfigure; default instrumented path
 - **Vertex buffer:** Guest `create-buffer` + `write-buffer` → standard `create-render-pipeline` → `set-vertex-buffer` + `draw`
-- **Frame loop** (host-driven): `init-*` → loop `draw-frame` → `drop-*`; Demo `TriangleCmOneShot` / `CubeCmOneShot` (reuse Session + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
-- **Acceptance**: instrumented triangle wave2 + cube wave3 (separate processes); Demo pause→CM→resume
-- **Desktop**: without an Android Surface, `CpuWasiWebGpuHost` → Unsupported and related unit tests skip (same gating as CM compute)
+- **Frame loop** (host-driven): `init-cube` → loop `draw-frame` → `drop-cube`; Demo `CubeCmOneShot` (reuse Session + `releaseLifetimeSafetyNets` + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
+- **Lifetime**: swapchain View↔Texture frame-equivalent `tryDrop`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4)
+- **Acceptance**: instrumented CM cube; Demo pause→CM→resume
+- **Desktop**: Cpu fake surface supports AbiCm multi-frame lifetime unit tests; full CM Guest on-screen still needs Android Surface / Dawn
 - **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md))
 
 ## Explicitly out of scope (this slice)

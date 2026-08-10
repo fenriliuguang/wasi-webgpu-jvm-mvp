@@ -29,15 +29,40 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
  * WIT resource reps arrive as u32 and map 1:1 to L2 [GpuHandle.raw].
  * No Guest linear-memory dependency — buffer bytes arrive as [ByteArray].
  *
- * Slice B: tracks View↔Texture pairs created by [surfaceGetCurrentTextureView] because
- * Texture is not a WIT resource and Guest never sees its rep. Pairs are [WasiWebGpuHost.tryDrop]ped
- * on present / next acquire; [WasiWebGpuHost.releaseFrameResources] still sweeps encoders/orphans.
+ * Frame lifetime (guest-descriptor-cube D): tracks View↔Texture pairs from
+ * [surfaceGetCurrentTextureView] because Texture is not a WIT resource and Guest never sees its
+ * rep. Pairs are [WasiWebGpuHost.tryDrop]ped on present / next acquire / unconfigure / session
+ * handoff. [WasiWebGpuHost.releaseFrameResources] still sweeps encoder orphans.
+ *
+ * **Still not true WIT destructors** — wasmtime4j `resourceTable` miss skips `.destructor`
+ * (see patches/UPSTREAM.md §4). Demo may keep [WasiWebGpuHost.releaseAllGpuObjects] as Session
+ * handoff insurance (D2/D3/D6).
  */
 class AbiCmHostBindings(
     private val host: WasiWebGpuHost,
 ) {
     /** view.raw → texture.raw for the current (or last) acquired swapchain frame. */
     private val frameTextureByView = LinkedHashMap<Int, Int>()
+
+    /**
+     * Host-side drop for a WIT resource rep (L2 [GpuHandle.raw]).
+     * Idempotent. Intended entry for a future rep-only destructor overlay; today Guest `drop`
+     * does not reach this path (see UPSTREAM §4).
+     */
+    fun dropRep(rep: Int): Boolean = host.tryDrop(GpuHandle(rep))
+
+    /** Live View↔Texture pairs awaiting present / next acquire (test / diagnostics). */
+    fun trackedFramePairCount(): Int = frameTextureByView.size
+
+    /**
+     * Drop tracked swapchain pairs + encoder orphans.
+     * Call after Guest `drop-*` / before [WasiWebGpuHost.releaseAllGpuObjects] handoff so the
+     * pairing map cannot retain stale reps across Session reuse.
+     */
+    fun releaseLifetimeSafetyNets() {
+        releaseTrackedFrameTextures()
+        host.releaseFrameResources()
+    }
 
     fun requestAdapter(): Int = host.requestAdapter().raw
 
@@ -236,6 +261,8 @@ class AbiCmHostBindings(
     }
 
     fun surfaceUnconfigure(surface: Int) {
+        // Guest may unconfigure while a View↔Texture pair is still tracked (failed present, etc.).
+        releaseTrackedFrameTextures()
         host.surfaceUnconfigure(GpuHandle(surface))
     }
 

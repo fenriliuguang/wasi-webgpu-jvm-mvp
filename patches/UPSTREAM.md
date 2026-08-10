@@ -18,7 +18,7 @@
 | Native Android / CM resources patches | 已入库 diff，构建脚本 `git apply` | `scripts/build-wasmtime4j-*.ps1` |
 | Java `ConcurrentCallCodec` unsigned-u64 | 上游未修；备忘优先项 | android-demo 过滤 jar + 本地类 |
 | Java `Validation` TBI 句柄 | 上游未修 | 同上 |
-| CM resource destructor → Host `drop(rep)` | 缺口已记录（本阶段 B） | AbiCm View↔Texture 配对 + `releaseFrame*` 保险 |
+| CM resource destructor → Host `drop(rep)` | **仍非真 dtor**（guest-descriptor-cube D，2026-08-10） | 帧等价保险强化（见 §4）；**不做** `JniComponentLinker` 全量 overlay / 上游 PR |
 
 ---
 
@@ -106,13 +106,27 @@ E JniComponentLinker: Host function callback failed for ID: …
 
 因此即使用 `.destructor { … }`：
 
-1. JNI `dispatchDestructor` 先 `resourceTable.delete(rep)`
-2. table miss → **Consumer 永不执行**
-3. Guest `drop` 资源时 Host 句柄表仍钉住 Dawn 对象（Surface/Texture 等）
+1. JNI `JniComponentLinker.dispatchDestructorCallback` → `lambda$defineResource$1`
+2. 先 `resourceTable.delete(rep)`；table miss → **`Optional.ifPresent` 跳过 Consumer**
+3. Guest `drop` 资源时 Host 句柄表仍可能钉住 Dawn 对象（Surface/Device 等）
 
-本仓对策（本阶段 B）：AbiCm **View↔Texture 配对** `tryDrop` + `releaseFrameResources` / Demo `releaseAllGpuObjects` 保险——**不是**真 WIT destructor。
+### guest-descriptor-cube D（2026-08-10）决策
 
-### 期望行为（若上游自行修复；本仓不代提）
+| 选项 | 本仓选择 |
+|------|----------|
+| (1) rep-only destructor overlay（改 `JniComponentLinker`：miss 时仍以 rep 调 Host） | **不做** — 类在 `wasmtime4j-jni`、含大量 native / private lambda；全量 overlay 维护成本高且易随上游漂移 |
+| (2) 强化 View↔Texture `tryDrop` + 帧/Session 释放保险并 **明确文档化** | **已做** — 见下 |
+
+**仍非真 WIT dtor。** `AbiCmHostBindings.dropRep` 是未来 overlay 的 Host 入口占位，今日 Guest `drop` **不会**走到该路径。
+
+本仓对策（帧等价 + 交接保险）：
+
+- AbiCm：`frameTextureByView` 在 present / 下次 acquire / `surfaceUnconfigure` / `releaseLifetimeSafetyNets` 时 `tryDrop` 配对
+- `WasmtimeCmCube.Session`：`runCube` / `runFrameLoop` / `close` 末尾调用 `releaseLifetimeSafetyNets`
+- Demo / 仪器：复用 Session + `releaseAllGpuObjects` 交还 ANativeWindow（D2/D3/D6；可留作交接保险）
+- 单测：`AbiCmHostBindingsTest.multiFrameAcquirePresentDoesNotAccumulateSwapchainHandles`（Cpu fake surface ×60 帧）
+
+### 期望对齐（若上游自行修复；本仓不代提）
 
 **A（兼容 L2-rep 模型）**  
 `resourceTable` miss 时仍调用可选 `IntConsumer` / destructor，参数为 **rep u32**（由 host 自行映射到自有表）。
@@ -120,7 +134,7 @@ E JniComponentLinker: Host function callback failed for ID: …
 **B**  
 文档明确：destructor 仅在走了 `.constructor` 填充 `resourceTable` 时生效；并提供「rep-only host resources」示例。
 
-相关：已有 CM resources native patch（§1）。本仓计划：[`docs/scheme/semantic-hardening.md`](../docs/scheme/semantic-hardening.md) 子切片 B。
+相关：已有 CM resources native patch（§1）。承接计划：[`docs/scheme/guest-descriptor-cube.md`](../docs/scheme/guest-descriptor-cube.md) 切片 D。
 
 ---
 
@@ -130,6 +144,6 @@ E JniComponentLinker: Host function callback failed for ID: …
 |----|------|------------------------|
 | Native `.so` | 构建时 `git apply` 入库 patch | 升依赖版本；可删对应 patch 段 |
 | Java Validation / ConcurrentCallCodec | 过滤 Maven jar + android-demo 同名包覆盖 | 去掉 `filterWasmtime4jJar` exclude 与本地类 |
-| 帧 Texture 清理 | AbiCm 配对 + Host sweep | 若 §4A 类行为出现，可收窄 sweep 语义依赖 |
+| 帧 Texture 清理 | AbiCm 配对 + Session `releaseLifetimeSafetyNets` + Demo `releaseAllGpuObjects` | 若 §4A 类行为出现，可收窄 sweep 语义依赖 |
 
-**C 验收**：本仓备忘写清即可；**不对上游提 issue/PR**。
+**验收**：本仓备忘 + 帧等价保险即可；**不对上游提 issue/PR**。仍非真 WIT dtor。

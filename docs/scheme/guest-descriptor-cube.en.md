@@ -2,9 +2,9 @@
 
 [中文](guest-descriptor-cube.md) | **English**
 
-> **Status: in progress (2026-08-10).** Slices **A ✅ / B ✅ / C ✅**; D not started.  
+> **Status: complete (2026-08-10).** Slices **A–D ✅**; archive [`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md).  
 > Continues from: compliant-world A–G archive ([`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md)).  
-> Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B ✅) → wasi primary-path subset wiring (C) → resource-lifetime hardening (D).
+> Composition: natives unlock (A ✅) → Guest standard descriptors + cube demo (B ✅) → wasi primary-path subset wiring (C ✅) → resource-lifetime hardening (D ✅, still not true WIT dtor).
 
 ## One-liner
 
@@ -63,9 +63,9 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (19 �
 
 ### D — Resource-lifetime hardening
 
-- [ ] Under [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md), advance one (or both): (1) rep-only destructor overlay / maintainable in-repo hook; (2) strengthen View↔Texture `tryDrop` + frame/Session safety nets and **document** the gap vs true WIT dtors
-- [ ] No handle-leak symptoms across many rotating cube frames (reuse D2/D3/D6 habits: shared Session, `releaseAllGpuObjects` may remain as handoff insurance)
-- [ ] **No** upstream PR; docs-only close-out is allowed if DoD states “still not true dtor”
+- [x] Under [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md), chose **(2)**: strengthen View↔Texture `tryDrop` + frame/Session nets and **document** the gap vs true WIT dtors; **skip (1)** full `JniComponentLinker` rep-only overlay (brittle jni private path)
+- [x] Multi-frame: `AbiCmHostBindingsTest` Cpu fake surface ×60 frames with no Texture/View growth; `releaseLifetimeSafetyNets` on `WasmtimeCmCube.Session`; Demo may keep `releaseAllGpuObjects` handoff (D2/D3/D6)
+- [x] **No** upstream PR; DoD states **still not true WIT dtor** (`dropRep` is a placeholder entry only)
 
 ## Out of scope
 
@@ -88,7 +88,7 @@ Refs: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) (19 �
 2. **B** Guest standard-descriptor migration + open-licensed rotating textured cube + mapping/instrumented  
 3. **C** wasi primary-path subset wiring + dual-track/gap docs (may finish after B close-out)  
 4. **D** Lifetime hardening or documented deviation  
-5. Docs close-out: check all DoD → `archive-guest-descriptor-cube-dod.md` (create then); root README / scheme / CHANGELOG  
+5. Docs close-out: check all DoD → [`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md); root README / scheme / CHANGELOG  
 
 ## Links
 

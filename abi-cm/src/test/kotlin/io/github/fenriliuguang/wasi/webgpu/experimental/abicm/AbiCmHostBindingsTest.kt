@@ -3,7 +3,10 @@ package io.github.fenriliuguang.wasi.webgpu.experimental.abicm
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.CpuWasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuBufferUsage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuMapMode
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -42,6 +45,56 @@ class AbiCmHostBindingsTest {
             val mapped = bindings.bufferGetMappedRange(buffer, 0, 16)
             bindings.bufferUnmap(buffer)
             assertArrayEquals(ByteArray(16), mapped)
+        }
+    }
+
+    @Test
+    fun multiFrameAcquirePresentDoesNotAccumulateSwapchainHandles() {
+        CpuWasiWebGpuHost().use { host ->
+            val bindings = AbiCmHostBindings(host)
+            val adapter = bindings.requestAdapter()
+            val device = bindings.adapterRequestDevice(adapter)
+            val surface = bindings.createSurfaceFromNativeWindow(0xDEADL)
+            bindings.surfaceConfigure(surface, device, adapter, 64, 64)
+
+            val baseline = host.handleCount()
+            repeat(60) {
+                val view = bindings.surfaceGetCurrentTextureView(surface)
+                assertTrue(view > 0)
+                assertEquals(1, bindings.trackedFramePairCount())
+                bindings.surfacePresent(surface)
+                assertEquals(0, bindings.trackedFramePairCount())
+            }
+
+            assertEquals(baseline, host.handleCount())
+            assertEquals(0, host.handleCount(ResourceKind.Texture))
+            assertEquals(0, host.handleCount(ResourceKind.TextureView))
+        }
+    }
+
+    @Test
+    fun dropRepAndUnconfigureClearTrackedPairs() {
+        CpuWasiWebGpuHost().use { host ->
+            val bindings = AbiCmHostBindings(host)
+            val adapter = bindings.requestAdapter()
+            val device = bindings.adapterRequestDevice(adapter)
+            val surface = bindings.createSurfaceFromNativeWindow(0xBEEFL)
+            bindings.surfaceConfigure(surface, device, adapter, 32, 32)
+
+            val view = bindings.surfaceGetCurrentTextureView(surface)
+            assertEquals(1, bindings.trackedFramePairCount())
+            assertTrue(bindings.dropRep(view))
+            assertFalse(bindings.dropRep(view))
+
+            bindings.releaseLifetimeSafetyNets()
+            assertEquals(0, bindings.trackedFramePairCount())
+            assertEquals(0, host.handleCount(ResourceKind.Texture))
+            assertEquals(0, host.handleCount(ResourceKind.TextureView))
+
+            bindings.surfaceGetCurrentTextureView(surface)
+            assertEquals(1, bindings.trackedFramePairCount())
+            bindings.surfaceUnconfigure(surface)
+            assertEquals(0, bindings.trackedFramePairCount())
         }
     }
 }

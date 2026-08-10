@@ -18,12 +18,12 @@
 
 ## Surface / render (CM Guest)
 
-- The CM path uses a **separate** `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-triangle-cm`); do **not** share it across threads with the L2 Host.  
-- Host-driven frame loop: same thread `init-triangle` → loop `draw-frame` → `drop-triangle` (see `WasmtimeCmTriangle.Session.runFrameLoop`).  
-- Demo: `pauseSurfaceAndAwait` before CM (L2 `teardownGpu`); after CM `drop-triangle` → `releaseAllGpuObjects` (keep Instance/Session) → settle → `resumeSurfaceAndAwait`.  
+- The CM path uses a **separate** `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-cube-cm`); do **not** share it across threads with the L2 Host.  
+- Host-driven frame loop: same thread `init-cube` → loop `draw-frame` → `drop-cube` (see `WasmtimeCmCube.Session.runFrameLoop`).  
+- Demo: `pauseSurfaceAndAwait` before CM (L2 `teardownGpu`); after CM `drop-cube` → Session `releaseLifetimeSafetyNets` → `releaseAllGpuObjects` (keep Instance/Session) → settle → `resumeSurfaceAndAwait`.  
 - **Demo taps**: reuse Host + Session; each press `releaseAllGpuObjects` to free ANativeWindow (avoid back-to-back linker teardown). See [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md).  
-- **Instrumented**: reuse Session (`cmGuestRepeatTriangleReusesSession`).  
-- Frame resources: `releaseFrameResources` after present (Guest WIT destructors unwired).
+- **Instrumented**: reuse Session (CM cube).  
+- Frame resources: View↔Texture `tryDrop` on present / unconfigure / Session end + `releaseFrameResources`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4).
 
 ## Instance / Device / Queue
 
