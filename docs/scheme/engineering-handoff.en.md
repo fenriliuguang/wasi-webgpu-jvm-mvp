@@ -2,7 +2,7 @@
 
 [中文](engineering-handoff.md) | **English**
 
-> **Status: in progress (2026-08-10).** Slices **A–C** (C optional, non-blocking); **A/B done**; C not started.  
+> **Status: complete (2026-08-10).** Slices **A–C** closed; archive [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md).  
 > Continues from: Guest standard descriptors + cube A–D archive ([`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md)).  
 > Composition: Maven publishability engineering (A, no external release) → abi-mvp flat render (B) → optional perf notes (C).
 
@@ -53,9 +53,9 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 
 ### C — Optional perf (non-blocking)
 
-- [ ] Update [`docs/perf/p1-boundary.en.md`](../perf/p1-boundary.en.md): move anchors off deleted vector-add instrumented tests onto a reproducible current path (desktop CM cube smoke or abi-mvp subset; keep “not a formal benchmark”)
-- [ ] (Optional) Keep or add a non-gating timing smoke; failures must not block A/B
-- [ ] One-line CHANGELOG is enough; **no** FPS / speed-ratio DoD
+- [x] Update [`docs/perf/p1-boundary.en.md`](../perf/p1-boundary.en.md): move anchors off deleted vector-add instrumented tests onto a reproducible current path (desktop CM cube smoke or abi-mvp subset; keep “not a formal benchmark”)
+- [x] (Optional) Keep or add a non-gating timing smoke; failures must not block A/B
+- [x] One-line CHANGELOG is enough; **no** FPS / speed-ratio DoD
 
 ## Out of scope
 

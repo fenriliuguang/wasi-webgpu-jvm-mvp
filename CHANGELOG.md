@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Engineering handoff — slice C (optional perf notes) + phase close-out
+
+- Refresh [`docs/perf/p1-boundary.md`](docs/perf/p1-boundary.md) / EN: drop deleted vector-add anchors; point at abi-mvp flat / CM cube paths; mark informal (no JMH / ratio gate)
+- Non-gating smoke: `AbiMvpHostBindingsTest.boundaryNoteTimingSmoke` (abi-mvp flat vs direct L2 averages; prints only)
+- Archive [`docs/scheme/archive-engineering-handoff-dod.md`](docs/scheme/archive-engineering-handoff-dod.md); README / scheme mark engineering-handoff **complete** (A–C)
+
 ### Engineering handoff — slice B (abi-mvp flat surface/render)
 
 - Flat `wasi-webgpu-mvp` imports for surface configure / get-current-texture-view / present / unconfigure, triangle render-pipeline, begin-pass (clear + color/depth), set-pipeline / set-bind-group / set-vertex-buffer / draw / end, create-texture-2d / texture-create-view / write-texture
@@ -22,8 +28,8 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A/B done**; C not started. Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
-- **Memo (not this phase):** true CM async / WASI Preview3 — [`docs/scheme/true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); revisit only after engineering-handoff lands; sync-compat stays current
+- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A–C complete** → [`archive-engineering-handoff-dod.md`](docs/scheme/archive-engineering-handoff-dod.md). Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. Primary acceptance remains experimental CM cube
+- **Memo (not chartered):** true CM async / WASI Preview3 — [`docs/scheme/true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); sync-compat stays current
 
 ### Docs sync — archive + consistency (CM cube baseline)
 

@@ -5,11 +5,13 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuBufferUsage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureFormat
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureUsage
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VectorAddScenario
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.system.measureNanoTime
 
 class AbiMvpHostBindingsTest {
 
@@ -188,5 +190,112 @@ class AbiMvpHostBindingsTest {
             abi.surfaceUnconfigure(surface)
             assertEquals(0, abi.trackedFramePairCount())
         }
+    }
+
+    /**
+     * Informal boundary note for docs/perf — prints averages only.
+     * Never fails on timing ratios (not a CI perf gate / not JMH).
+     */
+    @Test
+    fun boundaryNoteTimingSmoke() {
+        val iterations = 40
+        val shaderCode = "@vertex fn vs_main() -> @builtin(position) vec4f { return vec4f(0.0); }"
+        val heap = ByteArray(1 * 1024)
+        val shaderBytes = shaderCode.toByteArray()
+        System.arraycopy(shaderBytes, 0, heap, 0, shaderBytes.size)
+        val memory = object : GuestMemory {
+            override fun readBytes(ptr: Int, len: Int): ByteArray = heap.copyOfRange(ptr, ptr + len)
+            override fun writeBytes(ptr: Int, data: ByteArray) {
+                System.arraycopy(data, 0, heap, ptr, data.size)
+            }
+        }
+
+        fun runAbiPath() {
+            CpuWasiWebGpuHost().use { host ->
+                val abi = AbiMvpHostBindings(host) { memory }
+                val adapter = abi.requestAdapter()
+                val device = abi.adapterRequestDevice(adapter)
+                val queue = abi.deviceGetQueue(device)
+                val surface = abi.createSurfaceFromNativeWindow(0xCAFEL)
+                val format = abi.surfaceConfigure(surface, device, adapter, 16, 16)
+                val shader = abi.deviceCreateShaderModule(device, 0, shaderBytes.size)
+                val pipeline = abi.deviceCreateRenderPipelineTriangle(device, shader, format)
+                repeat(8) {
+                    val colorView = abi.surfaceGetCurrentTextureView(surface)
+                    val encoder = abi.deviceCreateCommandEncoder(device)
+                    val pass = abi.commandEncoderBeginRenderPassClear(
+                        encoder,
+                        colorView,
+                        0f,
+                        0f,
+                        0f,
+                        1f,
+                    )
+                    abi.renderPassSetPipeline(pass, pipeline)
+                    abi.renderPassDraw(pass, 3)
+                    abi.renderPassEnd(pass)
+                    abi.queueSubmit1(queue, abi.commandEncoderFinish(encoder))
+                    abi.surfacePresent(surface)
+                }
+                abi.surfaceUnconfigure(surface)
+            }
+        }
+
+        fun runDirectL2Path() {
+            CpuWasiWebGpuHost().use { host ->
+                val adapter = host.requestAdapter()
+                val device = host.adapterRequestDevice(adapter)
+                val queue = host.deviceGetQueue(device)
+                val surface = host.instanceCreateSurfaceFromAndroidNativeWindow(0xCAFEL)
+                val format = host.surfaceConfigure(surface, device, adapter, 16, 16)
+                val shader = host.deviceCreateShaderModule(
+                    device,
+                    ShaderModuleDescriptor(code = shaderCode),
+                )
+                val pipeline = host.deviceCreateRenderPipelineTriangle(device, shader, format)
+                repeat(8) {
+                    val result = host.surfaceGetCurrentTexture(surface)
+                    val texture = checkNotNull(result.texture)
+                    val colorView = host.textureCreateView(texture)
+                    val encoder = host.deviceCreateCommandEncoder(device)
+                    val pass = host.commandEncoderBeginRenderPassClear(
+                        encoder,
+                        colorView,
+                        0f,
+                        0f,
+                        0f,
+                        1f,
+                    )
+                    host.renderPassSetPipeline(pass, pipeline)
+                    host.renderPassDraw(pass, 3)
+                    host.renderPassEnd(pass)
+                    host.queueSubmit(queue, listOf(host.commandEncoderFinish(encoder)))
+                    host.surfacePresent(surface)
+                    host.tryDrop(colorView)
+                    host.tryDrop(texture)
+                }
+                host.surfaceUnconfigure(surface)
+            }
+        }
+
+        // Warm once (still informal — not a warmup matrix).
+        runAbiPath()
+        runDirectL2Path()
+
+        val abiNs = measureNanoTime {
+            repeat(iterations) { runAbiPath() }
+        }
+        val directNs = measureNanoTime {
+            repeat(iterations) { runDirectL2Path() }
+        }
+        val abiMs = abiNs / iterations / 1_000_000.0
+        val directMs = directNs / iterations / 1_000_000.0
+        println(
+            "boundaryNoteTimingSmoke (informal): " +
+                "abi-mvp flat avg=${"%.3f".format(abiMs)}ms " +
+                "direct-L2 avg=${"%.3f".format(directMs)}ms " +
+                "iters=$iterations (no ratio gate; see docs/perf/p1-boundary.md)",
+        )
+        assertTrue(abiMs >= 0.0 && directMs >= 0.0)
     }
 }

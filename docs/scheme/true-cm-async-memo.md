@@ -2,7 +2,7 @@
 
 **中文** | [English](true-cm-async-memo.en.md)
 
-> **状态：备忘（2026-08-10）。** **不**纳入现行 [engineering-handoff](engineering-handoff.md) 关门；**本阶段落成之后**再评估是否立项。  
+> **状态：备忘（2026-08-10）。** [engineering-handoff](engineering-handoff.md) 已归档；**尚未立项**，评估是否单独开阶段。  
 > 现行策略仍为 **sync-compat**（见 [`errors-async.md`](../mapping/errors-async.md)）。  
 > 仍为 **experimental**；真异步落地 **≠** 合规产品宣称，也 **≠** 对外发布。
 

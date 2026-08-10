@@ -19,8 +19,8 @@
 | **语义加固与工程清债** | **完成**（2026-08-09）— 详见 [`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)；计划页 [`semantic-hardening.md`](semantic-hardening.md) |
 | **合规 wasi:webgpu World（无 gfx）** | **已完成（A–G）** — 计划 [`compliant-world.md`](compliant-world.md)；归档 [`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)；缺口 [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)。**不做** wasi-gfx；**不宣传**合规产品 |
 | **Guest 标准 descriptor 真机 + 旋转纹理立方体** | **已完成（A–D）** — 计划 [`guest-descriptor-cube.md`](guest-descriptor-cube.md)；归档 [`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)。D：**仍非真 WIT dtor** |
-| **工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf** | **进行中（A–C）** — 计划 [`engineering-handoff.md`](engineering-handoff.md)；**A/B 已完成**（A：[`maven-local.md`](../maven-local.md)；B：abi-mvp 扁平 surface/render）；C 尚未实现。C 可选不阻塞。仍为 **experimental**；**不做**对外发布与发布宣称。**不做** wasi-gfx / 合规宣传 / 真 CM async / 上游 PR / 真 dtor overlay。**真机验收基准 = CM cube**（`guest/cube-cm`） |
-| **备忘：真 CM async / WASI Preview3** | **备忘（不参与本阶段）** — [`true-cm-async-memo.md`](true-cm-async-memo.md)；**engineering-handoff 落成后再评估立项**。现行仍 sync-compat |
+| **工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf** | **已完成（A–C）** — 计划 [`engineering-handoff.md`](engineering-handoff.md)；归档 [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)。仍为 **experimental**；本地 Publishing **≠** 对外发布。**真机验收基准 = CM cube**（`guest/cube-cm`） |
+| **备忘：真 CM async / WASI Preview3** | **备忘（未立项）** — [`true-cm-async-memo.md`](true-cm-async-memo.md)；engineering-handoff 已落成，立项另议。现行仍 sync-compat |
 
 已完成计划页保留正文作史实；现行口径以根 README + 本表 + 各 `archive-*-dod` 为准。vector-add / triangle Guest 示例已移除。
 

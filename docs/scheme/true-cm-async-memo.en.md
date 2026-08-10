@@ -2,7 +2,7 @@
 
 [中文](true-cm-async-memo.md) | **English**
 
-> **Status: memo (2026-08-10).** **Not** in scope for the active [engineering-handoff](engineering-handoff.en.md) close-out; revisit **only after that phase lands**.  
+> **Status: memo (2026-08-10).** [engineering-handoff](engineering-handoff.en.md) is archived; **not chartered** — decide separately whether to open a phase.  
 > Current strategy remains **sync-compat** (see [`errors-async.en.md`](../mapping/errors-async.en.md)).  
 > Remains **experimental**; true async **≠** a compliance-product claim and **≠** an external release.
 

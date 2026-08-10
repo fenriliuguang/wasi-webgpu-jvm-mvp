@@ -2,7 +2,7 @@
 
 **中文** | [English](engineering-handoff.en.md)
 
-> **状态：进行中（2026-08-10）。** 切片 **A–C**（C 可选、不阻塞关门）；**A/B 已完成**；C 尚未实现。  
+> **状态：已完成（2026-08-10）。** 切片 **A–C** 已关门；归档 [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)。  
 > 承接：Guest 标准 descriptor + 立方体 A–D 归档（[`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)）。  
 > 组合：Maven 可发布化工程改造（A，不对外发布）→ abi-mvp 扁平 render（B）→ 可选 perf 备注（C）。
 
@@ -53,9 +53,9 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 
 ### C — 可选 perf（不阻塞）
 
-- [ ] 更新 [`docs/perf/p1-boundary.md`](../perf/p1-boundary.md) / EN：锚点从已删除 vector-add 仪器迁到现行可复现路径（桌面 CM cube 烟测或 abi-mvp 子集；写明「非正式基准」）
-- [ ] （可选）保留或新增不进 CI 门禁的 timing smoke；失败不挡 A/B
-- [ ] CHANGELOG 一行即可；**无**倍率 / 帧率 DoD
+- [x] 更新 [`docs/perf/p1-boundary.md`](../perf/p1-boundary.md) / EN：锚点从已删除 vector-add 仪器迁到现行可复现路径（桌面 CM cube 烟测或 abi-mvp 子集；写明「非正式基准」）
+- [x] （可选）保留或新增不进 CI 门禁的 timing smoke；失败不挡 A/B
+- [x] CHANGELOG 一行即可；**无**倍率 / 帧率 DoD
 
 ## 本阶段不做
 
