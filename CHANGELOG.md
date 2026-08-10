@@ -5,10 +5,16 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Engineering handoff — slice A (Maven publishability, no external release)
+
+- Pin `groupId` `io.github.fenriliuguang.wasi.webgpu.experimental` / version `0.1.0-experimental` in `gradle.properties`
+- Shared [`gradle/wasi-webgpu-publishing.gradle.kts`](gradle/wasi-webgpu-publishing.gradle.kts) + root `publishEngineeredToMavenLocal` for `host-api`, `host-webgpu`, `abi-mvp`, `abi-cm`, `abi-wasi` (local `~/.m2` self-check only; **no** remote repos)
+- Docs: [`docs/maven-local.md`](docs/maven-local.md) / EN — engineered set, exclusions (demo / runtime-wasmtime natives / Guest / jniLibs), natives boundary; **not** a consumer-release guide
+- POM `description` stays experimental / non-compliant / no-external-release; README / scheme / handoff DoD A checked
+
 ### Planning
 
-- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (locked 2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — slices A–C (C optional, non-blocking); **not started**. Remains **experimental**; A allows local Publishing self-check only — **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
-- Root README / scheme status sync: next phase wording matches no-external-release handoff A
+- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A done**; B/C not started. Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
 
 ### Docs sync — archive + consistency (CM cube baseline)
 

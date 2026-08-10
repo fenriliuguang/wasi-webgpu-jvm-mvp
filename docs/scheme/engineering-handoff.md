@@ -2,7 +2,7 @@
 
 **中文** | [English](engineering-handoff.en.md)
 
-> **状态：已锁定（2026-08-10）。** 切片 **A–C**（C 可选、不阻塞关门）；**尚未开始实现**。  
+> **状态：进行中（2026-08-10）。** 切片 **A–C**（C 可选、不阻塞关门）；**A 已完成**；B/C 尚未实现。  
 > 承接：Guest 标准 descriptor + 立方体 A–D 归档（[`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)）。  
 > 组合：Maven 可发布化工程改造（A，不对外发布）→ abi-mvp 扁平 render（B）→ 可选 perf 备注（C）。
 
@@ -39,10 +39,10 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 
 ### A — Maven 可发布化改造（不对外发布）
 
-- [ ] 钉定 `groupId` / 模块 `artifactId` / 版本策略（与根 README 包名 `io.github.fenriliuguang.wasi.webgpu.experimental.*` 一致）；标明 **experimental / 非合规**；文档写明 **不对外发布**
-- [ ] Gradle Publishing（或等价）使核心库可本地 `publishToMavenLocal` 自检；列出工程化模块集合与**明确不纳入**项（demo、jniLibs 巨包、Guest 源）
-- [ ] 文档：本地坐标 / 工程边界示例，以及与 Bionic / desktop-natives「自建 `.so`」边界（按 [`android-wasmtime.md`](../android-wasmtime.md)）；**不**写对外发布步骤或「可供依赖」指引
-- [ ] CHANGELOG + 根 README「状态」同步；强调仍为实验性、**无**对外发布与发布宣称
+- [x] 钉定 `groupId` / 模块 `artifactId` / 版本策略（与根 README 包名 `io.github.fenriliuguang.wasi.webgpu.experimental.*` 一致）；标明 **experimental / 非合规**；文档写明 **不对外发布**
+- [x] Gradle Publishing（或等价）使核心库可本地 `publishToMavenLocal` 自检；列出工程化模块集合与**明确不纳入**项（demo、jniLibs 巨包、Guest 源）
+- [x] 文档：本地坐标 / 工程边界示例，以及与 Bionic / desktop-natives「自建 `.so`」边界（按 [`android-wasmtime.md`](../android-wasmtime.md)）；**不**写对外发布步骤或「可供依赖」指引
+- [x] CHANGELOG + 根 README「状态」同步；强调仍为实验性、**无**对外发布与发布宣称
 
 ### B — abi-mvp 扁平 render
 

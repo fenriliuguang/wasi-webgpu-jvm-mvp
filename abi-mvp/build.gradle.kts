@@ -15,3 +15,6 @@ dependencies {
     api(project(":host-api"))
     testImplementation(libs.junit)
 }
+
+apply(from = rootProject.file("gradle/wasi-webgpu-publishing.gradle.kts"))
+

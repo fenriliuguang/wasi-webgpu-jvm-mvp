@@ -14,3 +14,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 dependencies {
     testImplementation(libs.junit)
 }
+
+apply(from = rootProject.file("gradle/wasi-webgpu-publishing.gradle.kts"))
+

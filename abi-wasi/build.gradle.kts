@@ -16,3 +16,5 @@ dependencies {
     // Host bindings arrive in C+; keep free of host-api for a thin ABI identity layer.
     testImplementation(libs.junit)
 }
+
+apply(from = rootProject.file("gradle/wasi-webgpu-publishing.gradle.kts"))

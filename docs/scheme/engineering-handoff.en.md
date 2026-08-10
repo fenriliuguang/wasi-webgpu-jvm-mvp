@@ -2,7 +2,7 @@
 
 [中文](engineering-handoff.md) | **English**
 
-> **Status: locked (2026-08-10).** Slices **A–C** (C optional, non-blocking); **implementation not started**.  
+> **Status: in progress (2026-08-10).** Slices **A–C** (C optional, non-blocking); **A done**; B/C not started.  
 > Continues from: Guest standard descriptors + cube A–D archive ([`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md)).  
 > Composition: Maven publishability engineering (A, no external release) → abi-mvp flat render (B) → optional perf notes (C).
 
@@ -39,10 +39,10 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 
 ### A — Maven publishability engineering (no external release)
 
-- [ ] Pin `groupId` / module `artifactId` / versioning (aligned with root README package `io.github.fenriliuguang.wasi.webgpu.experimental.*`); mark **experimental / non-compliant**; docs state **no external release**
-- [ ] Gradle Publishing (or equivalent) so core libraries can local `publishToMavenLocal` self-check; list engineered module set and **explicit exclusions** (demo, huge jniLibs, Guest sources)
-- [ ] Docs: local coordinates / engineering boundaries, and boundary vs self-built Bionic / desktop-natives (follow [`android-wasmtime.en.md`](../android-wasmtime.en.md)); **no** external publish steps or “ready for consumers” guidance
-- [ ] CHANGELOG + root README status sync; emphasize still experimental, with **no** external release or release claims
+- [x] Pin `groupId` / module `artifactId` / versioning (aligned with root README package `io.github.fenriliuguang.wasi.webgpu.experimental.*`); mark **experimental / non-compliant**; docs state **no external release**
+- [x] Gradle Publishing (or equivalent) so core libraries can local `publishToMavenLocal` self-check; list engineered module set and **explicit exclusions** (demo, huge jniLibs, Guest sources)
+- [x] Docs: local coordinates / engineering boundaries, and boundary vs self-built Bionic / desktop-natives (follow [`android-wasmtime.en.md`](../android-wasmtime.en.md)); **no** external publish steps or “ready for consumers” guidance
+- [x] CHANGELOG + root README status sync; emphasize still experimental, with **no** external release or release claims
 
 ### B — abi-mvp flat render
 

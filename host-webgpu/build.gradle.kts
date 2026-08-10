@@ -20,6 +20,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    // Local publishToMavenLocal self-check only (see docs/maven-local.md).
+    publishing {
+        singleVariant("release")
+    }
 }
 
 dependencies {
@@ -28,3 +33,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     androidTestImplementation(libs.androidx.junit)
 }
+
+apply(from = rootProject.file("gradle/wasi-webgpu-publishing.gradle.kts"))
+
