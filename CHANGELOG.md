@@ -7,7 +7,8 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Engineering handoff: Maven / abi-mvp render / optional perf** (locked 2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — slices A–C (C optional, non-blocking); **not started**. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, forcing Central live / JMH. Primary acceptance remains experimental CM cube
+- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (locked 2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — slices A–C (C optional, non-blocking); **not started**. Remains **experimental**; A allows local Publishing self-check only — **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
+- Root README / scheme status sync: next phase wording matches no-external-release handoff A
 
 ### Docs sync — archive + consistency (CM cube baseline)
 
