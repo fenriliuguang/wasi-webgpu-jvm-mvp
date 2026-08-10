@@ -2,7 +2,7 @@
 
 [中文](engineering-handoff.md) | **English**
 
-> **Status: in progress (2026-08-10).** Slices **A–C** (C optional, non-blocking); **A done**; B/C not started.  
+> **Status: in progress (2026-08-10).** Slices **A–C** (C optional, non-blocking); **A/B done**; C not started.  
 > Continues from: Guest standard descriptors + cube A–D archive ([`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md)).  
 > Composition: Maven publishability engineering (A, no external release) → abi-mvp flat render (B) → optional perf notes (C).
 
@@ -46,10 +46,10 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 
 ### B — abi-mvp flat render
 
-- [ ] Wire flat surface/render imports in `abi-mvp` / related runtime (mirror CM cube main chain: configure / get-current-texture-view / present / render-pipeline / begin-render-pass / draw, etc.; depth / `write-texture` may be additive from existing L2)
-- [ ] Cpu Host unit coverage for the main chain; Dawn stays on existing L2 — **no** mandatory new instrumented cases
-- [ ] Update [`render-subset.en.md`](../mapping/render-subset.en.md): `abi-mvp` flat render row ❌ → this phase’s subset status; note **primary acceptance remains CM cube**
-- [ ] CHANGELOG; confirm `run-android-instrumented.ps1` (CM cube) does not regress
+- [x] Wire flat surface/render imports in `abi-mvp` / related runtime (mirror CM cube main chain: configure / get-current-texture-view / present / render-pipeline / begin-render-pass / draw, etc.; depth / `write-texture` may be additive from existing L2)
+- [x] Cpu Host unit coverage for the main chain; Dawn stays on existing L2 — **no** mandatory new instrumented cases
+- [x] Update [`render-subset.en.md`](../mapping/render-subset.en.md): `abi-mvp` flat render row ❌ → this phase’s subset status; note **primary acceptance remains CM cube**
+- [x] CHANGELOG; confirm `run-android-instrumented.ps1` (CM cube) does not regress
 
 ### C — Optional perf (non-blocking)
 

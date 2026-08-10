@@ -2,7 +2,7 @@
 
 **中文** | [English](engineering-handoff.en.md)
 
-> **状态：进行中（2026-08-10）。** 切片 **A–C**（C 可选、不阻塞关门）；**A 已完成**；B/C 尚未实现。  
+> **状态：进行中（2026-08-10）。** 切片 **A–C**（C 可选、不阻塞关门）；**A/B 已完成**；C 尚未实现。  
 > 承接：Guest 标准 descriptor + 立方体 A–D 归档（[`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)）。  
 > 组合：Maven 可发布化工程改造（A，不对外发布）→ abi-mvp 扁平 render（B）→ 可选 perf 备注（C）。
 
@@ -46,10 +46,10 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 
 ### B — abi-mvp 扁平 render
 
-- [ ] 在 `abi-mvp` / 相关 runtime 接线中增加扁平 surface/render import（对照 CM cube 主链：configure / get-current-texture-view / present / render-pipeline / begin-render-pass / draw 等合理子集；深度与 `write-texture` 可按 L2 已有能力 additive）
-- [ ] Cpu Host 路径单测覆盖主链；Dawn 路径以现有 L2 为准，**不**强制新增仪器用例
-- [ ] 更新 [`render-subset.md`](../mapping/render-subset.md) / EN：`abi-mvp` 扁平 render 行由 ❌ → 本阶段子集状态；注明 **主验收仍 CM cube**
-- [ ] CHANGELOG；确认 `run-android-instrumented.ps1`（CM cube）不回归
+- [x] 在 `abi-mvp` / 相关 runtime 接线中增加扁平 surface/render import（对照 CM cube 主链：configure / get-current-texture-view / present / render-pipeline / begin-render-pass / draw 等合理子集；深度与 `write-texture` 可按 L2 已有能力 additive）
+- [x] Cpu Host 路径单测覆盖主链；Dawn 路径以现有 L2 为准，**不**强制新增仪器用例
+- [x] 更新 [`render-subset.md`](../mapping/render-subset.md) / EN：`abi-mvp` 扁平 render 行由 ❌ → 本阶段子集状态；注明 **主验收仍 CM cube**
+- [x] CHANGELOG；确认 `run-android-instrumented.ps1`（CM cube）不回归
 
 ### C — 可选 perf（不阻塞）
 

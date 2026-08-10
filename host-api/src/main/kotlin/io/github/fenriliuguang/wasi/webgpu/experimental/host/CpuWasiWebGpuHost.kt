@@ -23,8 +23,11 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
     private class Texture(var texels: ByteArray? = null)
     private class TextureView
     private class ComputePipeline(val shader: ShaderModule)
-    /** Fake Android surface for AbiCm View↔Texture lifetime tests (not a real window). */
+    /** Fake Android surface for AbiCm/AbiMvp View↔Texture lifetime tests (not a real window). */
     private class Surface(var configured: Boolean = false)
+    /** Handle-only stubs so abi-mvp flat render chain can exercise Cpu Host without Dawn. */
+    private class RenderPipeline
+    private class RenderPassEncoder
 
     private class CommandEncoder {
         val copies = ArrayList<CopyOp>()
@@ -364,19 +367,28 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         device: GpuHandle,
         shader: GpuHandle,
         format: Int,
-    ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        handles.get<ShaderModule>(shader, ResourceKind.ShaderModule)
+        require(format != 0) { "render pipeline format must be non-zero" }
+        return handles.insert(ResourceKind.RenderPipeline, RenderPipeline())
+    }
 
     override fun deviceCreateRenderPipelineTriangleBuffers(
         device: GpuHandle,
         shader: GpuHandle,
         format: Int,
         vertexBuffers: List<VertexBufferLayout>,
-    ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
+    ): GpuHandle = deviceCreateRenderPipelineTriangle(device, shader, format)
 
     override fun deviceCreateRenderPipeline(
         device: GpuHandle,
         descriptor: RenderPipelineDescriptor,
-    ): GpuHandle = throw HostException.Unsupported("render pipeline (Cpu host)")
+    ): GpuHandle {
+        handles.get<Device>(device, ResourceKind.Device)
+        handles.get<ShaderModule>(descriptor.vertex.module, ResourceKind.ShaderModule)
+        return handles.insert(ResourceKind.RenderPipeline, RenderPipeline())
+    }
 
     override fun textureCreateView(texture: GpuHandle): GpuHandle {
         handles.get<Texture>(texture, ResourceKind.Texture)
@@ -390,22 +402,41 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         clearG: Float,
         clearB: Float,
         clearA: Float,
-    ): GpuHandle = throw HostException.Unsupported("render pass (Cpu host)")
+    ): GpuHandle {
+        handles.get<CommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        handles.get<TextureView>(view, ResourceKind.TextureView)
+        return handles.insert(ResourceKind.RenderPassEncoder, RenderPassEncoder())
+    }
 
     override fun commandEncoderBeginRenderPass(
         encoder: GpuHandle,
         descriptor: RenderPassDescriptor,
-    ): GpuHandle = throw HostException.Unsupported("render pass (Cpu host)")
+    ): GpuHandle {
+        handles.get<CommandEncoder>(encoder, ResourceKind.CommandEncoder)
+        descriptor.colorAttachments.forEach {
+            handles.get<TextureView>(it.view, ResourceKind.TextureView)
+        }
+        descriptor.depthStencilAttachment?.let {
+            handles.get<TextureView>(it.view, ResourceKind.TextureView)
+        }
+        return handles.insert(ResourceKind.RenderPassEncoder, RenderPassEncoder())
+    }
 
-    override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) =
-        throw HostException.Unsupported("render pass (Cpu host)")
+    override fun renderPassSetPipeline(pass: GpuHandle, pipeline: GpuHandle) {
+        handles.get<RenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        handles.get<RenderPipeline>(pipeline, ResourceKind.RenderPipeline)
+    }
 
     override fun renderPassSetBindGroup(
         pass: GpuHandle,
         index: Int,
         bindGroup: GpuHandle,
         dynamicOffsets: IntArray,
-    ) = throw HostException.Unsupported("render pass (Cpu host)")
+    ) {
+        handles.get<RenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        handles.get<BindGroup>(bindGroup, ResourceKind.BindGroup)
+        require(index >= 0) { "bind group index must be non-negative" }
+    }
 
     override fun renderPassSetVertexBuffer(
         pass: GpuHandle,
@@ -413,7 +444,12 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         buffer: GpuHandle,
         offset: Long,
         size: Long,
-    ) = throw HostException.Unsupported("render pass (Cpu host)")
+    ) {
+        handles.get<RenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        handles.get<BufferResource>(buffer, ResourceKind.Buffer)
+        require(slot >= 0) { "vertex buffer slot must be non-negative" }
+        require(offset >= 0 && size >= 0) { "vertex buffer range invalid" }
+    }
 
     override fun renderPassDraw(
         pass: GpuHandle,
@@ -421,10 +457,15 @@ class CpuWasiWebGpuHost : WasiWebGpuHost {
         instanceCount: Int,
         firstVertex: Int,
         firstInstance: Int,
-    ) = throw HostException.Unsupported("render pass (Cpu host)")
+    ) {
+        handles.get<RenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        require(vertexCount >= 0) { "vertexCount must be non-negative" }
+    }
 
-    override fun renderPassEnd(pass: GpuHandle) =
-        throw HostException.Unsupported("render pass (Cpu host)")
+    override fun renderPassEnd(pass: GpuHandle) {
+        handles.get<RenderPassEncoder>(pass, ResourceKind.RenderPassEncoder)
+        handles.tryDrop(pass)
+    }
 
     override fun drop(handle: GpuHandle) {
         handles.drop(handle)

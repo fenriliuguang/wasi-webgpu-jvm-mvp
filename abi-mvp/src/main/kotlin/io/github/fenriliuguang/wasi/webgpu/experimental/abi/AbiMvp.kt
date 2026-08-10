@@ -28,6 +28,25 @@ object AbiMvp {
         const val BUFFER_MAP_READ = "buffer_map_read"
         const val BUFFER_GET_MAPPED_RANGE = "buffer_get_mapped_range"
         const val BUFFER_UNMAP = "buffer_unmap"
+
+        // --- Surface / render (flat helpers; engineering-handoff B) ---
+        const val CREATE_SURFACE_FROM_NATIVE_WINDOW = "create_surface_from_native_window"
+        const val SURFACE_CONFIGURE = "surface_configure"
+        const val SURFACE_GET_CURRENT_TEXTURE_VIEW = "surface_get_current_texture_view"
+        const val SURFACE_PRESENT = "surface_present"
+        const val SURFACE_UNCONFIGURE = "surface_unconfigure"
+        const val DEVICE_CREATE_TEXTURE_2D = "device_create_texture_2d"
+        const val TEXTURE_CREATE_VIEW = "texture_create_view"
+        const val QUEUE_WRITE_TEXTURE = "queue_write_texture"
+        const val DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE = "device_create_render_pipeline_triangle"
+        const val COMMAND_ENCODER_BEGIN_RENDER_PASS_CLEAR = "command_encoder_begin_render_pass_clear"
+        const val COMMAND_ENCODER_BEGIN_RENDER_PASS_COLOR_DEPTH =
+            "command_encoder_begin_render_pass_color_depth"
+        const val RENDER_PASS_SET_PIPELINE = "render_pass_set_pipeline"
+        const val RENDER_PASS_SET_BIND_GROUP = "render_pass_set_bind_group"
+        const val RENDER_PASS_SET_VERTEX_BUFFER = "render_pass_set_vertex_buffer"
+        const val RENDER_PASS_DRAW = "render_pass_draw"
+        const val RENDER_PASS_END = "render_pass_end"
     }
 
     /** Guest export that runs the vector-add scenario. */

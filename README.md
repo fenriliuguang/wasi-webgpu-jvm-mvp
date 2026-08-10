@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)；**合规 wasi:webgpu World（无 gfx，A–G，2026-08-09）**→ [归档](docs/scheme/archive-compliant-world-dod.md)；**Guest 标准 descriptor + 旋转纹理立方体（A–D，2026-08-10）**→ [归档](docs/scheme/archive-guest-descriptor-cube-dod.md)（D：**仍非真 WIT dtor**）
-- **下一阶段（进行中）：** [工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf](docs/scheme/engineering-handoff.md)（A–C；C 可选不阻塞）。**A 已完成**（本地坐标 + `publishEngineeredToMavenLocal`；见 [`docs/maven-local.md`](docs/maven-local.md)）；B/C 尚未实现。仍为 **experimental**；**不做**任何对外发布与「已发布 / 可供依赖」宣称。**不做** wasi-gfx / 合规宣传 / 真 CM async / 上游 PR / 真 dtor overlay。**真机验收基准 = CM cube**
+- **下一阶段（进行中）：** [工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf](docs/scheme/engineering-handoff.md)（A–C；C 可选不阻塞）。**A/B 已完成**（A：[`docs/maven-local.md`](docs/maven-local.md)；B：abi-mvp 扁平 surface/render 子集）；C 尚未实现。仍为 **experimental**；**不做**任何对外发布与「已发布 / 可供依赖」宣称。**不做** wasi-gfx / 合规宣传 / 真 CM async / 上游 PR / 真 dtor overlay。**真机验收基准 = CM cube**
 
 ## 参考
 
@@ -76,7 +76,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
-| 工程移交（进行中；A 完成；不对外发布） | [engineering-handoff](docs/scheme/engineering-handoff.md) | [EN](docs/scheme/engineering-handoff.en.md) |
+| 工程移交（进行中；A/B 完成；不对外发布） | [engineering-handoff](docs/scheme/engineering-handoff.md) | [EN](docs/scheme/engineering-handoff.en.md) |
 | 本地 Maven 坐标（自检，非发布） | [maven-local](docs/maven-local.md) | [EN](docs/maven-local.en.md) |
 | 真 CM async 备忘（本阶段后） | [true-cm-async-memo](docs/scheme/true-cm-async-memo.md) | [EN](docs/scheme/true-cm-async-memo.en.md) |
 | Guest 标准 descriptor + 立方体 DoD 归档 | [archive-guest-descriptor-cube-dod](docs/scheme/archive-guest-descriptor-cube-dod.md) | [EN](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |

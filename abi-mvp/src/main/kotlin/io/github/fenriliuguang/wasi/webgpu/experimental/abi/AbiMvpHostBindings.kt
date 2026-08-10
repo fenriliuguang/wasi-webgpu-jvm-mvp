@@ -8,24 +8,38 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBinding
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingLayout
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferBindingType
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.BufferDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ComputePipelineDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Extent3D
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuMapMode
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuShaderStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.HostException
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.PipelineLayoutDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ProgrammableStage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDepthStencilAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.WasiWebGpuHost
 
 /**
  * Thin L1→L2 adapter: flattened core-wasm imports forward to [WasiWebGpuHost].
  *
- * Descriptor packing is intentionally minimal (vector-add shaped helpers).
+ * Descriptor packing is intentionally minimal (vector-add / cube-shaped helpers).
+ * Surface/render helpers mirror the CM cube L2 path; primary device acceptance stays CM cube.
  */
 class AbiMvpHostBindings(
     private val host: WasiWebGpuHost,
     private val memory: () -> GuestMemory,
 ) {
+    /** view.raw → texture.raw for the current (or last) acquired swapchain frame. */
+    private val frameTextureByView = LinkedHashMap<Int, Int>()
+
+    /** Live View↔Texture pairs awaiting present / next acquire (test / diagnostics). */
+    fun trackedFramePairCount(): Int = frameTextureByView.size
 
     fun requestAdapter(): Int = host.requestAdapter().raw
 
@@ -160,6 +174,163 @@ class AbiMvpHostBindings(
 
     fun bufferUnmap(buffer: Int) {
         host.bufferUnmap(GpuHandle(buffer))
+    }
+
+    fun createSurfaceFromNativeWindow(windowHandle: Long): Int =
+        host.instanceCreateSurfaceFromAndroidNativeWindow(windowHandle).raw
+
+    fun surfaceConfigure(surface: Int, device: Int, adapter: Int, width: Int, height: Int): Int =
+        host.surfaceConfigure(
+            GpuHandle(surface),
+            GpuHandle(device),
+            GpuHandle(adapter),
+            width,
+            height,
+        )
+
+    fun surfaceGetCurrentTextureView(surface: Int): Int {
+        releaseTrackedFrameTextures()
+        host.releaseFrameResources()
+        val result = host.surfaceGetCurrentTexture(GpuHandle(surface))
+        if (
+            result.status != SurfaceTextureStatus.SuccessOptimal &&
+            result.status != SurfaceTextureStatus.SuccessSuboptimal
+        ) {
+            throw HostException.Validation("surface get-current-texture status=${result.status}")
+        }
+        val texture = result.texture
+            ?: throw HostException.Validation("surface get-current-texture returned null texture")
+        val view = host.textureCreateView(texture)
+        frameTextureByView[view.raw] = texture.raw
+        return view.raw
+    }
+
+    fun surfacePresent(surface: Int) {
+        host.surfacePresent(GpuHandle(surface))
+        releaseTrackedFrameTextures()
+        host.releaseFrameResources()
+    }
+
+    fun surfaceUnconfigure(surface: Int) {
+        releaseTrackedFrameTextures()
+        host.surfaceUnconfigure(GpuHandle(surface))
+    }
+
+    fun deviceCreateTexture2d(device: Int, width: Int, height: Int, format: Int, usage: Int): Int =
+        host.deviceCreateTexture(
+            GpuHandle(device),
+            TextureDescriptor(
+                size = Extent3D(width = width, height = height),
+                format = format,
+                usage = usage,
+            ),
+        ).raw
+
+    fun textureCreateView(texture: Int): Int =
+        host.textureCreateView(GpuHandle(texture)).raw
+
+    fun queueWriteTexture(
+        queue: Int,
+        texture: Int,
+        ptr: Int,
+        len: Int,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+    ) {
+        val data = memory().readBytes(ptr, len)
+        host.queueWriteTexture(
+            GpuHandle(queue),
+            GpuHandle(texture),
+            data,
+            width,
+            height,
+            bytesPerRow,
+        )
+    }
+
+    fun deviceCreateRenderPipelineTriangle(device: Int, shader: Int, format: Int): Int =
+        host.deviceCreateRenderPipelineTriangle(
+            GpuHandle(device),
+            GpuHandle(shader),
+            format,
+        ).raw
+
+    fun commandEncoderBeginRenderPassClear(
+        encoder: Int,
+        view: Int,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float,
+    ): Int =
+        host.commandEncoderBeginRenderPassClear(
+            GpuHandle(encoder),
+            GpuHandle(view),
+            r,
+            g,
+            b,
+            a,
+        ).raw
+
+    fun commandEncoderBeginRenderPassColorDepth(
+        encoder: Int,
+        colorView: Int,
+        depthView: Int,
+        r: Float,
+        g: Float,
+        b: Float,
+        a: Float,
+    ): Int =
+        host.commandEncoderBeginRenderPass(
+            GpuHandle(encoder),
+            RenderPassDescriptor(
+                colorAttachments = listOf(
+                    RenderPassColorAttachment(
+                        view = GpuHandle(colorView),
+                        clearValue = Color(r.toDouble(), g.toDouble(), b.toDouble(), a.toDouble()),
+                    ),
+                ),
+                depthStencilAttachment = RenderPassDepthStencilAttachment(
+                    view = GpuHandle(depthView),
+                ),
+            ),
+        ).raw
+
+    fun renderPassSetPipeline(pass: Int, pipeline: Int) {
+        host.renderPassSetPipeline(GpuHandle(pass), GpuHandle(pipeline))
+    }
+
+    fun renderPassSetBindGroup(pass: Int, index: Int, bindGroup: Int) {
+        host.renderPassSetBindGroup(GpuHandle(pass), index, GpuHandle(bindGroup))
+    }
+
+    fun renderPassSetVertexBuffer(pass: Int, slot: Int, buffer: Int, offset: Int, size: Int) {
+        host.renderPassSetVertexBuffer(
+            GpuHandle(pass),
+            slot,
+            GpuHandle(buffer),
+            offset.toLong(),
+            size.toLong(),
+        )
+    }
+
+    fun renderPassDraw(pass: Int, vertexCount: Int) {
+        host.renderPassDraw(GpuHandle(pass), vertexCount)
+    }
+
+    fun renderPassEnd(pass: Int) {
+        host.renderPassEnd(GpuHandle(pass))
+    }
+
+    private fun releaseTrackedFrameTextures() {
+        if (frameTextureByView.isEmpty()) return
+        val pairs = frameTextureByView.entries.toList()
+        frameTextureByView.clear()
+        for ((viewRaw, textureRaw) in pairs) {
+            host.tryDrop(GpuHandle(viewRaw))
+            host.tryDrop(GpuHandle(textureRaw))
+        }
     }
 
     private fun storageEntry(binding: Int, type: BufferBindingType) = BindGroupLayoutEntry(

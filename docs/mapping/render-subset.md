@@ -58,7 +58,7 @@ guest/cube-cm（cube_cm.wasm，world cube）@0.8.0
 | `write-texture` / render `set-bind-group` | ✅ `@0.8.0` |
 | MSAA | ❌ |
 | Canvas / 多 window 抽象 | ❌ |
-| `abi-mvp` 扁平 render import | ❌（P1 仍仅 compute） |
+| `abi-mvp` 扁平 render import | ⚠️ 子集（engineering-handoff B）：surface configure/get-view/present/unconfigure、triangle render-pipeline、begin-pass clear / color+depth、set-pipeline / set-bind-group / set-vertex-buffer / draw / end、create-texture-2d / write-texture；**主验收仍 CM cube** |
 
 ## 线程
 

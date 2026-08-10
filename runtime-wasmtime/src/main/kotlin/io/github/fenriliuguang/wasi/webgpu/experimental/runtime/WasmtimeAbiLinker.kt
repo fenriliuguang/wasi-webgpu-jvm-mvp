@@ -159,5 +159,98 @@ class WasmtimeAbiLinker(
         defineVoid(AbiMvp.Func.BUFFER_UNMAP, arrayOf(i32)) { args ->
             bindings.bufferUnmap(args[0].asInt())
         }
+
+        val i64 = WasmValueType.I64
+        val f32 = WasmValueType.F32
+
+        defineI32(AbiMvp.Func.CREATE_SURFACE_FROM_NATIVE_WINDOW, arrayOf(i64)) { args ->
+            bindings.createSurfaceFromNativeWindow(args[0].asLong())
+        }
+        defineI32(AbiMvp.Func.SURFACE_CONFIGURE, arrayOf(i32, i32, i32, i32, i32)) { args ->
+            bindings.surfaceConfigure(
+                args[0].asInt(), args[1].asInt(), args[2].asInt(),
+                args[3].asInt(), args[4].asInt(),
+            )
+        }
+        defineI32(AbiMvp.Func.SURFACE_GET_CURRENT_TEXTURE_VIEW, arrayOf(i32)) { args ->
+            bindings.surfaceGetCurrentTextureView(args[0].asInt())
+        }
+        defineVoid(AbiMvp.Func.SURFACE_PRESENT, arrayOf(i32)) { args ->
+            bindings.surfacePresent(args[0].asInt())
+        }
+        defineVoid(AbiMvp.Func.SURFACE_UNCONFIGURE, arrayOf(i32)) { args ->
+            bindings.surfaceUnconfigure(args[0].asInt())
+        }
+        defineI32(AbiMvp.Func.DEVICE_CREATE_TEXTURE_2D, arrayOf(i32, i32, i32, i32, i32)) { args ->
+            bindings.deviceCreateTexture2d(
+                args[0].asInt(), args[1].asInt(), args[2].asInt(),
+                args[3].asInt(), args[4].asInt(),
+            )
+        }
+        defineI32(AbiMvp.Func.TEXTURE_CREATE_VIEW, arrayOf(i32)) { args ->
+            bindings.textureCreateView(args[0].asInt())
+        }
+        defineVoid(
+            AbiMvp.Func.QUEUE_WRITE_TEXTURE,
+            arrayOf(i32, i32, i32, i32, i32, i32, i32),
+        ) { args ->
+            bindings.queueWriteTexture(
+                args[0].asInt(), args[1].asInt(), args[2].asInt(), args[3].asInt(),
+                args[4].asInt(), args[5].asInt(), args[6].asInt(),
+            )
+        }
+        defineI32(AbiMvp.Func.DEVICE_CREATE_RENDER_PIPELINE_TRIANGLE, arrayOf(i32, i32, i32)) { args ->
+            bindings.deviceCreateRenderPipelineTriangle(
+                args[0].asInt(), args[1].asInt(), args[2].asInt(),
+            )
+        }
+        defineI32(
+            AbiMvp.Func.COMMAND_ENCODER_BEGIN_RENDER_PASS_CLEAR,
+            arrayOf(i32, i32, f32, f32, f32, f32),
+        ) { args ->
+            bindings.commandEncoderBeginRenderPassClear(
+                args[0].asInt(),
+                args[1].asInt(),
+                args[2].asFloat(),
+                args[3].asFloat(),
+                args[4].asFloat(),
+                args[5].asFloat(),
+            )
+        }
+        defineI32(
+            AbiMvp.Func.COMMAND_ENCODER_BEGIN_RENDER_PASS_COLOR_DEPTH,
+            arrayOf(i32, i32, i32, f32, f32, f32, f32),
+        ) { args ->
+            bindings.commandEncoderBeginRenderPassColorDepth(
+                args[0].asInt(),
+                args[1].asInt(),
+                args[2].asInt(),
+                args[3].asFloat(),
+                args[4].asFloat(),
+                args[5].asFloat(),
+                args[6].asFloat(),
+            )
+        }
+        defineVoid(AbiMvp.Func.RENDER_PASS_SET_PIPELINE, arrayOf(i32, i32)) { args ->
+            bindings.renderPassSetPipeline(args[0].asInt(), args[1].asInt())
+        }
+        defineVoid(AbiMvp.Func.RENDER_PASS_SET_BIND_GROUP, arrayOf(i32, i32, i32)) { args ->
+            bindings.renderPassSetBindGroup(args[0].asInt(), args[1].asInt(), args[2].asInt())
+        }
+        defineVoid(
+            AbiMvp.Func.RENDER_PASS_SET_VERTEX_BUFFER,
+            arrayOf(i32, i32, i32, i32, i32),
+        ) { args ->
+            bindings.renderPassSetVertexBuffer(
+                args[0].asInt(), args[1].asInt(), args[2].asInt(),
+                args[3].asInt(), args[4].asInt(),
+            )
+        }
+        defineVoid(AbiMvp.Func.RENDER_PASS_DRAW, arrayOf(i32, i32)) { args ->
+            bindings.renderPassDraw(args[0].asInt(), args[1].asInt())
+        }
+        defineVoid(AbiMvp.Func.RENDER_PASS_END, arrayOf(i32)) { args ->
+            bindings.renderPassEnd(args[0].asInt())
+        }
     }
 }

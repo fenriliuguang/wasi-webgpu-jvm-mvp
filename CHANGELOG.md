@@ -5,6 +5,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Engineering handoff — slice B (abi-mvp flat surface/render)
+
+- Flat `wasi-webgpu-mvp` imports for surface configure / get-current-texture-view / present / unconfigure, triangle render-pipeline, begin-pass (clear + color/depth), set-pipeline / set-bind-group / set-vertex-buffer / draw / end, create-texture-2d / texture-create-view / write-texture
+- `WasmtimeAbiLinker` registers the new helpers; `AbiMvpHostBindings` mirrors CM View↔Texture pairing
+- Cpu Host: handle-only render-pipeline / render-pass stubs so desktop unit tests cover the chain (not a real WGSL rasterizer)
+- Tests: multi-frame surface leak + render main-chain on Cpu; **primary acceptance remains CM cube** (no new instrumented cases)
+- Docs: render-subset abi-mvp row ❌ → ⚠️ subset; handoff B DoD checked
+
 ### Engineering handoff — slice A (Maven publishability, no external release)
 
 - Pin `groupId` `io.github.fenriliuguang.wasi.webgpu.experimental` / version `0.1.0-experimental` in `gradle.properties`
@@ -14,7 +22,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
-- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A done**; B/C not started. Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
+- **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A/B done**; C not started. Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, any external Maven release / JMH. Primary acceptance remains experimental CM cube
 - **Memo (not this phase):** true CM async / WASI Preview3 — [`docs/scheme/true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); revisit only after engineering-handoff lands; sync-compat stays current
 
 ### Docs sync — archive + consistency (CM cube baseline)
