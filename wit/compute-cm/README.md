@@ -15,9 +15,9 @@ Component Model compute + 最小 surface/render 切片。
 - **0.6.0（slice D）：** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`；BGL/BG sampler·texture 条目；`compute-pipeline.layout` → pipeline-layout
 - **0.7.0（slice E）：** `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`；`*-triangle*` / `begin-render-pass-clear` deprecated
 - **0.8.0（guest-descriptor-cube B）：** `write-texture`；render-pass `set-bind-group`；depth-stencil；`world cube`
-- World exports：`vector-add` → `run-vector-add`；`triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`；`cube` → `run-cube` / `init-cube` / `draw-frame` / `drop-cube`（Host 注入 native window）
+- World exports（WIT 仍保留历史 world）：`vector-add` / `triangle` / `cube`；**现行入库 Guest 仅 cube** → `run-cube` / `init-cube` / `draw-frame` / `drop-cube`（Host 注入 native window）
 
-Guest：`guest/vector-add-cm/`、`guest/triangle-cm/`、`guest/cube-cm/`（标准 descriptor；嵌套 borrow 需递归 `cm-resources` 补丁 natives）  
+Guest（现行）：[`guest/cube-cm/`](../../guest/cube-cm/)（标准 descriptor；嵌套 borrow 需递归 `cm-resources` 补丁 natives）。历史 vector-add-cm / triangle-cm 示例已移除。  
 Host 适配：`abi-cm` → `WasiWebGpuHost`  
 接线：`runtime-wasmtime` 的 `runtime.cm`（`ComponentLinker` + `defineResource`）
 

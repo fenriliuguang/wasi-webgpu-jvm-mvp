@@ -5,7 +5,8 @@
 > **状态：已完成（2026-08-09）。** DoD 归档：[`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)。  
 > 切片 **A–G 全部完成**。矩阵关门 ≠ 合规产品宣传（仍以 experimental 为主轨）。  
 > 承接：语义加固 A–E 归档（[`archive-semantic-hardening-dod.md`](archive-semantic-hardening-dod.md)）。  
-> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E ✅）→ 错误抬升（F ✅）→ 长尾关门（G ✅）。
+> 组合：上游钉定（A ✅）→ 双轨 Linker（B ✅）→ Compute 去特化（C ✅）→ 纹理（D ✅）→ 通用 Render（E ✅）→ 错误抬升（F ✅）→ 长尾关门（G ✅）。  
+> **后续（勿当现行口径）：** [`guest-descriptor-cube`](guest-descriptor-cube.md) 已推进至 `@0.8.0`；真机验收基准 = CM cube（vector-add / triangle 示例已移除）。下文「现行 `@0.7.0`」指本阶段关门时状态。
 
 ## 一句话
 

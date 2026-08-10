@@ -5,7 +5,7 @@
 > **状态：** experimental（P0 表为 host 路径；CM Guest 见下）  
 > **WIT 钉定：** `wasi:webgpu/webgpu@0.3.0-rc.2`（见 [`wit/`](../../wit/)）  
 > **Dawn：** `androidx.webgpu:webgpu:1.0.0-alpha05`
-> **现行 CM 包：** `experimental:webgpu-cm@0.7.0`（主验收轨）
+> **现行 CM 包：** `experimental:webgpu-cm@0.8.0`（主验收轨；真机 Guest = `cube-cm`）
 
 本表以 P0 验收路径为主。后续切片（C/D 等）能力见文末备注与缺口矩阵；完整 WebGPU / wasi-gfx **不在范围**。
 
@@ -62,7 +62,7 @@
 | Texture / sampler / query set | ⚠️ slice D：`create-texture` / `create-sampler` / `create-view` 已接线；query-set 仍 Unsupported；swapchain 见 render-subset |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌（显式 layout；slice D 起 layout 为 pipeline-layout） |
-| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.7.0`（仍非合规 wasi:webgpu；主验收轨） |
+| Component Model / Wasm import | ⚠️ CM 切片：`experimental:webgpu-cm@0.8.0`（仍非合规 wasi:webgpu；主验收轨 = cube-cm） |
 | 完整错误 `result` 抬升 | ⚠️ experimental 轨仍多为 Kotlin 异常 / trap；wasi 轨 result stub → `ComponentVal.err`（切片 F）；见 [errors-async.md](errors-async.md) |
 
 ## 偏差列表（摘要）
@@ -71,5 +71,5 @@
 2. **Mapped range：** WIT `get-with-copy` ↔ Host 返回拷贝后的 `ByteArray`。  
 3. **Auto layout：** 未实现；`deviceCreateComputePipeline` 要求 layout handle。  
 4. **Dawn ≠ wgpu：** 校验失败消息/时机可能与 `wasi-webgpu-wasmtime` 不同，以本表 + 单测为准。  
-5. **Slice C：** Host/WIT 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` 已接线；Guest 真机路径：layout descriptor + 嵌套 borrow 暂用 `*3` / `*-bgl` / `submit1`（待 `cm-resources` 递归补丁重编 `.so`）。
-6. **Slice D：** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`；BGL/BG 支持 sampler·texture 条目；`compute-pipeline.layout` 为 **pipeline-layout**。storage-texture / write-texture / texture 属性仍 Unsupported。
+5. **Slice C：** Host/WIT 标准形 `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` 已接线；嵌套 borrow 需递归 `cm-resources` 补丁 natives（guest-descriptor-cube A 已重编）。  
+6. **Slice D：** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`；BGL/BG 支持 sampler·texture 条目；`compute-pipeline.layout` 为 **pipeline-layout**。storage-texture / texture 属性仍 Unsupported；`write-texture` 见 `@0.8.0` / [render-subset.md](render-subset.md)。

@@ -9,21 +9,20 @@
 - Host background-polls `GPUInstance.processEvents()` (aligned with `androidx.webgpu.helper` event pump).  
 - Android demo / instrumented tests should call the Host on a **background thread** to avoid blocking the main thread.
 
-## Surface / render (L2)
+## Surface / render (L2 APIs)
 
 - On one `WasiWebGpuHost` instance: `surfaceConfigure` / `surfaceGetCurrentTexture` / `surfacePresent` and `queueSubmit` **must run on the same render thread**.  
-- `android-demo` `TriangleRenderer` owns that Host on a dedicated `HandlerThread` (`webgpu-triangle`); `SurfaceHolder` callbacks only post to that thread; the **UI thread does not** call WebGPU.  
-- The frame loop `postDelayed`s on the same render thread; `surfaceDestroyed` stops the loop and `surfaceUnconfigure`s / `drop`s the Surface.  
-- Separate `DawnWasiWebGpuHost` instance (and `GPUInstance`) from vector-add; they do not share.
+- The Demo **no longer** keeps a separate L2 `TriangleRenderer` on-screen path; the Surface is consumed only by the CM Guest path (below).  
+- L2 surface APIs remain callable by hosts that manage their own thread affinity.
 
-## Surface / render (CM Guest)
+## Surface / render (CM Guest — current Demo / instrumented)
 
-- The CM path uses a **separate** `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-cube-cm`); do **not** share it across threads with the L2 Host.  
+- The CM path uses `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-cube-cm`); the **UI thread does not** call WebGPU.  
 - Host-driven frame loop: same thread `init-cube` → loop `draw-frame` → `drop-cube` (see `WasmtimeCmCube.Session.runFrameLoop`).  
-- Demo: `pauseSurfaceAndAwait` before CM (L2 `teardownGpu`); after CM `drop-cube` → Session `releaseLifetimeSafetyNets` → `releaseAllGpuObjects` (keep Instance/Session) → settle → `resumeSurfaceAndAwait`.  
-- **Demo taps**: reuse Host + Session; each press `releaseAllGpuObjects` to free ANativeWindow (avoid back-to-back linker teardown). See [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md).  
-- **Instrumented**: reuse Session (CM cube).  
-- Frame resources: View↔Texture `tryDrop` on present / unconfigure / Session end + `releaseFrameResources`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4).
+- Demo `CubeCmOneShot`: reuse Host + Session; `releaseAllGpuObjects` around each press to free ANativeWindow (avoid back-to-back linker teardown); Session ends with `releaseLifetimeSafetyNets`.  
+- **Instrumented**: `WasmtimeCmCubeInstrumentedTest` (reuse Session).  
+- Frame resources: View↔Texture `tryDrop` on present / unconfigure / Session end + `releaseFrameResources`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4).  
+- Historical L2↔CM pause/resume and two-wave triangle instrumentation: see [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md) (ZH).
 
 ## Instance / Device / Queue
 

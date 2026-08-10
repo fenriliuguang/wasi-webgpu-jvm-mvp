@@ -6,7 +6,8 @@
 旧记录：[`guest-onscreen-cm-blockers.md`](guest-onscreen-cm-blockers.md)（P1/P6）
 
 > 2026-08-07 整理；2026-08-08 同机收口 D2/D3，继而 D5/D6/D1。  
-> D7 已文档旁路正式化：唯一推荐 `scripts/run-android-instrumented.ps1`（两波）。
+> D7 已文档旁路正式化：唯一推荐 `scripts/run-android-instrumented.ps1`（当时两波）。  
+> **现行（2026-08-10+）：** 真机验收基准 = CM cube；脚本默认单波；L2 `TriangleRenderer` / triangle Guest 已移除。下文保留回归当时锚点。
 
 ---
 
@@ -130,16 +131,18 @@ wasmtime4j CM host 回调进程级注册；背靠背关掉 linker 再 instantiat
 **唯一推荐**：`scripts/run-android-instrumented.ps1`
 
 - 绕过 Studio/Gradle UTP 重装竞态（vivo 上常见 `Process crashed`）
-- 默认两波 `am instrument`，波间 `force-stop`：compute（含 CM vector-add）→ CM triangle  
+- **回归当时**默认两波 `am instrument`，波间 `force-stop`：compute（含 CM vector-add）→ CM triangle  
   （D6：同进程关掉一个 ComponentLinker 后再 instantiate 易 trap）
-- 三角仪器：勿用 `ActivityScenario` / `startActivitySync`（vivo Intent 不匹配会挂起数十秒）；用 async `startActivity` + LifecycleMonitor + Surface 轮询（P5 续）
-- 三角重复 draw：类内共享 Host+Session，`releaseAllGpuObjects` 交还窗口（D2/D3）
+- **现行**：默认单波 CM cube（`WasmtimeCmCubeInstrumentedTest`）；若同进程多 CM Guest，仍须波间 `force-stop`
+- 仪器：勿用 `ActivityScenario` / `startActivitySync`（vivo Intent 不匹配会挂起数十秒）；用 async `startActivity` + LifecycleMonitor + Surface 轮询
+- 重复 draw：类内共享 Host+Session，`releaseAllGpuObjects` 交还窗口（D2/D3；现行 `CubeCmOneShot`）
 
 ---
 
 ## 相关代码锚点
 
-- L2：`android-demo/.../TriangleRenderer.kt`  
-- CM：`android-demo/.../TriangleCmOneShot.kt`  
+- **现行 Demo / CM**：`android-demo/.../CubeCmOneShot.kt` · `WasmtimeCmCubeAndroid.kt`
+- **历史（已移除）**：`TriangleRenderer.kt` · `TriangleCmOneShot.kt`
 - Dawn：`host-webgpu/.../DawnWasiWebGpuHost.kt`（`gpuLock` / `releaseFrameResources` / `releaseAllGpuObjects` / `close`）  
-- AbiCm：`abi-cm/.../AbiCmHostBindings.kt`（present 后释放帧资源）  
+- AbiCm：`abi-cm/.../AbiCmHostBindings.kt`（present 后释放帧资源；另见 `releaseLifetimeSafetyNets`）  
+

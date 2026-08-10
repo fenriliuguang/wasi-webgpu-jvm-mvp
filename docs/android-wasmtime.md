@@ -28,14 +28,11 @@ guest/cube_cm.wasm
   → DawnWasiWebGpuHost
 ```
 
-对照：
+对照（历史路径已移除；保留名称便于读旧日志）：
 
-- P0：`VectorAddInstrumentedTest`（Kotlin → Dawn）
-- P1 Android：`WasmtimeVectorAddInstrumentedTest`（Guest → Dawn）
-- P1 桌面：`WasmtimeVectorAddTest`（Guest → CpuHost）
-- CM Android：`WasmtimeCmVectorAddInstrumentedTest`（CM Guest → Dawn）
-- CM 桌面：`WasmtimeCmVectorAddTest`（CM Guest → CpuHost）
-- CM triangle Android：`WasmtimeCmTriangleInstrumentedTest`（Guest 上屏 → Dawn）
+- 现行仪器：`WasmtimeCmCubeInstrumentedTest`（CM cube → Dawn）
+- 现行桌面 CM：`:runtime-wasmtime:test`（`WasmtimeCmCubeTest` 等；无 desktop-natives 时 skip）
+- 历史：P0 `VectorAddInstrumentedTest`、abi-mvp / CM vector-add、CM triangle 仪器（见各 `archive-*-dod`）
 
 ## 踩坑分级说明
 
@@ -94,7 +91,7 @@ WIT resources（`own`/`borrow` ↔ `U32(rep)`）编组与进程级 resource regi
 
 **嵌套 resource：** 旧补丁只把**顶层** `Val::Resource` 转成 `U32(rep)`；record/list 内的 borrow 若走 `val_to_component_value` 会变成 opaque `Own`/`Borrow` 句柄，Java 侧 `asU32()` 期望的是 Host table rep → trap。补丁现已 **递归** 转换。
 
-**guest-descriptor-cube A（2026-08-09）：** 已重跑 `build-wasmtime4j-android.ps1` 替换 `jniLibs`；桌面 CM 冒烟：`vector-add-cm` 已改走标准 `create-bind-group` / `create-pipeline-layout` / `create-compute-pipeline` / `queue.submit(list)`（`:runtime-wasmtime:test` WasmtimeCmVectorAddTest 绿灯）。Windows 交叉编译若遇 rustc `STATUS_ACCESS_VIOLATION`（`opt-level>=1`），脚本默认 `CARGO_PROFILE_RELEASE_OPT_LEVEL=0`（`.so` 更大，可 `llvm-strip`）。
+**guest-descriptor-cube A（2026-08-09）：** 已重跑 `build-wasmtime4j-android.ps1` 替换 `jniLibs`；当时桌面 CM 冒烟曾用 `vector-add-cm` 嵌套标准 descriptor（该 Guest 示例随后移除；现行验收 = cube-cm）。Windows 交叉编译若遇 rustc `STATUS_ACCESS_VIOLATION`（`opt-level>=1`），脚本默认 `CARGO_PROFILE_RELEASE_OPT_LEVEL=0`（`.so` 更大，可 `llvm-strip`）。
 
 ### 7. Studio / Gradle UTP：`Process crashed` / `No UID for androidx.test.services` · **外围**
 
@@ -110,9 +107,9 @@ WIT resources（`own`/`borrow` ↔ `U32(rep)`）编组与进程级 resource regi
 
 - `gradle.properties`：`android.injected.androidTest.leaveApksInstalledAfterRun=true`
 - `androidTestUtil(libs.androidx.test.services)` 让 AGP 安装 test-services
-- **唯一推荐**：`./scripts/run-android-instrumented.ps1`（直接 `am instrument`；默认两波 + 波间 `force-stop`，避免同进程 CM linker 背靠背）
+- **唯一推荐**：`./scripts/run-android-instrumented.ps1`（直接 `am instrument`；现行默认 **CM cube** 单波；若日后同进程多 CM Guest，波间须 `force-stop`）
 - 不要同时开两个 Run / Gradle 任务往同一台机装 APK
-- CM triangle 仪器：勿 `ActivityScenario` / `startActivitySync`（vivo 易挂起）；保持亮屏，避免 Surface 长期未就绪
+- CM cube 仪器：勿 `ActivityScenario` / `startActivitySync`（vivo 易挂起）；保持亮屏，避免 Surface 长期未就绪
 
 ## 补丁落点（备忘）
 
@@ -143,7 +140,6 @@ WIT resources（`own`/`borrow` ↔ `U32(rep)`）编组与进程级 resource regi
 ./gradlew :android-demo:connectedDebugAndroidTest
 ```
 
-- `WasmtimeVectorAddInstrumentedTest`（abi-mvp）
-- `WasmtimeCmVectorAddInstrumentedTest`（CM；需 CM-patched `.so`）
+- `WasmtimeCmCubeInstrumentedTest`（CM cube；需 android + cm-resources 双补丁 `.so`）
 
 仍标明 **experimental / 非合规 wasi:webgpu**。

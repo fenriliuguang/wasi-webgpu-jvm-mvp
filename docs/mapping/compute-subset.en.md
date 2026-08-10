@@ -5,7 +5,7 @@
 > **Status:** experimental (P0 table is host path; CM Guests below)  
 > **WIT pin:** `wasi:webgpu/webgpu@0.3.0-rc.2` (see [`wit/`](../../wit/))  
 > **Dawn:** `androidx.webgpu:webgpu:1.0.0-alpha05`  
-> **Current CM package:** `experimental:webgpu-cm@0.7.0` (primary acceptance)
+> **Current CM package:** `experimental:webgpu-cm@0.8.0` (primary acceptance; device Guest = `cube-cm`)
 
 This table centers on the P0 acceptance path. Later-slice (C/D, …) capabilities are in the notes and gap matrix; full WebGPU / wasi-gfx is **out of scope**.
 
@@ -62,7 +62,7 @@ This table centers on the P0 acceptance path. Later-slice (C/D, …) capabilitie
 | Texture / sampler / query set | ⚠️ slice D: `create-texture` / `create-sampler` / `create-view` wired; query-set still Unsupported; swapchain in render-subset |
 | Indirect dispatch | ❌ |
 | Pipeline layout auto | ❌ (explicit layout; from slice D layout is pipeline-layout) |
-| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.7.0` (still not compliant wasi:webgpu; primary acceptance) |
+| Component Model / Wasm import | ⚠️ CM slice: `experimental:webgpu-cm@0.8.0` (still not compliant wasi:webgpu; primary acceptance = cube-cm) |
 | Full `result` error lifting | ⚠️ experimental track mostly Kotlin exceptions / traps; wasi track result stubs → `ComponentVal.err` (slice F); see [errors-async.en.md](errors-async.en.md) |
 
 ## Deviation list (summary)
@@ -71,5 +71,5 @@ This table centers on the P0 acceptance path. Later-slice (C/D, …) capabilitie
 2. **Mapped range:** WIT `get-with-copy` ↔ Host returns a copied `ByteArray`.  
 3. **Auto layout:** Not implemented; `deviceCreateComputePipeline` requires a layout handle.  
 4. **Dawn ≠ wgpu:** Validation failure messages/timing may differ from `wasi-webgpu-wasmtime`; this table + unit tests are authoritative.  
-5. **Slice C:** Host/WIT standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` wired; Guest on device: layout descriptor + nested-borrow helpers `*3` / `*-bgl` / `submit1` until `cm-resources` recursive patch rebuilds `.so`.
-6. **Slice D:** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG support sampler·texture entries; `compute-pipeline.layout` is **pipeline-layout**. storage-texture / write-texture / texture attributes remain Unsupported.
+5. **Slice C:** Host/WIT standard-shaped `create-bind-group-layout` / `create-bind-group` / `create-compute-pipeline(descriptor)` / `queue.submit` wired; nested borrow needs recursive `cm-resources`-patched natives (rebuilt in guest-descriptor-cube A).  
+6. **Slice D:** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG support sampler·texture entries; `compute-pipeline.layout` is **pipeline-layout**. storage-texture / texture attributes remain Unsupported; `write-texture` is `@0.8.0` — see [render-subset.en.md](render-subset.en.md).

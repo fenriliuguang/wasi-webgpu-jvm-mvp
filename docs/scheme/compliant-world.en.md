@@ -5,7 +5,8 @@
 > **Status: complete (2026-08-09).** DoD archive: [`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md).  
 > Slices **A–G all done**. Matrix close-out ≠ compliance marketing (experimental remains primary).  
 > Continues: semantic-hardening A–E archive ([`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md)).  
-> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E ✅) → error lift (F ✅) → long-tail close (G ✅).
+> Packages: upstream pin (A ✅) → dual-track Linker (B ✅) → compute de-specialize (C ✅) → textures (D ✅) → generic render (E ✅) → error lift (F ✅) → long-tail close (G ✅).  
+> **Follow-on (not current source of truth):** [`guest-descriptor-cube`](guest-descriptor-cube.en.md) advanced to `@0.8.0`; device acceptance baseline = CM cube (vector-add / triangle demos removed). Mentions of “current `@0.7.0`” below mean status at this phase’s close-out.
 
 ## One-liner
 

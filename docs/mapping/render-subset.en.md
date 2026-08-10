@@ -2,10 +2,10 @@
 
 [中文](render-subset.md) | **English**
 
-This table covers methods needed for the red-triangle on-screen path. Still **experimental**; **not** compliant `wasi:webgpu` / wasi-gfx.
+This table covers methods needed for the CM rotating textured cube on-screen path. Still **experimental**; **not** compliant `wasi:webgpu` / wasi-gfx.
 
-Reference: [`TriangleRenderer`](../../android-demo/src/main/java/io/github/fenriliuguang/wasi/webgpu/demo/onscreen/TriangleRenderer.kt) → `WasiWebGpuHost` → Dawn.
-Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCmTriangle`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmTriangle.kt) → abi-cm → same L2 → Dawn.
+Guest on-screen (current acceptance baseline): [`guest/cube-cm`](../../guest/cube-cm) → [`WasmtimeCmCube`](../../runtime-wasmtime/src/main/kotlin/io/github/fenriliuguang/wasi/webgpu/experimental/runtime/cm/WasmtimeCmCube.kt) → abi-cm → same L2 → Dawn.  
+Historical triangle-cm / `TriangleRenderer` paths removed; see [`archive-guest-onscreen-cm-dod.en.md`](../scheme/archive-guest-onscreen-cm-dod.en.md).
 
 | WIT / semantics | L2 (`WasiWebGpuHost`) | Dawn | Notes |
 |-----------------|----------------------|------|-------|
@@ -18,37 +18,32 @@ Guest on-screen: [`guest/triangle-cm`](../../guest/triangle-cm) → [`WasmtimeCm
 | `command-encoder.begin-render-pass` | `commandEncoderBeginRenderPass` | color-attachments + optional depth-stencil-attachment | `@0.7.0` slice E; `@0.8.0` depth |
 | `queue.write-texture` | `queueWriteTexture` | 2D texel upload (origin 0; depth 1) | `@0.8.0` guest-descriptor-cube B |
 | `render-pass-encoder.set-bind-group` | `renderPassSetBindGroup` | mirrors compute | `@0.8.0` |
-| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | **deprecated** (E); `vertex_index` path |
-| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | **deprecated** (E); device Guest interim (nested borrow) |
-| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated** (E); device Guest interim |
+| `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | **deprecated** (E); historical `vertex_index` path |
+| `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | **deprecated** (E) |
+| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated** (E) |
 | `render-pass-encoder.set-pipeline` | `renderPassSetPipeline` | `setPipeline` | |
 | `render-pass-encoder.set-vertex-buffer` | `renderPassSetVertexBuffer` | `setVertexBuffer` | `@0.4.0`; slot + buffer + offset/size |
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
 | `render-pass-encoder.end` | `renderPassEnd` | `end` | |
 
-Records (`@0.4.0`): `vertex-attribute` / `vertex-buffer-layout`; flag aliases `vertex-format` / `vertex-step-mode` (same numeric values as `androidx.webgpu`; see L2 `GpuVertexFormat`). Guest vertex-buffer acceptance: completed slice E in [`semantic-hardening.en.md`](../scheme/semantic-hardening.en.md).
+Records (`@0.4.0`): `vertex-attribute` / `vertex-buffer-layout`; flag aliases `vertex-format` / `vertex-step-mode` (same numeric values as `androidx.webgpu`; see L2 `GpuVertexFormat`). Guest vertex-buffer work: completed slice E in [`semantic-hardening.en.md`](../scheme/semantic-hardening.en.md); cube path continues on `@0.8.0`.
 
-## Guest CM on-screen path (working)
+## Guest CM on-screen path (current)
 
 ```text
-guest/triangle-cm (triangle_cm.wasm, world triangle)
-  export run-triangle | init-triangle / draw-frame / drop-triangle
-  → WasmtimeCmTriangle.Session (L1) / WasmtimeCmTriangleAndroid
-  → Wasmtime ComponentLinker + abi-cm (imports from the table above)
-  → same WasiWebGpuHost → Dawn → SurfaceView
-
 guest/cube-cm (cube_cm.wasm, world cube) @0.8.0
   export run-cube | init-cube / draw-frame / drop-cube
   → WasmtimeCmCube.Session / WasmtimeCmCubeAndroid / CubeCmOneShot
   → standard descriptors + write-texture + depth + set-bind-group + MVP
+  → same WasiWebGpuHost → Dawn → SurfaceView
 ```
 
 - **Window**: the Host side injects the native window (`Surface` → ANativeWindow pointer, passed as u64); the Guest only holds a `surface` resource and never creates windows
-- **One-shot** (`run-triangle` / `run-cube`): configure → draw → present → unconfigure; default instrumented path
-- **Vertex buffer:** Guest `create-buffer` + `write-buffer` → standard `create-render-pipeline` → `set-vertex-buffer` + `draw`
+- **One-shot** (`run-cube`): configure → draw → present → unconfigure; default instrumented path
+- **Vertex / texture:** Guest `create-buffer` + `write-buffer` / `write-texture` → standard `create-render-pipeline` → `set-vertex-buffer` / `set-bind-group` + `draw`
 - **Frame loop** (host-driven): `init-cube` → loop `draw-frame` → `drop-cube`; Demo `CubeCmOneShot` (reuse Session + `releaseLifetimeSafetyNets` + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
 - **Lifetime**: swapchain View↔Texture frame-equivalent `tryDrop`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4)
-- **Acceptance**: instrumented CM cube; Demo pause→CM→resume
+- **Acceptance**: instrumented `WasmtimeCmCubeInstrumentedTest`; Demo tap shows slowly rotating textured cube
 - **Desktop**: Cpu fake surface supports AbiCm multi-frame lifetime unit tests; full CM Guest on-screen still needs Android Surface / Dawn
 - **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md))
 
@@ -56,7 +51,7 @@ guest/cube-cm (cube_cm.wasm, world cube) @0.8.0
 
 | Area | Status |
 |------|--------|
-| Guest CM on-screen (triangle-cm / cube-cm) | ✅ working (see above) |
+| Guest CM on-screen (cube-cm) | ✅ working (see above) |
 | wasi-gfx on-screen | ❌ |
 | Generic `create-render-pipeline` / `begin-render-pass` descriptor | ✅ `@0.7.0`; depth `@0.8.0` |
 | Minimal depth24plus | ✅ `@0.8.0` (no MSAA / stencil faces) |

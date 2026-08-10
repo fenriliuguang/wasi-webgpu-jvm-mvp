@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Docs sync — archive + consistency (CM cube baseline)
+
+- Root README ZH/EN index deduped; Guest link → `guest/cube-cm`; scheme stage table adds handoff row
+- Active docs aligned to sole device acceptance = CM cube `@0.8.0`: render/threading/compute-subset, android-wasmtime ZH/EN, wit + compute-cm READMEs
+- Historical plan pages (compliant-world, blockers) keep phase wording; add supersession notes where they still said `@0.7.0` / two-wave / triangle as “current”
+
 ### guest-descriptor-cube slice D — resource-lifetime hardening (still not true WIT dtor)
 
 - Chose frame-equivalent nets over `JniComponentLinker` rep-only overlay: AbiCm `dropRep` / `releaseLifetimeSafetyNets`; clear View↔Texture on present / next acquire / unconfigure; `WasmtimeCmCube.Session` calls nets after `runCube` / `runFrameLoop` / `close`
@@ -45,9 +51,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 - **Guest standard descriptors on device + rotating textured cube** (2026-08-09→10): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / archive [`archive-guest-descriptor-cube-dod.md`](docs/scheme/archive-guest-descriptor-cube-dod.md) — slices A–D complete. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌, true WIT dtor overlay. Primary acceptance remains experimental CM cube
 
-### Docs sync
+### Docs sync (pre-cube; superseded)
 
-- Cross-doc consistency pass: primary acceptance remains experimental `@0.7.0`; matrix close-out ≠ compliance marketing; Guest/dual-track versions; android-wasmtime / compute+render subset tables; archive-demo Session footnote vs D6 reuse; scheme/CHANGELOG unlocked status
+- Cross-doc consistency pass at compliant-world close-out: primary acceptance was experimental `@0.7.0`; matrix close-out ≠ compliance marketing. **Superseded** by guest-descriptor-cube `@0.8.0` + CM-cube-only acceptance + 2026-08-10 docs sync above
 
 ### Compliant-world slice F — result / error-kind lift
 

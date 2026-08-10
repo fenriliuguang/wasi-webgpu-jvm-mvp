@@ -9,21 +9,20 @@
 - Host 后台轮询 `GPUInstance.processEvents()`（对齐 `androidx.webgpu.helper` 的事件泵）。  
 - Android demo / 仪器测试应在 **后台线程** 调用 Host，避免阻塞主线程。
 
-## Surface / render（L2）
+## Surface / render（L2 API）
 
 - 同一 `WasiWebGpuHost` 实例上：`surfaceConfigure` / `surfaceGetCurrentTexture` / `surfacePresent` 与 `queueSubmit` **必须在同一渲染线程**。  
-- `android-demo` 的 `TriangleRenderer` 使用独立 `HandlerThread`（`webgpu-triangle`）持有该 Host；`SurfaceHolder` 回调只投递到该线程；**主线程不**调用 WebGPU。  
-- 帧循环在同一渲染线程 `postDelayed`；`surfaceDestroyed` 时停循环并 `surfaceUnconfigure` / `drop` Surface。  
-- 与向量加用的另一个 `DawnWasiWebGpuHost` 实例各用各的 `GPUInstance`，互不共享。
+- Demo **不再**保留独立 L2 `TriangleRenderer` 上屏路径；Surface 仅由 CM Guest 路径消费（见下）。  
+- L2 surface API 仍可供宿主直接调用；调用方须自管线程亲和。
 
-## Surface / render（CM Guest）
+## Surface / render（CM Guest，现行 Demo / 仪器）
 
-- CM 路径使用**单独** `DawnWasiWebGpuHost` + `HandlerThread`（`webgpu-cube-cm`）；**不**与 L2 Host 跨线程共享。  
+- CM 路径使用 `DawnWasiWebGpuHost` + `HandlerThread`（`webgpu-cube-cm`）；**主线程不**调用 WebGPU。  
 - 宿主驱动帧循环：同线程 `init-cube` → 循环 `draw-frame` → `drop-cube`（见 `WasmtimeCmCube.Session.runFrameLoop`）。  
-- Demo：CM 前 `pauseSurfaceAndAwait`（L2 `teardownGpu`）；CM 后 `drop-cube` → Session `releaseLifetimeSafetyNets` → `releaseAllGpuObjects`（保留 Instance/Session）→ settle → `resumeSurfaceAndAwait`。  
-- **Demo 手点**：复用 Host + Session；每轮 `releaseAllGpuObjects` 交还 ANativeWindow（避免背靠背关 linker）。详见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)。  
-- **仪器**：复用 Session（CM cube）。  
-- 帧资源：present / unconfigure / Session 末尾 `tryDrop` View↔Texture 配对 + `releaseFrameResources`；**仍非真 WIT dtor**（[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) §4）。
+- Demo `CubeCmOneShot`：复用 Host + Session；每轮前后 `releaseAllGpuObjects` 交还 ANativeWindow（避免背靠背关 linker）；Session 末尾 `releaseLifetimeSafetyNets`。  
+- **仪器**：`WasmtimeCmCubeInstrumentedTest`（复用 Session）。  
+- 帧资源：present / unconfigure / Session 末尾 `tryDrop` View↔Texture 配对 + `releaseFrameResources`；**仍非真 WIT dtor**（[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) §4）。  
+- 历史 L2↔CM pause/resume 与 triangle 两波仪器：见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)。
 
 ## Instance / Device / Queue
 

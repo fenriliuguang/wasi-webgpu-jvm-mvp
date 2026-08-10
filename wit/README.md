@@ -20,7 +20,7 @@
 
 ## 双轨说明
 
-- **experimental（主验收轨）**：现有 Guest（vector-add-cm / triangle-cm / cube-cm）与 `abi-cm` / Linker 仍走 `experimental:webgpu-cm@0.8.0`。  
+- **experimental（主验收轨）**：现行 Guest 仅 [`guest/cube-cm`](../guest/cube-cm/)；`abi-cm` / Linker 走 `experimental:webgpu-cm@0.8.0`。历史 vector-add-cm / triangle-cm 示例已移除。  
 - **标准包（双轨 stub）**：已 vendor 钉定；Linker 已注册资源 + Unsupported / result stub（切片 B–G）；**尚未**成为主 Guest / 主验收路径。矩阵关门 ≠ 合规产品；**仍不得**宣传合规。  
 - **升级**：先改 [`deps/wasi-webgpu/PIN.md`](deps/wasi-webgpu/PIN.md) → `python scripts/gen-wasi-webgpu-inventory.py` → `python scripts/gen-compliant-world-gap.py` → 再改 Host / ABI。
 

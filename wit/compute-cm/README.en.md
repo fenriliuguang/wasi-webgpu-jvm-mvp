@@ -15,9 +15,9 @@ Component Model compute + minimal surface/render slice.
 - **0.6.0 (slice D):** `create-texture` / `create-sampler` / `create-pipeline-layout` / `texture.create-view`; BGL/BG sampler·texture entries; `compute-pipeline.layout` → pipeline-layout
 - **0.7.0 (slice E):** `create-render-pipeline(descriptor)` / `begin-render-pass(descriptor)`; `*-triangle*` / `begin-render-pass-clear` deprecated
 - **0.8.0 (guest-descriptor-cube B):** `write-texture`; render-pass `set-bind-group`; depth-stencil; `world cube`
-- World exports: `vector-add` → `run-vector-add`; `triangle` → `run-triangle` / `init-triangle` / `draw-frame` / `drop-triangle`; `cube` → `run-cube` / `init-cube` / `draw-frame` / `drop-cube` (Host injects native window)
+- World exports (WIT still keeps historical worlds): `vector-add` / `triangle` / `cube`; **in-tree Guest is cube only** → `run-cube` / `init-cube` / `draw-frame` / `drop-cube` (Host injects native window)
 
-Guests: `guest/vector-add-cm/`, `guest/triangle-cm/`, `guest/cube-cm/` (standard descriptors; nested borrow needs recursive `cm-resources`-patched natives)  
+Guest (current): [`guest/cube-cm/`](../../guest/cube-cm/) (standard descriptors; nested borrow needs recursive `cm-resources`-patched natives). Historical vector-add-cm / triangle-cm demos removed.  
 Host adapter: `abi-cm` → `WasiWebGpuHost`  
 Wiring: `runtime-wasmtime` `runtime.cm` (`ComponentLinker` + `defineResource`)
 

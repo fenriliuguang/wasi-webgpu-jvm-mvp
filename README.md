@@ -75,22 +75,17 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 文档 | 中文 | English |
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
-| Demo CM 稳性 DoD 归档 | [docs/scheme/archive-demo-cm-stability-dod.md](docs/scheme/archive-demo-cm-stability-dod.md) | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
-| Demo CM 真机稳性回归 blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) | （仅中文） |
-| 语义加固与工程清债 DoD 归档 | [docs/scheme/archive-semantic-hardening-dod.md](docs/scheme/archive-semantic-hardening-dod.md) | [docs/scheme/archive-semantic-hardening-dod.en.md](docs/scheme/archive-semantic-hardening-dod.en.md) |
-| 语义加固计划（已完成） | [docs/scheme/semantic-hardening.md](docs/scheme/semantic-hardening.md) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
-| 合规 World DoD 归档（已完成，无 gfx） | [docs/scheme/archive-compliant-world-dod.md](docs/scheme/archive-compliant-world-dod.md) | [docs/scheme/archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |
-| 合规 World 计划（已完成，无 gfx） | [docs/scheme/compliant-world.md](docs/scheme/compliant-world.md) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
-| Guest 标准 descriptor + 立方体 DoD 归档（已完成） | [docs/scheme/archive-guest-descriptor-cube-dod.md](docs/scheme/archive-guest-descriptor-cube-dod.md) | [docs/scheme/archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
-| Guest 标准 descriptor + 旋转纹理立方体（计划，已完成） | [docs/scheme/guest-descriptor-cube.md](docs/scheme/guest-descriptor-cube.md) | [docs/scheme/guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
-| 合规 World 缺口矩阵 | [docs/mapping/compliant-world-gap.md](docs/mapping/compliant-world-gap.md) | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
-| 合规 World 双轨 | [docs/mapping/compliant-world-dual-track.md](docs/mapping/compliant-world-dual-track.md) | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
-| 基线 DoD 归档 | [docs/scheme/archive-baseline-dod.md](docs/scheme/archive-baseline-dod.md) | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
-| Guest CM 上屏 DoD 归档 | [docs/scheme/archive-guest-onscreen-cm-dod.md](docs/scheme/archive-guest-onscreen-cm-dod.md) | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
-| Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
-| Compute / Render 映射 | [compute-subset](docs/mapping/compute-subset.md) · [render-subset](docs/mapping/render-subset.md) | [EN](docs/mapping/compute-subset.en.md) · [EN](docs/mapping/render-subset.en.md) |
-| 合规缺口矩阵 | [compliant-world-gap](docs/mapping/compliant-world-gap.md) | [EN](docs/mapping/compliant-world-gap.en.md) |
+| Guest 标准 descriptor + 立方体 DoD 归档 | [archive-guest-descriptor-cube-dod](docs/scheme/archive-guest-descriptor-cube-dod.md) | [EN](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
+| Guest 标准 descriptor + 立方体（计划，已完成） | [guest-descriptor-cube](docs/scheme/guest-descriptor-cube.md) | [EN](docs/scheme/guest-descriptor-cube.en.md) |
+| 合规 World DoD 归档（无 gfx） | [archive-compliant-world-dod](docs/scheme/archive-compliant-world-dod.md) | [EN](docs/scheme/archive-compliant-world-dod.en.md) |
+| 合规 World 计划（已完成） | [compliant-world](docs/scheme/compliant-world.md) | [EN](docs/scheme/compliant-world.en.md) |
+| 合规缺口矩阵 / 双轨 | [gap](docs/mapping/compliant-world-gap.md) · [dual-track](docs/mapping/compliant-world-dual-track.md) | [EN](docs/mapping/compliant-world-gap.en.md) · [EN](docs/mapping/compliant-world-dual-track.en.md) |
+| 语义加固 DoD 归档 / 计划 | [archive](docs/scheme/archive-semantic-hardening-dod.md) · [plan](docs/scheme/semantic-hardening.md) | [EN](docs/scheme/archive-semantic-hardening-dod.en.md) · [EN](docs/scheme/semantic-hardening.en.md) |
+| Demo CM 稳性 DoD 归档 / blockers | [archive](docs/scheme/archive-demo-cm-stability-dod.md) · [blockers](docs/scheme/demo-cm-stability-blockers.md) | [EN archive](docs/scheme/archive-demo-cm-stability-dod.en.md) · blockers 仅中文 |
+| 基线 / Guest CM 上屏 DoD 归档 | [baseline](docs/scheme/archive-baseline-dod.md) · [onscreen](docs/scheme/archive-guest-onscreen-cm-dod.md) | [EN](docs/scheme/archive-baseline-dod.en.md) · [EN](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
+| Android Wasmtime | [docs/android-wasmtime.md](docs/android-wasmtime.md) | [EN](docs/android-wasmtime.en.md) |
+| Compute / Render 映射 | [compute](docs/mapping/compute-subset.md) · [render](docs/mapping/render-subset.md) | [EN](docs/mapping/compute-subset.en.md) · [EN](docs/mapping/render-subset.en.md) |
 | 线程 / 错误与 Async | [threading](docs/mapping/threading.md) · [errors-async](docs/mapping/errors-async.md) | [EN](docs/mapping/threading.en.md) · [EN](docs/mapping/errors-async.en.md) |
 | WIT / 补丁 / natives / Guest | [wit/](wit/README.md) · [patches/](patches/README.md) · [android-natives](runtime-wasmtime/android-natives/README.md) · [guest/cube-cm](guest/cube-cm/README.md) | 见各目录 EN |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) | 同上 |

@@ -3,51 +3,36 @@
 [中文](android-wasmtime.md) | **English**
 
 > experimental · Guest → Wasmtime (L1) → `WasiWebGpuHost` (L2) → `DawnWasiWebGpuHost`  
-> Acceptance: `WasmtimeVectorAddInstrumentedTest` (abi-mvp) + `WasmtimeCmVectorAddInstrumentedTest` (CM) + `WasmtimeCmTriangleInstrumentedTest` (Guest on-screen)
+> Device acceptance baseline: `WasmtimeCmCubeInstrumentedTest` (CM rotating textured cube)
 
 ## Progress
 
 | Item | Status |
 |------|--------|
-| Desktop P1: Guest → Wasmtime → CpuHost (`:runtime-wasmtime:test`) | Done |
+| Desktop P1: Guest → Wasmtime → CpuHost (`:runtime-wasmtime:test`) | Done (historical vector-add; desktop CM now cube-centric) |
 | Desktop CM: Guest.component → ComponentLinker → CpuHost | Done |
 | Android: cross-compile Bionic `libwasmtime4j.so` (arm64-v8a / x86_64) | Done |
 | Android: jniLibs packaging + exclude Maven desktop `wasmtime4j-native` | Done |
-| Android: guest wasm in assets; instrumented vector-add (abi-mvp) | Done (green) |
-| Android CM: CM-patched `.so` + `vector_add_cm.wasm` instrumented test | Done (green) |
+| Android: guest wasm in assets | Done (current: `cube_cm.wasm` only) |
 | Desktop CM: `desktop-natives/` (no Gradle cache mutation) + CM test gate | Done |
-| On-screen (L2 Kotlin) | Demo: `TriangleRenderer` → L2 Host → Dawn ✅ |
-| On-screen (Guest CM) | `triangle-cm` → abi-cm → same L2 → Dawn ✅ (`WasmtimeCmTriangleInstrumentedTest`) |
+| On-screen (Guest CM) | `cube-cm` → abi-cm → same L2 → Dawn ✅ (`WasmtimeCmCubeInstrumentedTest`) |
 | wasi-gfx | ❌ out of phase |
 
-Path (abi-mvp):
+Path (CM cube, current acceptance):
 
 ```text
-guest/vector_add.wasm
-  → System.loadLibrary("wasmtime4j")   # APK jniLibs (Bionic)
-  → Wasmtime4j JNI + abi-mvp
-  → WasiWebGpuHost
-  → DawnWasiWebGpuHost
-```
-
-Path (CM):
-
-```text
-guest/vector_add_cm.wasm
+guest/cube_cm.wasm
   → System.loadLibrary("wasmtime4j")   # needs android + cm-resources patches
   → Wasmtime4j ComponentLinker + abi-cm
   → WasiWebGpuHost
   → DawnWasiWebGpuHost
 ```
 
-Comparisons:
+Comparisons (historical paths removed; names kept for old logs):
 
-- P0: `VectorAddInstrumentedTest` (Kotlin → Dawn)
-- P1 Android: `WasmtimeVectorAddInstrumentedTest` (Guest → Dawn)
-- P1 desktop: `WasmtimeVectorAddTest` (Guest → CpuHost)
-- CM Android: `WasmtimeCmVectorAddInstrumentedTest` (CM Guest → Dawn)
-- CM desktop: `WasmtimeCmVectorAddTest` (CM Guest → CpuHost)
-- CM triangle Android: `WasmtimeCmTriangleInstrumentedTest` (Guest on-screen → Dawn)
+- Current instrumented: `WasmtimeCmCubeInstrumentedTest` (CM cube → Dawn)
+- Current desktop CM: `:runtime-wasmtime:test` (`WasmtimeCmCubeTest`, etc.; skip without desktop-natives)
+- Historical: P0 `VectorAddInstrumentedTest`, abi-mvp / CM vector-add, CM triangle instrumented (see `archive-*-dod`)
 
 ## Pitfall relevance grades
 
@@ -106,7 +91,7 @@ An android-only-patched `.so` cannot run the CM Guest; `build-wasmtime4j-android
 
 **Nested resources:** older patch only mapped **top-level** `Val::Resource` to `U32(rep)`; borrow-inside-record/list via `val_to_component_value` becomes opaque `Own`/`Borrow` handles, while Java `asU32()` expects host table reps → trap. Patch now **recurses**.
 
-**guest-descriptor-cube A (2026-08-09):** rebuilt via `build-wasmtime4j-android.ps1` and replaced `jniLibs`; desktop CM smoke: `vector-add-cm` uses standard `create-bind-group` / `create-pipeline-layout` / `create-compute-pipeline` / `queue.submit(list)` (`:runtime-wasmtime:test` WasmtimeCmVectorAddTest green). On Windows, if rustc hits `STATUS_ACCESS_VIOLATION` at `opt-level>=1`, the script defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0` (larger `.so`; strip with `llvm-strip`).
+**guest-descriptor-cube A (2026-08-09):** rebuilt via `build-wasmtime4j-android.ps1` and replaced `jniLibs`; desktop CM smoke at the time used nested standard descriptors on `vector-add-cm` (that Guest demo was later removed; current acceptance = cube-cm). On Windows, if rustc hits `STATUS_ACCESS_VIOLATION` at `opt-level>=1`, the script defaults `CARGO_PROFILE_RELEASE_OPT_LEVEL=0` (larger `.so`; strip with `llvm-strip`).
 
 ### 7. Studio / Gradle UTP: `Process crashed` / `No UID for androidx.test.services` · **Peripheral**
 
@@ -122,9 +107,9 @@ Mitigations:
 
 - `gradle.properties`: `android.injected.androidTest.leaveApksInstalledAfterRun=true`
 - `androidTestUtil(libs.androidx.test.services)` so AGP installs test-services
-- **Single recommended entry**: `./scripts/run-android-instrumented.ps1` (plain `am instrument`; default two waves + `force-stop` between — avoid back-to-back CM linker in one process)
+- **Single recommended entry**: `./scripts/run-android-instrumented.ps1` (plain `am instrument`; current default **CM cube** single wave; if multiple CM Guests share a process later, `force-stop` between waves)
 - Do not run two Studio/Gradle install sessions against the same device at once
-- CM triangle instrumented tests: do not use `ActivityScenario` / `startActivitySync` (vivo can hang); keep screen on so Surface becomes ready
+- CM cube instrumented tests: do not use `ActivityScenario` / `startActivitySync` (vivo can hang); keep screen on so Surface becomes ready
 
 ## Patch landing spots (cheat sheet)
 
@@ -155,7 +140,6 @@ Instrumented tests (device + WebGPU/Vulkan):
 ./gradlew :android-demo:connectedDebugAndroidTest
 ```
 
-- `WasmtimeVectorAddInstrumentedTest` (abi-mvp)
-- `WasmtimeCmVectorAddInstrumentedTest` (CM; needs CM-patched `.so`)
+- `WasmtimeCmCubeInstrumentedTest` (CM cube; needs android + cm-resources dual-patched `.so`)
 
 Still marked **experimental / non-compliant wasi:webgpu**.

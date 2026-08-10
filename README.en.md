@@ -75,22 +75,17 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Document | Link |
 |----------|------|
 | Root README | [README.en.md](README.en.md) |
-| Demo CM stability DoD archive | [docs/scheme/archive-demo-cm-stability-dod.en.md](docs/scheme/archive-demo-cm-stability-dod.en.md) |
-| Demo CM device stability regression blockers | [docs/scheme/demo-cm-stability-blockers.md](docs/scheme/demo-cm-stability-blockers.md) (ZH) |
-| Semantic hardening DoD archive | [docs/scheme/archive-semantic-hardening-dod.en.md](docs/scheme/archive-semantic-hardening-dod.en.md) |
-| Semantic hardening plan (complete) | [docs/scheme/semantic-hardening.en.md](docs/scheme/semantic-hardening.en.md) |
-| Compliant-world DoD archive (complete, no gfx) | [docs/scheme/archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |
-| Compliant-world plan (complete, no gfx) | [docs/scheme/compliant-world.en.md](docs/scheme/compliant-world.en.md) |
-| Guest standard descriptors + cube DoD archive (complete) | [docs/scheme/archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
-| Guest standard descriptors + rotating textured cube (plan, complete) | [docs/scheme/guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
-| Compliant-world gap matrix | [docs/mapping/compliant-world-gap.en.md](docs/mapping/compliant-world-gap.en.md) |
-| Compliant-world dual-track | [docs/mapping/compliant-world-dual-track.en.md](docs/mapping/compliant-world-dual-track.en.md) |
-| Baseline DoD archive | [docs/scheme/archive-baseline-dod.en.md](docs/scheme/archive-baseline-dod.en.md) |
-| Guest CM on-screen DoD archive | [docs/scheme/archive-guest-onscreen-cm-dod.en.md](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
+| Guest standard descriptors + cube DoD archive | [archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
+| Guest standard descriptors + cube (plan, complete) | [guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
+| Compliant-world DoD archive (no gfx) | [archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |
+| Compliant-world plan (complete) | [compliant-world.en.md](docs/scheme/compliant-world.en.md) |
+| Compliant-world gap / dual-track | [gap](docs/mapping/compliant-world-gap.en.md) · [dual-track](docs/mapping/compliant-world-dual-track.en.md) |
+| Semantic hardening archive / plan | [archive](docs/scheme/archive-semantic-hardening-dod.en.md) · [plan](docs/scheme/semantic-hardening.en.md) |
+| Demo CM stability archive / blockers | [archive](docs/scheme/archive-demo-cm-stability-dod.en.md) · [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH) |
+| Baseline / Guest CM on-screen DoD archives | [baseline](docs/scheme/archive-baseline-dod.en.md) · [onscreen](docs/scheme/archive-guest-onscreen-cm-dod.en.md) |
 | Android Wasmtime | [docs/android-wasmtime.en.md](docs/android-wasmtime.en.md) |
 | Compute / Render mapping | [compute](docs/mapping/compute-subset.en.md) · [render](docs/mapping/render-subset.en.md) |
-| Compliant-world gap matrix | [gap](docs/mapping/compliant-world-gap.en.md) |
 | Threading / errors | [threading](docs/mapping/threading.en.md) · [errors-async](docs/mapping/errors-async.en.md) |
-| WIT / patches / natives / Guest | [wit/](wit/README.en.md) · [patches/](patches/README.en.md) · [natives](runtime-wasmtime/android-natives/README.md) · [guest](guest/vector-add/README.en.md) |
+| WIT / patches / natives / Guest | [wit/](wit/README.en.md) · [patches/](patches/README.en.md) · [natives](runtime-wasmtime/android-natives/README.md) · [guest/cube-cm](guest/cube-cm/README.en.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
