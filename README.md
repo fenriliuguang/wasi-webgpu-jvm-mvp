@@ -63,7 +63,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 ## 状态
 
 - **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)；**合规 wasi:webgpu World（无 gfx，A–G，2026-08-09）**→ [归档](docs/scheme/archive-compliant-world-dod.md)；**Guest 标准 descriptor + 旋转纹理立方体（A–D，2026-08-10）**→ [归档](docs/scheme/archive-guest-descriptor-cube-dod.md)（D：**仍非真 WIT dtor**）；**工程移交**（Maven 可发布化 / abi-mvp render / 可选 perf，A–C，2026-08-10）→ [归档](docs/scheme/archive-engineering-handoff-dod.md)
-- **现行口径：** 仍为 **experimental**；本地 Publishing **≠** 对外发布；**真机验收基准 = CM cube**。后续备忘（未立项）：[真 CM async](docs/scheme/true-cm-async-memo.md)
+- **现行口径：** 仍为 **experimental**；本地 Publishing **≠** 对外发布；**真机验收基准 = CM cube**。**已立项（仅计划，未开工代码）：** [真 CM async](docs/scheme/true-cm-async.md)（切片 A–E；备忘史实 [memo](docs/scheme/true-cm-async-memo.md)）；默认仍 sync-compat
 
 ## 参考
 
@@ -79,7 +79,8 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 工程移交 DoD 归档 | [archive-engineering-handoff-dod](docs/scheme/archive-engineering-handoff-dod.md) | [EN](docs/scheme/archive-engineering-handoff-dod.en.md) |
 | 工程移交（计划，已完成） | [engineering-handoff](docs/scheme/engineering-handoff.md) | [EN](docs/scheme/engineering-handoff.en.md) |
 | 本地 Maven 坐标（自检，非发布） | [maven-local](docs/maven-local.md) | [EN](docs/maven-local.en.md) |
-| 真 CM async 备忘（未立项） | [true-cm-async-memo](docs/scheme/true-cm-async-memo.md) | [EN](docs/scheme/true-cm-async-memo.en.md) |
+| 真 CM async（计划已立项，未开工） | [true-cm-async](docs/scheme/true-cm-async.md) | [EN](docs/scheme/true-cm-async.en.md) |
+| 真 CM async 备忘（已立项史实） | [true-cm-async-memo](docs/scheme/true-cm-async-memo.md) | [EN](docs/scheme/true-cm-async-memo.en.md) |
 | Guest 标准 descriptor + 立方体 DoD 归档 | [archive-guest-descriptor-cube-dod](docs/scheme/archive-guest-descriptor-cube-dod.md) | [EN](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
 | Guest 标准 descriptor + 立方体（计划，已完成） | [guest-descriptor-cube](docs/scheme/guest-descriptor-cube.md) | [EN](docs/scheme/guest-descriptor-cube.en.md) |
 | 合规 World DoD 归档（无 gfx） | [archive-compliant-world-dod](docs/scheme/archive-compliant-world-dod.md) | [EN](docs/scheme/archive-compliant-world-dod.en.md) |

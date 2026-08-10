@@ -20,7 +20,7 @@
 | **合规 wasi:webgpu World（无 gfx）** | **已完成（A–G）** — 计划 [`compliant-world.md`](compliant-world.md)；归档 [`archive-compliant-world-dod.md`](archive-compliant-world-dod.md)；缺口 [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)。**不做** wasi-gfx；**不宣传**合规产品 |
 | **Guest 标准 descriptor 真机 + 旋转纹理立方体** | **已完成（A–D）** — 计划 [`guest-descriptor-cube.md`](guest-descriptor-cube.md)；归档 [`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)。D：**仍非真 WIT dtor** |
 | **工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf** | **已完成（A–C）** — 计划 [`engineering-handoff.md`](engineering-handoff.md)；归档 [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)。仍为 **experimental**；本地 Publishing **≠** 对外发布。**真机验收基准 = CM cube**（`guest/cube-cm`） |
-| **备忘：真 CM async / WASI Preview3** | **备忘（未立项）** — [`true-cm-async-memo.md`](true-cm-async-memo.md)；engineering-handoff 已落成，立项另议。现行仍 sync-compat |
+| **真 CM async（层 A）/ 可选 P3 Spike** | **已立项（A–E，2026-08-10；计划冻结，代码未开工）** — 计划 [`true-cm-async.md`](true-cm-async.md)；备忘史实 [`true-cm-async-memo.md`](true-cm-async-memo.md)。主验收仍 CM cube + sync-compat；真异步 ≠ 合规宣称 / 对外发布 |
 
 已完成计划页保留正文作史实；现行口径以根 README + 本表 + 各 `archive-*-dod` 为准。vector-add / triangle Guest 示例已移除。
 

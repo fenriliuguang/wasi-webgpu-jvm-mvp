@@ -90,5 +90,5 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 - 本地 Maven：[`docs/maven-local.md`](../maven-local.md)  
 - Android natives：[`docs/android-wasmtime.md`](../android-wasmtime.md) · [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)  
 - 双轨 / 缺口（只读）：[`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) · [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
-- 备忘（未立项）：[`true-cm-async-memo.md`](true-cm-async-memo.md)  
+- 后续立项：[`true-cm-async.md`](true-cm-async.md)（备忘史实 [`true-cm-async-memo.md`](true-cm-async-memo.md)）  
 

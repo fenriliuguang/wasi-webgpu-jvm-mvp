@@ -7,7 +7,7 @@
 
 Archive covers slices A (Maven publishability, no external release) → B (abi-mvp flat render) → C (optional perf notes), 2026-08-10.
 
-**Important:** Still **experimental**; local Publishing **≠** external release / consumer-ready claims; true-async memo is [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md) (memo page open, **not chartered**). Primary acceptance remains CM cube.
+**Important:** Still **experimental**; local Publishing **≠** external release / consumer-ready claims; true async is chartered at [`true-cm-async.en.md`](true-cm-async.en.md) (memo history [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)). Primary acceptance remains CM cube.
 
 ## DoD
 

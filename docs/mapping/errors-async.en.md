@@ -36,9 +36,10 @@ Unwired wasi **result** stubs: map `Unsupported` into that method’s Err shape 
 
 | Phase | Strategy |
 |-------|----------|
-| Current (still after engineering-handoff archive) | **sync-compat**: `requestAdapter` / `requestDevice` / `mapAsync` still wait via `CountDownLatch`; standard `*-async` methods may stub as result Err / later wiring stays sync |
-| True CM async / WASI Preview3 | **Out of scope** now; memo [`true-cm-async-memo.en.md`](../scheme/true-cm-async-memo.en.md) (**not chartered**; handoff archived) |
+| Default (until slices land / cube primary acceptance) | **sync-compat**: `requestAdapter` / `requestDevice` / `mapAsync` still wait via `CountDownLatch`; standard long-tail `*-async` may stub as result Err |
+| True CM async (**chartered, no code yet**) | Plan [`true-cm-async.en.md`](../scheme/true-cm-async.en.md): primary-path `request-adapter` / `request-device` / `map-async` to be advanced to CM futures; primary acceptance **stays** CM cube + sync-compat; optional P3 spike must not block close-out |
+| WASI Preview3 | **Not** a close-out requirement; see plan slice E optional path |
 
-Skew vs upstream: WIT `async func` methods still return synchronously here; gap rows marked ⚠️ sync-compat.
+Skew vs upstream (default path): WIT `async func` methods still return synchronously on sync-compat; gap rows marked ⚠️ sync-compat until true-cm-async slices lift them.
 
-Default timeout is 30s; timeout throws `HostException.Backend` (experimental) or later lifts to the matching result Err.
+Default timeout is 30s; timeout throws `HostException.Backend` (experimental) or lifts to the matching result Err.

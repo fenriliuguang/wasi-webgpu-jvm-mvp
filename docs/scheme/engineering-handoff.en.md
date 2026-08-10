@@ -90,5 +90,5 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 - Local Maven: [`docs/maven-local.en.md`](../maven-local.en.md)  
 - Android natives: [`docs/android-wasmtime.en.md`](../android-wasmtime.en.md) · [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  
 - Dual-track / gap (read-only): [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) · [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
-- Memo (not chartered): [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
+- Next charter: [`true-cm-async.en.md`](true-cm-async.en.md) (memo history [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md))  
 

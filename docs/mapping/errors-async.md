@@ -36,9 +36,10 @@
 
 | 阶段 | 策略 |
 |------|------|
-| 现行（engineering-handoff 已归档后仍适用） | **sync-compat**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包 `*-async` 方法可 stub 为 result Err / 日后接线仍 sync |
-| 真 CM async / WASI Preview3 | **不做**（现行排除）；备忘 [`true-cm-async-memo.md`](../scheme/true-cm-async-memo.md)（**未立项**；handoff 已归档） |
+| 默认（切片落地前 / cube 主验收） | **sync-compat**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包长尾 `*-async` 可 stub 为 result Err |
+| 真 CM async（**已立项，代码未开工**） | 计划 [`true-cm-async.md`](../scheme/true-cm-async.md)：主链 `request-adapter` / `request-device` / `map-async` 拟推进 CM future；主验收 **仍** CM cube + sync-compat；可选 P3 Spike 不阻塞关门 |
+| WASI Preview3 | **非**关门条件；见计划页切片 E 可选旁路 |
 
-与上游偏差：WIT 标 `async func` 的方法在本仓仍为同步返回；缺口矩阵对应行标 ⚠️ sync-compat。
+与上游偏差（默认路径）：WIT 标 `async func` 的方法在 sync-compat 路径仍为同步返回；缺口矩阵对应行标 ⚠️ sync-compat，直至 true-cm-async 切片抬升。
 
-超时默认 30s，超时抛 `HostException.Backend`（experimental）或日后抬成对应 result Err。
+超时默认 30s，超时抛 `HostException.Backend`（experimental）或抬成对应 result Err。

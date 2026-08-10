@@ -5,6 +5,13 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Planning — true CM async chartered (docs only)
+
+- Charter plan [`docs/scheme/true-cm-async.md`](docs/scheme/true-cm-async.md) / EN (slices A–E; tier A = CM async DoD; P3 optional spike)
+- Memo [`true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md) marked **chartered** → points at formal plan
+- README / scheme / errors-async ZH/EN: plan **chartered / frozen**; default path remains sync-compat until code slices land; **no** implementation in this docs drop
+- Primary acceptance unchanged: experimental CM cube
+
 ### Docs sync — engineering-handoff archive consistency
 
 - Align ZH/EN after A–C close-out: errors-async / true-cm-async-memo wording; engineering-handoff title + landing-order marked complete; archive-guest-descriptor-cube forward pointer to handoff archive
@@ -33,7 +40,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 ### Planning
 
 - **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A–C complete** → [`archive-engineering-handoff-dod.md`](docs/scheme/archive-engineering-handoff-dod.md). Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. Primary acceptance remains experimental CM cube
-- **Memo (not chartered):** true CM async / WASI Preview3 — [`docs/scheme/true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); sync-compat stays current
+- **True CM async (chartered 2026-08-10, docs only):** [`docs/scheme/true-cm-async.md`](docs/scheme/true-cm-async.md); memo history [`true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); sync-compat remains default until code slices
 
 ### Docs sync — archive + consistency (CM cube baseline)
 

@@ -2,13 +2,13 @@
 
 [中文](true-cm-async-memo.md) | **English**
 
-> **Status: memo (2026-08-10).** [engineering-handoff](engineering-handoff.en.md) is archived; **not chartered** — decide separately whether to open a phase.  
-> Current strategy remains **sync-compat** (see [`errors-async.en.md`](../mapping/errors-async.en.md)).  
-> Remains **experimental**; true async **≠** a compliance-product claim and **≠** an external release.
+> **Status: chartered (2026-08-10).** Formal plan: [`true-cm-async.en.md`](true-cm-async.en.md); this page remains the pre-charter memo.  
+> Continues from archived [engineering-handoff](engineering-handoff.en.md) ([`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md)).  
+> Remains **experimental**; true async **≠** a compliance-product claim and **≠** an external release. Default remains **sync-compat** until slices land (see [`errors-async.en.md`](../mapping/errors-async.en.md)).
 
 ## One-liner
 
-Move wasi:webgpu 0.3’s many `async func`s from “block inside L2 with `CountDownLatch`” to **Component Model async (futures/streams)**; optionally layer **WASI Preview3**. Until this is chartered, primary acceptance stays experimental CM cube + sync-compat.
+Move wasi:webgpu 0.3’s many `async func`s from “block inside L2 with `CountDownLatch`” to **Component Model async (futures/streams)**; optionally layer **WASI Preview3**. **Chartered:** scope and DoD live in [`true-cm-async.en.md`](true-cm-async.en.md); primary acceptance **stays** experimental CM cube + sync-compat.
 
 ## Why a separate memo
 
@@ -71,6 +71,7 @@ Default charter recommendation: **A**; treat **B** as an explicit add-on.
 
 ## Links
 
+- **Formal plan (current):** [`true-cm-async.en.md`](true-cm-async.en.md)  
 - Current async policy: [`errors-async.en.md`](../mapping/errors-async.en.md)  
 - Gap matrix: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
 - Threading: [`threading.en.md`](../mapping/threading.en.md)  
