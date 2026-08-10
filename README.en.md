@@ -62,8 +62,8 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 
 ## Status
 
-- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md); **Guest standard descriptors + rotating textured cube (A–D, 2026-08-10)** → [archive](docs/scheme/archive-guest-descriptor-cube-dod.en.md) (D: **still not true WIT dtor**); **engineering handoff** (Maven publishability / abi-mvp render / optional perf, A–C, 2026-08-10) → [archive](docs/scheme/archive-engineering-handoff-dod.en.md)
-- **Current:** Remains **experimental**; local Publishing **≠** external release; **device acceptance baseline = CM cube**. **Chartered (plan only, no code yet):** [true CM async](docs/scheme/true-cm-async.en.md) (slices A–E; memo history [memo](docs/scheme/true-cm-async-memo.en.md)); default remains sync-compat
+- **Done**: baseline (P0–P1 / CM compute / L2 on-screen) → [archive](docs/scheme/archive-baseline-dod.en.md); Guest CM on-screen (triangle-cm, 2026-08-06) → [archive](docs/scheme/archive-guest-onscreen-cm-dod.en.md); Demo CM stability + frame loop (2026-08-07) → [archive](docs/scheme/archive-demo-cm-stability-dod.en.md); Demo CM **device stability regression** (D1–D6, 2026-08-08, V2458A) → [blockers](docs/scheme/demo-cm-stability-blockers.md) (ZH); **semantic hardening & engineering debt** (A–E, 2026-08-09) → [archive](docs/scheme/archive-semantic-hardening-dod.en.md); **compliant wasi:webgpu world (no gfx, A–G, 2026-08-09)** → [archive](docs/scheme/archive-compliant-world-dod.en.md); **Guest standard descriptors + rotating textured cube (A–D, 2026-08-10)** → [archive](docs/scheme/archive-guest-descriptor-cube-dod.en.md) (D: **still not true WIT dtor**); **engineering handoff** (Maven publishability / abi-mvp render / optional perf, A–C, 2026-08-10) → [archive](docs/scheme/archive-engineering-handoff-dod.en.md); **true CM async** (A gate close-out, 2026-08-10; B–E stopped) → [archive](docs/scheme/archive-true-cm-async-dod.en.md)
+- **Current:** Remains **experimental**; local Publishing **≠** external release; **device acceptance baseline = CM cube**; async **locked sync-compat** (no Java future writer in 4j; true CM async / custom Android L1 → sister repo [`wasmtime-android-kt`](../wasmtime-android-kt); see [dual-runtime-track](docs/scheme/dual-runtime-track.en.md))
 
 ## References
 
@@ -79,8 +79,10 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Engineering handoff DoD archive | [archive-engineering-handoff-dod.en.md](docs/scheme/archive-engineering-handoff-dod.en.md) |
 | Engineering handoff (plan, complete) | [engineering-handoff.en.md](docs/scheme/engineering-handoff.en.md) |
 | Local Maven coordinates (self-check, not a release) | [maven-local.en.md](docs/maven-local.en.md) |
-| True CM async (plan chartered, no code yet) | [true-cm-async.en.md](docs/scheme/true-cm-async.en.md) |
-| True CM async memo (chartered history) | [true-cm-async-memo.en.md](docs/scheme/true-cm-async-memo.en.md) |
+| Dual runtime tracks (A locked sync-compat / B custom L1) | [dual-runtime-track.en.md](docs/scheme/dual-runtime-track.en.md) |
+| True CM async DoD archive (A gate) | [archive-true-cm-async-dod.en.md](docs/scheme/archive-true-cm-async-dod.en.md) |
+| True CM async (plan, A gate closed) | [true-cm-async.en.md](docs/scheme/true-cm-async.en.md) |
+| True CM async memo (charter history) | [true-cm-async-memo.en.md](docs/scheme/true-cm-async-memo.en.md) |
 | Guest standard descriptors + cube DoD archive | [archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
 | Guest standard descriptors + cube (plan, complete) | [guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
 | Compliant-world DoD archive (no gfx) | [archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |

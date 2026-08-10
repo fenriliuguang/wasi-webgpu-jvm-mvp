@@ -2,13 +2,13 @@
 
 **中文** | [English](true-cm-async-memo.en.md)
 
-> **状态：已立项（2026-08-10）。** 正式计划见 [`true-cm-async.md`](true-cm-async.md)；本页保留为立项前备忘史实。  
+> **状态：已归档（切片 A 闸门关门，2026-08-10）。** 正式计划 / 归档见 [`true-cm-async.md`](true-cm-async.md) · [`archive-true-cm-async-dod.md`](archive-true-cm-async-dod.md)；本页保留为立项前备忘史实。  
 > 承接 [engineering-handoff](engineering-handoff.md) 归档（[`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)）。  
-> 仍为 **experimental**；真异步落地 **≠** 合规产品宣称，也 **≠** 对外发布。现行默认在切片落地前仍为 **sync-compat**（见 [`errors-async.md`](../mapping/errors-async.md)）。
+> 仍为 **experimental**；真异步 **未**落地（无 Java future writer）；默认仍为 **sync-compat**（见 [`errors-async.md`](../mapping/errors-async.md)）。
 
 ## 一句话
 
-把 wasi:webgpu 0.3 大量 `async func` 从「L2 内 `CountDownLatch` 阻塞等待」换成 **Component Model async（future/stream）**；可选再叠加 **WASI Preview3**。**已立项**：范围与 DoD 以 [`true-cm-async.md`](true-cm-async.md) 为准；主验收 **仍保持** experimental CM cube + sync-compat。
+把 wasi:webgpu 0.3 大量 `async func` 从「L2 内 `CountDownLatch` 阻塞等待」换成 **Component Model async（future/stream）**；可选再叠加 **WASI Preview3**。**A 闸门已归档**：范围与 DoD 以 [`true-cm-async.md`](true-cm-async.md) / [`archive-true-cm-async-dod.md`](archive-true-cm-async-dod.md) 为准；主验收 **仍保持** experimental CM cube + sync-compat。
 
 ## 为何单独备忘
 
@@ -71,9 +71,9 @@
 
 ## 链接
 
-- **正式计划（现行）：** [`true-cm-async.md`](true-cm-async.md)  
+- **正式计划 / 归档（现行）：** [`true-cm-async.md`](true-cm-async.md) · [`archive-true-cm-async-dod.md`](archive-true-cm-async-dod.md)  
 - 现行 async 策略：[`errors-async.md`](../mapping/errors-async.md)  
 - 缺口矩阵：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
 - 线程：[`threading.md`](../mapping/threading.md)  
 - 已归档阶段：[`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md) · 计划页 [`engineering-handoff.md`](engineering-handoff.md)  
-- Upstream 备忘：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)  
+- Upstream 备忘：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) §5  

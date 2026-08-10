@@ -19,6 +19,7 @@
 | Java `ConcurrentCallCodec` unsigned-u64 | 上游未修；备忘优先项 | android-demo 过滤 jar + 本地类 |
 | Java `Validation` TBI 句柄 | 上游未修 | 同上 |
 | CM resource destructor → Host `drop(rep)` | **仍非真 dtor**（guest-descriptor-cube D，2026-08-10） | 帧等价保险强化（见 §4）；**不做** `JniComponentLinker` 全量 overlay / 上游 PR |
+| CM async future writer（host complete/reject） | **缺口**（true-cm-async A 闸门，2026-08-10） | 保持 sync-compat；见 §5；**不做** future-writer overlay / 上游 PR |
 
 ---
 
@@ -138,12 +139,44 @@ E JniComponentLinker: Host function callback failed for ID: …
 
 ---
 
-## 5. 本仓 overlay 策略
+## 5. CM async future writer（true-cm-async A 闸门，2026-08-10）
+
+### 现象 / 评估
+
+| 层 | 状态 |
+|----|------|
+| Cargo | `component-model` feature **已绑定** `wasmtime/component-model-async`；桌面 `build-wasmtime4j-desktop-cm.ps1` / Android 默认 features 均带上；与 android + cm-resources 补丁共存 |
+| `wasi-p3` | **未**编入当前 desktop/Android CM natives（`enableWasiP3` 会失败）；非 A 关门条件 |
+| Engine | 需 `concurrencySupport(true)`（另可加 `asyncSupport` / `wasmComponentModelAsync`） |
+| Linker | `setAsyncSupport(true)` + `defineFunctionAsync` → native `func_new_async`；Java 回调仍是 **同步** `ComponentHostFunction` |
+| Future 完成面 | `FutureAny` / `GuardedFutureReader`：**无** write / complete / reject；`AsyncValRegistry` 仅 store/remove/close |
+
+### 闸门
+
+按 [`docs/scheme/true-cm-async.md`](../docs/scheme/true-cm-async.md)：**async host import 无法端到端完成/拒绝 future** → **停止** L2 分轨 / Linker 主链 future / async Guest（B–E）。默认继续 **sync-compat**。归档：[`archive-true-cm-async-dod.md`](../docs/scheme/archive-true-cm-async-dod.md)。
+
+### 嵌套 borrow 残余（async 注册路径）
+
+本仓 cm-resources 补丁：sync `func_new` 走 `vals_to_host_params` / `host_results_to_vals`；**async** `func_new_async` 回调仍 `val_to_component_value`。即使上游日后补 future writer，resource 嵌套编组仍可能需对齐。闸门下 **不**修。
+
+### 本仓探测
+
+- `CmAsyncApiSurfaceTest`：证明无 future writer API（无需 natives）
+- `CmAsyncHostImportSpikeTest`：async-capable Engine 上 `defineResource` + `defineFunctionAsync` 可注册（需 `desktop-natives`）
+
+### 期望对齐（若上游自行提供；本仓不代提）
+
+Host 可创建 CM future 并 **complete / reject**（或等价 Writer），且与 WIT `async func` 返回 future 语义对齐；`defineFunctionAsync` 不应仅是「把 sync 回调包进 async move」。
+
+---
+
+## 6. 本仓 overlay 策略
 
 | 层 | 策略 | 若上游日后自带同类修复 |
 |----|------|------------------------|
 | Native `.so` | 构建时 `git apply` 入库 patch | 升依赖版本；可删对应 patch 段 |
 | Java Validation / ConcurrentCallCodec | 过滤 Maven jar + android-demo 同名包覆盖 | 去掉 `filterWasmtime4jJar` exclude 与本地类 |
 | 帧 Texture 清理 | AbiCm 配对 + Session `releaseLifetimeSafetyNets` + Demo `releaseAllGpuObjects` | 若 §4A 类行为出现，可收窄 sweep 语义依赖 |
+| CM future writer | **不做** overlay；保持 sync-compat | 若上游暴露 complete/reject，可重开 true-cm-async（新计划页） |
 
-**验收**：本仓备忘 + 帧等价保险即可；**不对上游提 issue/PR**。仍非真 WIT dtor。
+**验收**：本仓备忘 + 帧等价保险即可；**不对上游提 issue/PR**。仍非真 WIT dtor；真 CM async **未**落地。

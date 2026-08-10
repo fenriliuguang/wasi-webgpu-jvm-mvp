@@ -19,6 +19,7 @@ Rely on in-repo **overlay / filtered-jar / local patches** for the long term; dr
 | Java `ConcurrentCallCodec` unsigned-u64 | Not fixed upstream; primary note | android-demo filtered jar + local class |
 | Java `Validation` TBI handles | Not fixed upstream | same overlay |
 | CM resource destructor → Host `drop(rep)` | **Still not true dtor** (guest-descriptor-cube D, 2026-08-10) | Strengthened frame-equivalent nets (see §4); **no** full `JniComponentLinker` overlay / upstream PR |
+| CM async future writer (host complete/reject) | **Gap** (true-cm-async A gate, 2026-08-10) | Keep sync-compat; see §5; **no** future-writer overlay / upstream PR |
 
 ---
 
@@ -138,12 +139,44 @@ Related: existing CM resources native patch (§1). Plan: [`docs/scheme/guest-des
 
 ---
 
-## 5. In-repo overlay strategy
+## 5. CM async future writer (true-cm-async A gate, 2026-08-10)
+
+### Assessment
+
+| Layer | Status |
+|-------|--------|
+| Cargo | `component-model` feature **already binds** `wasmtime/component-model-async`; desktop `build-wasmtime4j-desktop-cm.ps1` / Android default features include it; coexists with android + cm-resources patches |
+| `wasi-p3` | **Not** built into current desktop/Android CM natives (`enableWasiP3` fails); not a slice-A close-out requirement |
+| Engine | Need `concurrencySupport(true)` (plus optional `asyncSupport` / `wasmComponentModelAsync`) |
+| Linker | `setAsyncSupport(true)` + `defineFunctionAsync` → native `func_new_async`; Java callback remains **sync** `ComponentHostFunction` |
+| Future completion | `FutureAny` / `GuardedFutureReader`: **no** write / complete / reject; `AsyncValRegistry` is store/remove/close only |
+
+### Gate
+
+Per [`docs/scheme/true-cm-async.en.md`](../docs/scheme/true-cm-async.en.md): **async host import cannot complete/reject a future e2e** → **stop** L2 split / Linker primary-path futures / async Guest (B–E). Default stays **sync-compat**. Archive: [`archive-true-cm-async-dod.en.md`](../docs/scheme/archive-true-cm-async-dod.en.md).
+
+### Nested-borrow residual (async registration path)
+
+In-repo cm-resources patch: sync `func_new` uses `vals_to_host_params` / `host_results_to_vals`; **async** `func_new_async` callbacks still use `val_to_component_value`. Even if upstream later adds a future writer, nested resource marshalling may still need alignment. **Not** fixed under the gate.
+
+### In-repo probes
+
+- `CmAsyncApiSurfaceTest`: proves no future-writer API (no natives required)
+- `CmAsyncHostImportSpikeTest`: `defineResource` + `defineFunctionAsync` register on an async-capable Engine (needs `desktop-natives`)
+
+### Desired alignment (if upstream provides it; we do not submit)
+
+Host can create a CM future and **complete / reject** it (or an equivalent Writer), aligned with WIT `async func` returning a future; `defineFunctionAsync` must not merely wrap a sync callback in `async move`.
+
+---
+
+## 6. In-repo overlay strategy
 
 | Layer | Strategy | If upstream later ships equivalents |
 |-------|----------|-------------------------------------|
 | Native `.so` | Build-time `git apply` of in-tree patches | Bump dependency; drop matching patch hunks |
 | Java Validation / ConcurrentCallCodec | Filter Maven jar + same-package overlay in android-demo | Remove `filterWasmtime4jJar` excludes + local classes |
 | Frame Texture cleanup | AbiCm pairing + Session `releaseLifetimeSafetyNets` + Demo `releaseAllGpuObjects` | If §4A-like behavior appears, narrow sweep reliance |
+| CM future writer | **No** overlay; keep sync-compat | If upstream exposes complete/reject, re-open true-cm-async (new plan page) |
 
-**Acceptance:** in-repo notes + frame-equivalent nets are enough; **do not open upstream issues/PRs**. Still not true WIT dtor.
+**Acceptance:** in-repo notes + frame-equivalent nets are enough; **do not open upstream issues/PRs**. Still not true WIT dtor; true CM async is **not** landed.

@@ -5,6 +5,21 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Dual-track lock — sync-compat here; Track B sister repo
+
+- **Lock** this repo (Track A) to **sync-compat** for default/acceptance paths; do not resume true CM async on wasmtime4j
+- Sister planning repo: [`../wasmtime-android-kt`](../wasmtime-android-kt) (Android-first upstream-Wasmtime thin L1; docs only)
+- Docs: [`dual-runtime-track.md`](docs/scheme/dual-runtime-track.md) / EN; README / scheme / errors-async ZH/EN point at Track B
+
+### True CM async — slice A gate close-out (stop B–E)
+
+- Spike: Cargo `component-model-async` already enabled via `component-model` on desktop/Android CM-patched natives; Engine needs `concurrencySupport` for CM-async
+- Gate: wasmtime4j **47.0.2-1.5.0** has **no** Java CM future create/write/complete/reject API (`FutureAny` opaque only; `defineFunctionAsync` is sync-callback + `func_new_async`)
+- Probes: `CmAsyncApiSurfaceTest` (no natives) + `CmAsyncHostImportSpikeTest` (`defineResource` + `defineFunctionAsync` registration)
+- Residual: cm-resources patch async callback path still uses legacy `val_to_component_value` (not nested-borrow helpers)
+- **Stop** L2 split / Linker futures / async Guest (B–E); default remains **sync-compat**; primary acceptance unchanged (CM cube)
+- Docs: [`archive-true-cm-async-dod.md`](docs/scheme/archive-true-cm-async-dod.md); [`patches/UPSTREAM.md`](patches/UPSTREAM.md) §5; README / scheme / errors-async ZH/EN
+
 ### Planning — true CM async chartered (docs only)
 
 - Charter plan [`docs/scheme/true-cm-async.md`](docs/scheme/true-cm-async.md) / EN (slices A–E; tier A = CM async DoD; P3 optional spike)
@@ -39,8 +54,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ### Planning
 
+- **True CM async (A gate close-out 2026-08-10):** [`docs/scheme/true-cm-async.md`](docs/scheme/true-cm-async.md) → [`archive-true-cm-async-dod.md`](docs/scheme/archive-true-cm-async-dod.md). B–E stopped; sync-compat remains default; **no** remote upload / compliance claims. Primary acceptance remains experimental CM cube
 - **Engineering handoff: Maven publishability (no external release) / abi-mvp render / optional perf** (2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — **A–C complete** → [`archive-engineering-handoff-dod.md`](docs/scheme/archive-engineering-handoff-dod.md). Remains **experimental**; **no** remote upload / “published / ready for consumers” claims. Primary acceptance remains experimental CM cube
-- **True CM async (chartered 2026-08-10, docs only):** [`docs/scheme/true-cm-async.md`](docs/scheme/true-cm-async.md); memo history [`true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); sync-compat remains default until code slices
+- **True CM async (chartered 2026-08-10, then A-gated):** history in [`true-cm-async-memo.md`](docs/scheme/true-cm-async-memo.md); sync-compat remains default
 
 ### Docs sync — archive + consistency (CM cube baseline)
 

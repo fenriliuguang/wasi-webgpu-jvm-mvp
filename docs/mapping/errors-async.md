@@ -36,10 +36,10 @@
 
 | 阶段 | 策略 |
 |------|------|
-| 默认（切片落地前 / cube 主验收） | **sync-compat**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包长尾 `*-async` 可 stub 为 result Err |
-| 真 CM async（**已立项，代码未开工**） | 计划 [`true-cm-async.md`](../scheme/true-cm-async.md)：主链 `request-adapter` / `request-device` / `map-async` 拟推进 CM future；主验收 **仍** CM cube + sync-compat；可选 P3 Spike 不阻塞关门 |
-| WASI Preview3 | **非**关门条件；见计划页切片 E 可选旁路 |
+| 默认（cube 主验收） | **sync-compat（锁死）**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包长尾 `*-async` 可 stub 为 result Err |
+| 真 CM async（**A 闸门关门；本仓不再推进**） | 归档 [`archive-true-cm-async-dod.md`](../scheme/archive-true-cm-async-dod.md)。后续真 async → 姊妹仓 [`wasmtime-android-kt`](../../../wasmtime-android-kt)；本仓契约 [`dual-runtime-track.md`](../scheme/dual-runtime-track.md) |
+| WASI Preview3 | **非**本仓关门条件；当前 CM natives 未编 `wasi-p3` |
 
-与上游偏差（默认路径）：WIT 标 `async func` 的方法在 sync-compat 路径仍为同步返回；缺口矩阵对应行标 ⚠️ sync-compat，直至 true-cm-async 切片抬升。
+与上游偏差（默认路径）：WIT 标 `async func` 的方法在 sync-compat 路径仍为同步返回；缺口矩阵对应行标 ⚠️ sync-compat（true-cm-async A 闸门后暂不抬升）。
 
 超时默认 30s，超时抛 `HostException.Backend`（experimental）或抬成对应 result Err。

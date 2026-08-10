@@ -1,106 +1,92 @@
-# True CM async (tier A) / optional P3 spike (true-cm-async) — in progress
+# True CM async (tier A) / optional P3 spike (true-cm-async) — archived (A gate)
 
 [中文](true-cm-async.md) | **English**
 
-> **Status: chartered / plan frozen (2026-08-10).** Slice **A–E** text and DoD are locked; **no code started yet** (docs first, implementation later).  
+> **Status: slice A gate close-out (2026-08-10).** Archive: [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md).  
 > Continues from memo [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md) and engineering-handoff archive ([`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md)).  
-> Composition: Runtime spike (A) → L2 non-blocking split (B) → Linker primary-path futures (C) → Guest smoke + threading (D) → docs/matrix + optional P3 spike (E).  
+> **B–E stopped by the gate** (no L2 / Linker primary-path / Guest churn). Default remains **sync-compat**; primary acceptance stays CM cube.  
 > Remains **experimental**; true async **≠** a compliance-product claim and **≠** an external release.
 
 ## One-liner
 
-Move wasi:webgpu primary-path `async func`s (`request-adapter` / `request-device` / `map-async`) from “block inside L2 with `CountDownLatch`” to **Component Model async (futures)** so the CM host-callback path does **not** block the wasm thread; **WASI Preview3** is a non-blocking spike only. Primary acceptance **stays** experimental CM cube + sync-compat for the whole phase.
+Original goal: move wasi:webgpu primary-path `async func`s from L2 `CountDownLatch` to CM futures.  
+**Gate result:** Cargo/`component-model-async` is available, but wasmtime4j **47.0.2-1.5.0** Java has **no** future complete/reject surface → **stop** B–E.
 
 ```text
-A Runtime spike (async host import e2e; fail = hard gate)
-  → B L2 non-blocking split (no awaitRequest on CM path; keep sync)
-  → C Linker primary-path futures (request-adapter / request-device / map-async)
-  → D Guest smoke + threading contract (do not move primary acceptance)
-  → E Docs / gap-matrix close-out + optional P3 spike (must not block)
+A Runtime spike → gate: not feasible (no Java future writer)
+  ✗ B L2 non-blocking split (stopped)
+  ✗ C Linker primary-path futures (stopped)
+  ✗ D Guest smoke (stopped)
+  ✓ E Docs close-out (this page + archive + UPSTREAM §5)
 ```
 
 Refs: [`errors-async.en.md`](../mapping/errors-async.en.md) · [`threading.en.md`](../mapping/threading.en.md) · [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) · memo [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md).
 
-## Decisions
+## Spike A outcome (2026-08-10)
+
+| Item | Result |
+|------|--------|
+| Cargo `component-model-async` | **Enabled** (bound to `component-model`); coexists with android / cm-resources patches; `wasi-p3` not in current natives |
+| Engine flags | Need `concurrencySupport(true)` (+ `asyncSupport` / `wasmComponentModelAsync`) to create a CM-async Engine |
+| `defineFunctionAsync` | Registers (`func_new_async`); callback remains **sync** `ComponentHostFunction` |
+| Future complete/reject | **Missing** — `FutureAny` is opaque handle + `close` only; no Writer / write / complete / reject |
+| Resource / nested borrow | Registration: `defineResource` + `defineFunctionAsync` OK; patch async callback branch still uses `val_to_component_value` (not `vals_to_host_params`) |
+| Gate | **Triggered** → stop B–E; see [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md) · [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §5 |
+
+Probe tests: `CmAsyncApiSurfaceTest` (no natives) · `CmAsyncHostImportSpikeTest` (needs `desktop-natives`).
+
+## Decisions (at charter)
 
 | Topic | Decision |
 |-------|----------|
-| Phase scope | Lock slices **A–E**; **tier A (CM async)** is the formal DoD; **tier B (WASI Preview3 / `enableWasiP3`)** is spike/optional only and **must not** block close-out; out-of-scope table is hard |
-| Order | **A → B → C** hard order (C needs B’s non-blocking surface); **D** after C; **E** close-out; optional P3 anytime without blocking A–D |
-| Primary track | **Keep** experimental CM cube + sync-compat (`guest/cube-cm` / `WasmtimeCmCubeInstrumentedTest`); **do not** move primary Demo/instrumentation to an async wasi Guest |
-| Guest strategy | Add a **minimal async smoke Guest** (prefer one wasi-track `async` import, e.g. `request-adapter`); experimental cube **does not** switch to true async |
-| L2 | **Split**: keep sync API for Cpu/direct Kotlin/tests; CM async path uses a non-blocking completion surface (future/callback); **L2 still must not depend on L1** |
-| Primary methods (first batch) | `request-adapter` → `request-device` → `map-async`; **do not** sweep pipeline-async / long-tail async |
-| Spike fail gate | If slice A proves async host import e2e is unavailable, **stop** L2/Linker primary-path churn; document the runtime boundary and close via the gate |
-| Async / claims | Advance true CM async; package / README stay `experimental`; **no** compliant `wasi:webgpu` product claim; **no** external release |
-| Upstream | Overlay/patches self-contained; **no** issues/PRs to tegmentum/wasmtime4j; **no** true WIT dtor overlay |
-| Acceptance | A: desktop smoke **or** written “not feasible” gate; B/C: `:host-*` / `:runtime-wasmtime:test` (with desktop-natives); D: async Guest desktop smoke + CM cube non-regression; E: gap matrix/CHANGELOG; per-slice CHANGELOG |
+| Phase scope | Lock slices **A–E**; **tier A (CM async)** is the formal DoD; **tier B (WASI Preview3 / `enableWasiP3`)** is spike/optional only |
+| Spike fail gate | If slice A proves async host import e2e unavailable, **stop** L2/Linker primary-path churn → **triggered** |
+| Primary track | **Keep** experimental CM cube + sync-compat |
+| Upstream | Overlay/patches self-contained; **no** issues/PRs to tegmentum/wasmtime4j |
 
 ## Slices & DoD
 
 ### A — Runtime spike (hard step 1; fail = gate)
 
-- [ ] Evaluate whether desktop / Android CM patched builds can enable `component-model-async` (and coexist with android / cm-resources patches); full `wasi-p3` is **not** a close-out requirement  
-- [ ] Minimal e2e: one async host import can **complete / reject** a future (fake impl OK; Dawn not required)  
-- [ ] Validate process-global resource registry / nested-borrow patches on the async registration path  
-- [ ] Docs: spike outcome in this page or a short [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) section; gaps → overlay boundary (still no upstream PRs)  
-- [ ] DoD: reproducible desktop smoke **or** explicit “not feasible + stop later slices” record; CHANGELOG  
+- [x] Evaluate desktop / Android CM patched builds vs `component-model-async`; full `wasi-p3` is **not** a close-out requirement
+- [x] Minimal e2e complete/reject → **not feasible** (API gap)
+- [x] Registration-path probe + nested-borrow residual risk documented
+- [x] Spike outcome → this page / UPSTREAM §5
+- [x] DoD: written gate + probe tests + CHANGELOG
 
 ### B — L2 non-blocking split
 
-- [ ] `DawnWasiWebGpuHost`: CM path must not block inside host callbacks via `awaitRequest`; keep sync wrappers for Cpu / direct Kotlin / existing unit tests  
-- [ ] `WasiWebGpuHost` (or a parallel async surface) exposes completable adapter/device/map requests; `processEvents` may still run in the background; contract in [`threading.en.md`](../mapping/threading.en.md)  
-- [ ] Cpu Host: immediately-complete / controllable-delay impls for Linker unit tests without Dawn  
-- [ ] DoD: L2 unit tests cover “non-blocking start + complete”; existing sync tests stay green; CHANGELOG  
+- [ ] **Stopped (gate)**
 
 ### C — Linker primary-path futures
 
-- [ ] `WasmtimeCmLinker`: rewire wasi (and experimental as needed) primary-path `request-adapter` / `request-device` / `map-async` to CM async/future semantics; other async stays stub / sync-compat  
-- [ ] Errors: align future completion `result` / error-context with `WasiResultCodec` / `HostErrorMapping`  
-- [ ] DoD: desktop CM unit tests prove complete/reject on the three primary paths; **no** requirement to move instrumentation to async; CHANGELOG  
+- [ ] **Stopped (gate)**
 
 ### D — Guest smoke + threading (do not move primary acceptance)
 
-- [ ] Minimal Guest (e.g. `guest/async-smoke-cm`): call at least one true async import and observe completion  
-- [ ] Restate Dawn `processEvents`, CM scheduler, and Surface/present **same-thread** rules ([`threading.en.md`](../mapping/threading.en.md)); cube frame loop stays as-is  
-- [ ] Demo / instrumentation: still `run-android-instrumented.ps1` + CM cube; async is desktop smoke only (Android instrumented async **optional**, not a primary gate)  
-- [ ] DoD: async smoke green + cube instrumented/regression baseline unchanged; CHANGELOG  
+- [ ] **Stopped (gate)**
 
 ### E — Docs / matrix close-out + optional P3 spike
 
-- [ ] Gap-matrix async rows: three primary paths → true-async status; long tail stays stub/❌  
-- [ ] Dual-track and other affected notes; root README / scheme status; CHANGELOG  
-- [ ] (Optional) `enableWasiP3` exploration notes; failure or skip **must not** block A–D close-out  
-- [ ] After all boxes: [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md) (+ ZH)  
+- [x] Gap-matrix primary paths **not** lifted to true async (remain sync-compat); README / scheme / errors-async close-out
+- [x] (Optional) `enableWasiP3`: current natives lack `wasi-p3`; does not block close-out
+- [x] → [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md)
 
 ## Out of scope
 
 | ID | Item |
 |----|------|
 | — | Move primary Demo / device acceptance to an async wasi Guest or drop cube sync-compat |
-| — | Make full WASI Preview3 / `enableWasiHttpP3` a close-out requirement |
-| — | Sweep every WIT `async` (`on-submitted-work-done`, `get-compilation-info`, `pop-error-scope`, full pipeline-async, …) |
-| — | wasi-gfx / canvas / multi-window abstraction |
-| — | Compliant `wasi:webgpu` product marketing; any external release |
-| — | Issues/PRs to tegmentum/wasmtime4j; true WIT dtor / `JniComponentLinker` rep-only overlay |
-| — | Delete sync L2 entirely (Cpu/tests/direct calls may keep sync-compat) |
-
-## Landing order
-
-1. Charter docs: this page (+ZH) + memo/README/scheme/errors-async indexes  
-2. **A** spike (gate)  
-3. **B** L2 split → **C** Linker futures  
-4. **D** Guest smoke + threading docs  
-5. **E** matrix/CHANGELOG; optional P3 notes  
-6. All boxes → archive DoD; root README / scheme / CHANGELOG close-out  
+| — | Full WASI Preview3 / `enableWasiHttpP3` as a close-out requirement |
+| — | Sweep every WIT `async`; wasi-gfx; compliance marketing; external release |
+| — | Issues/PRs to tegmentum/wasmtime4j; true WIT dtor overlay |
+| — | Change L2 / Linker primary path without a future writer (gate) |
 
 ## Links
 
+- Archive: [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md)  
 - Root README: [`README.en.md`](../../README.en.md)  
 - Scheme index: [`docs/scheme/README.en.md`](README.en.md)  
-- Memo (chartered): [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
-- Prior archive: [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md)  
+- Memo: [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
+- Upstream §5: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  
 - Errors / async: [`errors-async.en.md`](../mapping/errors-async.en.md)  
-- Threading: [`threading.en.md`](../mapping/threading.en.md)  
-- Gap / dual-track: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md) · [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md)  
-- Android natives: [`docs/android-wasmtime.en.md`](../android-wasmtime.en.md) · [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  
