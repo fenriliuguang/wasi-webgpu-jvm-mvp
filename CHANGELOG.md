@@ -5,6 +5,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Planning
+
+- **Engineering handoff: Maven / abi-mvp render / optional perf** (locked 2026-08-10): [`docs/scheme/engineering-handoff.md`](docs/scheme/engineering-handoff.md) — slices A–C (C optional, non-blocking); **not started**. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, true WIT dtor overlay, forcing Central live / JMH. Primary acceptance remains experimental CM cube
+
 ### Docs sync — archive + consistency (CM cube baseline)
 
 - Root README ZH/EN index deduped; Guest link → `guest/cube-cm`; scheme stage table adds handoff row
@@ -47,9 +51,9 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 - Smoke: `vector-add-cm` migrates to nested standard descriptors (`create-bind-group` / pipeline-layout / `create-compute-pipeline` / `queue.submit`); desktop `WasmtimeCmVectorAddTest` green
 - Docs: [`guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) A checked; [`android-wasmtime.md`](docs/android-wasmtime.md) §6
 
-### Planning
+### Planning (prior)
 
-- **Guest standard descriptors on device + rotating textured cube** (2026-08-09→10): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / archive [`archive-guest-descriptor-cube-dod.md`](docs/scheme/archive-guest-descriptor-cube-dod.md) — slices A–D complete. **Out:** wasi-gfx, compliance marketing, true CM async, upstream wasmtime4j PRs, Maven / `abi-mvp` render / perf, clearing all gap ❌, true WIT dtor overlay. Primary acceptance remains experimental CM cube
+- **Guest standard descriptors on device + rotating textured cube** (2026-08-09→10): [`docs/scheme/guest-descriptor-cube.md`](docs/scheme/guest-descriptor-cube.md) / archive [`archive-guest-descriptor-cube-dod.md`](docs/scheme/archive-guest-descriptor-cube-dod.md) — slices A–D complete. Handed off Maven / `abi-mvp` render / perf → [`engineering-handoff.md`](docs/scheme/engineering-handoff.md)
 
 ### Docs sync (pre-cube; superseded)
 

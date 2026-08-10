@@ -18,8 +18,8 @@ Build the **lamp wiring (Dawn Host glue)** first, then plug in the **socket (Was
 | **Demo CM device stability regression** | **Done** (2026-08-08, V2458A, D1–D6) — see [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH) |
 | **Semantic hardening & engineering debt** | **Done** (2026-08-09) — see [`archive-semantic-hardening-dod.en.md`](archive-semantic-hardening-dod.en.md); plan [`semantic-hardening.en.md`](semantic-hardening.en.md) |
 | **Compliant wasi:webgpu world (no gfx)** | **Complete (A–G)** — plan [`compliant-world.en.md`](compliant-world.en.md); archive [`archive-compliant-world-dod.en.md`](archive-compliant-world-dod.en.md); gap [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md). **No** wasi-gfx; **no** compliance-product marketing |
-| **Guest standard descriptors + rotating textured cube** | **Complete (A–D)** — plan [`guest-descriptor-cube.en.md`](guest-descriptor-cube.en.md); archive [`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md). D: **still not true WIT dtor**. Maven / `abi-mvp` render / perf still deferred |
-| **Handoff / next** | **No new slice locked** — Maven / `abi-mvp` render / optional perf; **no** wasi-gfx / compliance marketing / true CM async / upstream PRs / true dtor overlay. **Device acceptance baseline = CM cube** (`guest/cube-cm`) |
+| **Guest standard descriptors + rotating textured cube** | **Complete (A–D)** — plan [`guest-descriptor-cube.en.md`](guest-descriptor-cube.en.md); archive [`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md). D: **still not true WIT dtor** |
+| **Engineering handoff: Maven / abi-mvp render / optional perf** | **Locked (A–C)** — plan [`engineering-handoff.en.md`](engineering-handoff.en.md); **not started**. C optional, non-blocking. **No** wasi-gfx / compliance marketing / true CM async / upstream PRs / true dtor overlay. **Device acceptance baseline = CM cube** (`guest/cube-cm`) |
 
 Completed plan pages keep historical wording; current source of truth is the root README + this table + each `archive-*-dod`. vector-add / triangle Guest demos have been removed.
 
