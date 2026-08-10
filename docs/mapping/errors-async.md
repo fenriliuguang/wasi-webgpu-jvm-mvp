@@ -36,8 +36,8 @@
 
 | 阶段 | 策略 |
 |------|------|
-| 本阶段（compliant-world F） | **sync-compat**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包 `*-async` 方法可 stub 为 result Err / 日后接线仍 sync |
-| 真 CM async / WASI Preview3 | **不做**（本阶段排除） |
+| 本阶段（含 engineering-handoff） | **sync-compat**：`requestAdapter` / `requestDevice` / `mapAsync` 等仍内部 `CountDownLatch` 等待；标准包 `*-async` 方法可 stub 为 result Err / 日后接线仍 sync |
+| 真 CM async / WASI Preview3 | **不做**（现行排除）；备忘 [`true-cm-async-memo.md`](../scheme/true-cm-async-memo.md)，**engineering-handoff 落成后再评估** |
 
 与上游偏差：WIT 标 `async func` 的方法在本仓仍为同步返回；缺口矩阵对应行标 ⚠️ sync-compat。
 

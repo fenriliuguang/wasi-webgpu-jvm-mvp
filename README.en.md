@@ -78,6 +78,7 @@ Native / Guest rebuilds and pitfalls: [`docs/android-wasmtime.en.md`](docs/andro
 | Scheme summary | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | Engineering handoff (in progress; A done; no external release) | [engineering-handoff.en.md](docs/scheme/engineering-handoff.en.md) |
 | Local Maven coordinates (self-check, not a release) | [maven-local.en.md](docs/maven-local.en.md) |
+| True CM async memo (after this phase) | [true-cm-async-memo.en.md](docs/scheme/true-cm-async-memo.en.md) |
 | Guest standard descriptors + cube DoD archive | [archive-guest-descriptor-cube-dod.en.md](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
 | Guest standard descriptors + cube (plan, complete) | [guest-descriptor-cube.en.md](docs/scheme/guest-descriptor-cube.en.md) |
 | Compliant-world DoD archive (no gfx) | [archive-compliant-world-dod.en.md](docs/scheme/archive-compliant-world-dod.en.md) |

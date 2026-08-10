@@ -63,7 +63,7 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 |----|------|
 | — | wasi-gfx / canvas / multi-window (on-screen stays Host-injected) |
 | — | Advertising a compliant `wasi:webgpu` product; any “published / ready for external consumers” claim (engineering ≠ release claim) |
-| — | True CM async / WASI Preview3 async runtime (keep sync-compat) |
+| — | True CM async / WASI Preview3 async runtime (keep sync-compat; memo [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md), **after this phase**) |
 | — | Issues/PRs to tegmentum/wasmtime4j; true WIT dtor / `JniComponentLinker` rep-only overlay |
 | — | Moving primary Demo / device acceptance onto abi-mvp or a `wasi:webgpu` Guest |
 | — | Clearing gap-matrix long tail (query-set / render-bundle / features·limits, …) |
@@ -86,3 +86,5 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 - Perf draft: [`docs/perf/p1-boundary.en.md`](../perf/p1-boundary.en.md)  
 - Android natives: [`docs/android-wasmtime.en.md`](../android-wasmtime.en.md) · [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  
 - Dual-track / gap (read-only; no long-tail sweep): [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) · [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
+- Memo (not this phase): [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
+

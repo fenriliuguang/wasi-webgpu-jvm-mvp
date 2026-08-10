@@ -78,6 +78,7 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
 | 工程移交（进行中；A 完成；不对外发布） | [engineering-handoff](docs/scheme/engineering-handoff.md) | [EN](docs/scheme/engineering-handoff.en.md) |
 | 本地 Maven 坐标（自检，非发布） | [maven-local](docs/maven-local.md) | [EN](docs/maven-local.en.md) |
+| 真 CM async 备忘（本阶段后） | [true-cm-async-memo](docs/scheme/true-cm-async-memo.md) | [EN](docs/scheme/true-cm-async-memo.en.md) |
 | Guest 标准 descriptor + 立方体 DoD 归档 | [archive-guest-descriptor-cube-dod](docs/scheme/archive-guest-descriptor-cube-dod.md) | [EN](docs/scheme/archive-guest-descriptor-cube-dod.en.md) |
 | Guest 标准 descriptor + 立方体（计划，已完成） | [guest-descriptor-cube](docs/scheme/guest-descriptor-cube.md) | [EN](docs/scheme/guest-descriptor-cube.en.md) |
 | 合规 World DoD 归档（无 gfx） | [archive-compliant-world-dod](docs/scheme/archive-compliant-world-dod.md) | [EN](docs/scheme/archive-compliant-world-dod.en.md) |

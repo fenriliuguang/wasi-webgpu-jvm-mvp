@@ -63,7 +63,7 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 |----|-----|
 | — | wasi-gfx / canvas / 多 window 抽象（上屏继续 Host 注入） |
 | — | 宣传已合规 `wasi:webgpu` 产品；任何「已发布 / 可供外部依赖」宣称（工程化 ≠ 发布宣称） |
-| — | 真 CM async / WASI Preview3 异步运行时（保持 sync-compat） |
+| — | 真 CM async / WASI Preview3 异步运行时（保持 sync-compat；备忘见 [`true-cm-async-memo.md`](true-cm-async-memo.md)，**本阶段后**再议） |
 | — | 对 tegmentum/wasmtime4j 提 issue/PR；真 WIT dtor / `JniComponentLinker` rep-only overlay |
 | — | 将主 Demo / 真机验收迁到 abi-mvp 或 `wasi:webgpu` Guest |
 | — | 扫完缺口矩阵长尾（query-set / render-bundle / features·limits 等） |
@@ -86,3 +86,5 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 - Perf 初稿：[`docs/perf/p1-boundary.md`](../perf/p1-boundary.md)  
 - Android natives：[`docs/android-wasmtime.md`](../android-wasmtime.md) · [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)  
 - 双轨 / 缺口（只读，本阶段不扫长尾）：[`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) · [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
+- 备忘（不参与本阶段）：[`true-cm-async-memo.md`](true-cm-async-memo.md)  
+

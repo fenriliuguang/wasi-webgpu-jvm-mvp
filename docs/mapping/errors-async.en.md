@@ -36,8 +36,8 @@ Unwired wasi **result** stubs: map `Unsupported` into that method’s Err shape 
 
 | Phase | Strategy |
 |-------|----------|
-| This phase (compliant-world F) | **sync-compat**: `requestAdapter` / `requestDevice` / `mapAsync` still wait via `CountDownLatch`; standard `*-async` methods may stub as result Err / later wiring stays sync |
-| True CM async / WASI Preview3 | **Out of scope** for this phase |
+| This phase (incl. engineering-handoff) | **sync-compat**: `requestAdapter` / `requestDevice` / `mapAsync` still wait via `CountDownLatch`; standard `*-async` methods may stub as result Err / later wiring stays sync |
+| True CM async / WASI Preview3 | **Out of scope** now; memo [`true-cm-async-memo.en.md`](../scheme/true-cm-async-memo.en.md) — **revisit after engineering-handoff lands** |
 
 Skew vs upstream: WIT `async func` methods still return synchronously here; gap rows marked ⚠️ sync-compat.
 
