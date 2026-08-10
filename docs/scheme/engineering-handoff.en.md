@@ -1,4 +1,4 @@
-# Engineering handoff: Maven / abi-mvp render / optional perf (engineering-handoff)
+# Engineering handoff: Maven / abi-mvp render / optional perf (engineering-handoff) — complete
 
 [中文](engineering-handoff.md) | **English**
 
@@ -71,20 +71,24 @@ Refs: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`docs/perf/p1-
 | — | Any external release (Maven Central / Sonatype / remote-repo upload); requiring JMH / formal perf contracts |
 | — | Treating prebuilt Bionic `libwasmtime4j.so` / full jniLibs as primary would-be release artifacts |
 
-## Landing order
+## Landing order (complete)
 
-1. **A** and **B** may proceed in parallel; prefer pinning A coordinates before B so artifact boundaries do not thrash  
-2. **C** anytime; non-blocking  
-3. Docs close-out: check DoD on this page → [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md); root README / scheme / CHANGELOG  
+1. ~~**A** and **B** may proceed in parallel; prefer pinning A coordinates before B so artifact boundaries do not thrash~~  
+2. ~~**C** anytime; non-blocking~~  
+3. ~~Docs close-out: check DoD → archive; root README / scheme / CHANGELOG~~  
+
+**Done:** DoD → [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md); root README / scheme / CHANGELOG synced.
 
 ## Links
 
 - Root README: [`README.en.md`](../../README.en.md)  
 - Scheme index: [`docs/scheme/README.en.md`](README.en.md)  
+- This phase archive: [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md)  
 - Prior archive: [`archive-guest-descriptor-cube-dod.en.md`](archive-guest-descriptor-cube-dod.en.md)  
 - Render / Compute: [`render-subset.en.md`](../mapping/render-subset.en.md) · [`compute-subset.en.md`](../mapping/compute-subset.en.md)  
-- Perf draft: [`docs/perf/p1-boundary.en.md`](../perf/p1-boundary.en.md)  
+- Perf notes: [`docs/perf/p1-boundary.en.md`](../perf/p1-boundary.en.md)  
+- Local Maven: [`docs/maven-local.en.md`](../maven-local.en.md)  
 - Android natives: [`docs/android-wasmtime.en.md`](../android-wasmtime.en.md) · [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  
-- Dual-track / gap (read-only; no long-tail sweep): [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) · [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
-- Memo (not this phase): [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
+- Dual-track / gap (read-only): [`compliant-world-dual-track.en.md`](../mapping/compliant-world-dual-track.en.md) · [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
+- Memo (not chartered): [`true-cm-async-memo.en.md`](true-cm-async-memo.en.md)  
 

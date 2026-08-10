@@ -5,6 +5,10 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Docs sync — engineering-handoff archive consistency
+
+- Align ZH/EN after A–C close-out: errors-async / true-cm-async-memo wording; engineering-handoff title + landing-order marked complete; archive-guest-descriptor-cube forward pointer to handoff archive
+
 ### Engineering handoff — slice C (optional perf notes) + phase close-out
 
 - Refresh [`docs/perf/p1-boundary.md`](docs/perf/p1-boundary.md) / EN: drop deleted vector-add anchors; point at abi-mvp flat / CM cube paths; mark informal (no JMH / ratio gate)

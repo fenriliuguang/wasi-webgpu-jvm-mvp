@@ -1,4 +1,4 @@
-# 工程移交：Maven / abi-mvp render / 可选 perf（engineering-handoff）
+# 工程移交：Maven / abi-mvp render / 可选 perf（engineering-handoff）— 已完成
 
 **中文** | [English](engineering-handoff.en.md)
 
@@ -71,20 +71,24 @@ A Maven 可发布化改造（坐标 / 本地 Publishing 自检 / experimental �
 | — | 任何对外发布（Maven Central / Sonatype / 远端仓库上传）；强制 JMH / 正式 perf 契约 |
 | — | 把预编译 Bionic `libwasmtime4j.so` / 全量 jniLibs 当成拟发布主工件 |
 
-## 落地顺序
+## 落地顺序（已完成）
 
-1. **A** 与 **B** 可并行；建议先 A 钉坐标再 B 避免 artifact 边界摇摆  
-2. **C** 随时可做，不阻塞关门  
-3. 文档收口：本页 DoD 勾选 → [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)；根 README / scheme / CHANGELOG  
+1. ~~**A** 与 **B** 可并行；建议先 A 钉坐标再 B 避免 artifact 边界摇摆~~  
+2. ~~**C** 随时可做，不阻塞关门~~  
+3. ~~文档收口：本页 DoD 勾选 → archive；根 README / scheme / CHANGELOG~~  
+
+**已完成：** DoD → [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)；根 README / scheme / CHANGELOG 已同步。
 
 ## 链接
 
 - 根 README：[`README.md`](../../README.md)  
 - 方案索引：[`docs/scheme/README.md`](README.md)  
+- 本阶段归档：[`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)  
 - 上阶段归档：[`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)  
 - Render / Compute：[`render-subset.md`](../mapping/render-subset.md) · [`compute-subset.md`](../mapping/compute-subset.md)  
-- Perf 初稿：[`docs/perf/p1-boundary.md`](../perf/p1-boundary.md)  
+- Perf 备注：[`docs/perf/p1-boundary.md`](../perf/p1-boundary.md)  
+- 本地 Maven：[`docs/maven-local.md`](../maven-local.md)  
 - Android natives：[`docs/android-wasmtime.md`](../android-wasmtime.md) · [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)  
-- 双轨 / 缺口（只读，本阶段不扫长尾）：[`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) · [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
-- 备忘（不参与本阶段）：[`true-cm-async-memo.md`](true-cm-async-memo.md)  
+- 双轨 / 缺口（只读）：[`compliant-world-dual-track.md`](../mapping/compliant-world-dual-track.md) · [`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
+- 备忘（未立项）：[`true-cm-async-memo.md`](true-cm-async-memo.md)  
 

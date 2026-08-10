@@ -38,4 +38,5 @@
 
 - 真机验收基准：CM cube（vector-add / triangle 示例已移除）
 - 生命周期：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) §4；`AbiCmHostBindings` / `WasmtimeCmCube.Session`
-- 未做（阶段排除）：wasi-gfx、合规宣传、真 CM async、上游 PR、Maven、`abi-mvp` render、perf、真 dtor overlay
+- 未做（本阶段排除）：wasi-gfx、合规宣传、真 CM async、上游 PR、真 dtor overlay  
+- 后续已完成：Maven 可发布化 / `abi-mvp` render / 可选 perf → [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)

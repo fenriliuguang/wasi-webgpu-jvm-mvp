@@ -64,7 +64,7 @@
 
 ## 明确不做（在本备忘立项前）
 
-- 不阻塞 [engineering-handoff](engineering-handoff.md) A/B/C  
+- 未阻塞已归档的 [engineering-handoff](engineering-handoff.md) A/B/C（见 [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)）  
 - 不改现行真机验收基准（CM cube + sync-compat）  
 - 不宣传合规 `wasi:webgpu`；不对外发布  
 - 不对 tegmentum/wasmtime4j 默认提 issue/PR（与 [`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) 一致）
@@ -74,5 +74,5 @@
 - 现行 async 策略：[`errors-async.md`](../mapping/errors-async.md)  
 - 缺口矩阵：[`compliant-world-gap.md`](../mapping/compliant-world-gap.md)  
 - 线程：[`threading.md`](../mapping/threading.md)  
-- 当前阶段：[`engineering-handoff.md`](engineering-handoff.md)  
+- 已归档阶段：[`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md) · 计划页 [`engineering-handoff.md`](engineering-handoff.md)  
 - Upstream 备忘：[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md)  

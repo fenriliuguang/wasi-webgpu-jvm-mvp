@@ -64,7 +64,7 @@ Default charter recommendation: **A**; treat **B** as an explicit add-on.
 
 ## Explicitly out until chartered
 
-- Must not block [engineering-handoff](engineering-handoff.en.md) A/B/C  
+- Did not block archived [engineering-handoff](engineering-handoff.en.md) A/B/C (see [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md))  
 - Must not change the device acceptance baseline (CM cube + sync-compat)  
 - No compliant `wasi:webgpu` marketing; no external release  
 - No default issues/PRs to tegmentum/wasmtime4j (see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md))
@@ -74,5 +74,5 @@ Default charter recommendation: **A**; treat **B** as an explicit add-on.
 - Current async policy: [`errors-async.en.md`](../mapping/errors-async.en.md)  
 - Gap matrix: [`compliant-world-gap.en.md`](../mapping/compliant-world-gap.en.md)  
 - Threading: [`threading.en.md`](../mapping/threading.en.md)  
-- Active phase: [`engineering-handoff.en.md`](engineering-handoff.en.md)  
+- Archived phase: [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md) · plan [`engineering-handoff.en.md`](engineering-handoff.en.md)  
 - Upstream memo: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md)  

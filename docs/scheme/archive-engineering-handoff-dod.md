@@ -7,7 +7,7 @@
 
 归档对应：切片 A（Maven 可发布化，不对外发布）→ B（abi-mvp 扁平 render）→ C（可选 perf 备注），2026-08-10。
 
-**重要：** 仍为 **experimental**；本地 Publishing **≠** 对外发布 / 可供依赖宣称；真异步备忘见 [`true-cm-async-memo.md`](true-cm-async-memo.md)（本阶段后）。主验收仍为 CM cube。
+**重要：** 仍为 **experimental**；本地 Publishing **≠** 对外发布 / 可供依赖宣称；真异步备忘见 [`true-cm-async-memo.md`](true-cm-async-memo.md)（已开备忘页、**未立项**）。主验收仍为 CM cube。
 
 ## DoD
 

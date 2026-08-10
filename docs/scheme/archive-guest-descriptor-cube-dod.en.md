@@ -38,4 +38,5 @@ Archive covers slices A (Android CM natives) → B (standard descriptors + cube 
 
 - Device acceptance baseline: CM cube (vector-add / triangle demos removed)
 - Lifetime: [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4; `AbiCmHostBindings` / `WasmtimeCmCube.Session`
-- Out of scope: wasi-gfx, compliance marketing, true CM async, upstream PRs, Maven, `abi-mvp` render, perf, true dtor overlay
+- Out of scope for this phase: wasi-gfx, compliance marketing, true CM async, upstream PRs, true dtor overlay  
+- Later completed: Maven publishability / `abi-mvp` render / optional perf → [`archive-engineering-handoff-dod.en.md`](archive-engineering-handoff-dod.en.md)
