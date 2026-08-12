@@ -8,7 +8,7 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 ### Dual-track lock — sync-compat here; Track B sister repo
 
 - **Lock** this repo (Track A) to **sync-compat** for default/acceptance paths; do not resume true CM async on wasmtime4j
-- Sister planning repo: [`../wasmtime-android-kt`](../wasmtime-android-kt) (Android-first upstream-Wasmtime thin L1; docs only)
+- Sister repo: [`../wasmtime-android-kt`](../wasmtime-android-kt) (Android-first upstream-Wasmtime thin L1; M0–M5 archived; wasi:webgpu W1 delivered — next W2 true async)
 - Docs: [`dual-runtime-track.md`](docs/scheme/dual-runtime-track.md) / EN; README / scheme / errors-async ZH/EN point at Track B
 
 ### True CM async — slice A gate close-out (stop B–E)

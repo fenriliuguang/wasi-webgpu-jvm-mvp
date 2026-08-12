@@ -2,8 +2,8 @@
 
 [中文](dual-runtime-track.md) | **English**
 
-> **In effect (2026-08-10).**  
-> Track B repo: [`wasmtime-android-kt`](../../../wasmtime-android-kt) (docs chartered; no code yet).  
+> **In effect (2026-08-10; Track B progress synced 2026-08-12).**  
+> Track B repo: [`../wasmtime-android-kt`](../../../wasmtime-android-kt) — short-term M0–M5 thin L1 **archived**; current line WASI 0.3 + `wasi:webgpu` (W1 delivered; next cut **W2 true async**).  
 > Authoritative contract: Track B [`dual-track.en.md`](../../../wasmtime-android-kt/docs/scheme/dual-track.en.md).
 
 ## One-liner

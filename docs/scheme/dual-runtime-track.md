@@ -2,8 +2,8 @@
 
 **中文** | [English](dual-runtime-track.en.md)
 
-> **状态：生效（2026-08-10）。**  
-> 轨 B 仓：[`d:\projects\wasmtime-android-kt`](../../../wasmtime-android-kt)（计划文档已立项；无代码）。  
+> **状态：生效（2026-08-10；轨 B 进度同步 2026-08-12）。**  
+> 轨 B 仓：[`../wasmtime-android-kt`](../../../wasmtime-android-kt) — 短期 M0–M5 薄 L1 **已归档**；现行主线 WASI 0.3 + `wasi:webgpu`（W1 已交付，下一刀 **W2 真 async**）。  
 > 契约正文以轨 B [`dual-track.md`](../../../wasmtime-android-kt/docs/scheme/dual-track.md) 为准；本页是轨 A 侧锁死声明与索引。
 
 ## 一句话
