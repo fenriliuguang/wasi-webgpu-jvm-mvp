@@ -5,6 +5,12 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Planning — Track A mainline chartered (docs only)
+
+- Charter [`docs/scheme/track-a-baseline-host.md`](docs/scheme/track-a-baseline-host.md) / EN: slices **A→B** (baseline care → formal Host follow for Track B WIT); **implementation not started**
+- Set as **this repo’s current mainline**; still experimental + sync-compat locked; primary acceptance unchanged (CM cube)
+- Sync: root README / scheme README / dual-runtime-track ZH/EN
+
 ### Dual-track lock — sync-compat here; Track B sister repo
 
 - **Lock** this repo (Track A) to **sync-compat** for default/acceptance paths; do not resume true CM async on wasmtime4j
