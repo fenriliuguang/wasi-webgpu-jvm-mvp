@@ -15,12 +15,13 @@ Historical triangle-cm / `TriangleRenderer` paths removed; see [`archive-guest-o
 | `surface.present` | `surfacePresent` | `present` | |
 | `surface.unconfigure` | `surfaceUnconfigure` | `unconfigure` | |
 | `device.create-render-pipeline` | `deviceCreateRenderPipeline` | standard descriptor (vertex/fragment/layout/primitive/optional depth-stencil) | `@0.7.0` slice E; `@0.8.0` depth-stencil; layout is pipeline-layout |
-| `command-encoder.begin-render-pass` | `commandEncoderBeginRenderPass` | color-attachments + optional depth-stencil-attachment | `@0.7.0` slice E; `@0.8.0` depth |
+| `queue.submit` | `queueSubmit(list)` | `GPUQueue.submit` | Formal surface (Track B should migrate here); abi-cm `queueSubmit1` **deprecated** compatibility window |
+| `command-encoder.begin-render-pass` | `commandEncoderBeginRenderPass` | color-attachments + optional depth-stencil-attachment | Formal surface; `@0.7.0` slice E; `@0.8.0` depth |
 | `queue.write-texture` | `queueWriteTexture` | 2D texel upload (origin 0; depth 1) | `@0.8.0` guest-descriptor-cube B |
 | `render-pass-encoder.set-bind-group` | `renderPassSetBindGroup` | mirrors compute | `@0.8.0` |
 | `device.create-render-pipeline-triangle` | `deviceCreateRenderPipelineTriangle` | no vertex buffers + TriangleList | **deprecated** (E); historical `vertex_index` path |
 | `device.create-render-pipeline-triangle-buffers` | `deviceCreateRenderPipelineTriangleBuffers` | `GPUVertexState.buffers` + TriangleList | **deprecated** (E) |
-| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated** (E) |
+| `command-encoder.begin-render-pass-clear` | `commandEncoderBeginRenderPassClear` | `beginRenderPass` Clear/Store | **deprecated** (E); compatibility window → `commandEncoderBeginRenderPass(descriptor)` |
 | `render-pass-encoder.set-pipeline` | `renderPassSetPipeline` | `setPipeline` | |
 | `render-pass-encoder.set-vertex-buffer` | `renderPassSetVertexBuffer` | `setVertexBuffer` | `@0.4.0`; slot + buffer + offset/size |
 | `render-pass-encoder.draw` | `renderPassDraw` | `draw` | |
@@ -43,9 +44,33 @@ guest/cube-cm (cube_cm.wasm, world cube) @0.8.0
 - **Vertex / texture:** Guest `create-buffer` + `write-buffer` / `write-texture` → standard `create-render-pipeline` → `set-vertex-buffer` / `set-bind-group` + `draw`
 - **Frame loop** (host-driven): `init-cube` → loop `draw-frame` → `drop-cube`; Demo `CubeCmOneShot` (reuse Session + `releaseLifetimeSafetyNets` + `releaseAllGpuObjects`); threading: [`threading.en.md`](threading.en.md)
 - **Lifetime**: swapchain View↔Texture frame-equivalent `tryDrop`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4)
-- **Acceptance**: instrumented `WasmtimeCmCubeInstrumentedTest`; Demo tap shows slowly rotating textured cube
+- **Acceptance**: instrumented `WasmtimeCmCubeInstrumentedTest` (one-shot + 8 frames + same-Session `runCube` ×3); Demo tap shows slowly rotating textured cube
 - **Desktop**: Cpu fake surface supports AbiCm multi-frame lifetime unit tests; full CM Guest on-screen still needs Android Surface / Dawn
 - **u64 caveat**: `window-handle` high bits can exceed `Long.MAX_VALUE`; wasmtime4j `ConcurrentCallCodec` must parse it unsigned (overlaid in android-demo, see [`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md))
+
+## Track B formal Host surface (this repo changes first)
+
+L2 **already has** the formal APIs below; Track B should migrate off deprecated / shortcut paths (this repo does not edit Track B sources):
+
+| Shortcut / deprecated | Formal surface |
+|-----------------------|----------------|
+| `begin-render-pass-clear` / `commandEncoderBeginRenderPassClear` | `commandEncoderBeginRenderPass(RenderPassDescriptor)` |
+| abi-cm / abi-mvp `queueSubmit1` | `queueSubmit(list)` |
+| one-step `surface-get-current-texture-view` | `surfaceGetCurrentTexture` + `textureCreateView` |
+
+AbiCm still offers one-step `surfaceGetCurrentTextureView` for Guest CM cube (internal two-step + frame-pair tracking). Clear helper / `queueSubmit1` stay as a **compatibility window**, marked deprecated in KDoc.
+
+This round does **not** add adapter `features` / `limits` / `info`, `deviceDestroy`, or `on-submitted-work-done`.
+
+### texture / view lifetime short contract
+
+Still **not** a true WIT dtor. Frame-pair release:
+
+1. **After present**, `tryDrop` the View, then `tryDrop` the Texture (do not close the swapchain before submit/present).
+2. AbiCm’s one-step helper pairs `tryDrop` on present / next acquire / unconfigure.
+3. Two-step callers (Track B proposal names) must drop in that order themselves (`dropRep` / `tryDrop`).
+4. Session handoff: `releaseLifetimeSafetyNets` (pairs + encoder orphans), then `releaseAllGpuObjects` (Demo / instrumented; keep Instance / linker — D6).
+5. Guest-owned albedo / depth must **not** be swept by `releaseFrameResources`.
 
 ## Explicitly out of scope (this slice)
 

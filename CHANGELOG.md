@@ -5,6 +5,14 @@ Package / marketing claims remain **non-compliant** `wasi:webgpu` until a full s
 
 ## Unreleased
 
+### Track A mainline — A+B close-out (baseline care + formal Host)
+
+- CI: JVM job adds `:abi-cm:test` / `:abi-wasi:test`; android-assemble adds `publishEngineeredToMavenLocal` (fail red; no remote upload)
+- Instrumented: same-Session `runCube` ×3 (`cmGuestCubeSameSessionRepeatRunCube`, D6); first-launch RESUMED wait 20s→45s + one relaunch; script `force-stop` settle 400→1200ms
+- Cpu: abi-cm / abi-mvp formal `commandEncoderBeginRenderPass(descriptor)` + `queueSubmit(list)` clear→finish→submit without handle growth; abi-cm two-step `surfaceGetCurrentTexture` + `textureCreateView` + post-present `tryDrop`
+- Formal Host KDoc + [`render-subset.md`](docs/mapping/render-subset.md) Track B migration table; clear helper / `queueSubmit1` stay deprecated compatibility window
+- Archive [`archive-track-a-baseline-host-dod.md`](docs/scheme/archive-track-a-baseline-host-dod.md); README / scheme / dual-runtime-track ZH/EN; **still experimental + sync-compat**; primary acceptance unchanged (CM cube)
+
 ### Planning — Track A mainline chartered (docs only)
 
 - Charter [`docs/scheme/track-a-baseline-host.md`](docs/scheme/track-a-baseline-host.md) / EN: slices **A→B** (baseline care → formal Host follow for Track B WIT); **implementation not started**

@@ -54,6 +54,24 @@ class WasmtimeCmCubeInstrumentedTest {
         }
     }
 
+    /**
+     * Historical D6: second CM must reuse the same Session (process-global linker).
+     * Between cubes, [releaseGpuOwnership] returns ANativeWindow (D2/D3) without closing the Session.
+     */
+    @Test
+    fun cmGuestCubeSameSessionRepeatRunCube() {
+        withReadySurface { ctx ->
+            runOnCmThread("cm-cube-repeat-instrumented", timeoutSec = 240) {
+                val (host, session) = ensureSharedSession(ctx.context)
+                val windowHandle = Util.windowFromSurface(ctx.surface)
+                repeat(SAME_SESSION_CUBE_REPEAT) {
+                    session.runCube(windowHandle, ctx.width, ctx.height)
+                    releaseGpuOwnership(host)
+                }
+            }
+        }
+    }
+
     private data class ReadySurface(
         val context: android.content.Context,
         val activity: MainActivity,
@@ -91,7 +109,7 @@ class WasmtimeCmCubeInstrumentedTest {
         }
         context.startActivity(intent)
 
-        val activity = waitForResumedMainActivity(timeoutMs = 20_000)
+        val activity = waitForResumedMainActivity(timeoutMs = 45_000)
         instrumentation.runOnMainSync {
             activity.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
@@ -181,8 +199,10 @@ class WasmtimeCmCubeInstrumentedTest {
 
     private fun waitForResumedMainActivity(timeoutMs: Long): MainActivity {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
         val monitor = ActivityLifecycleMonitorRegistry.getInstance()
         val deadline = SystemClock.uptimeMillis() + timeoutMs
+        var relaunched = false
         while (SystemClock.uptimeMillis() < deadline) {
             val found = AtomicReference<MainActivity?>(null)
             instrumentation.runOnMainSync {
@@ -191,6 +211,15 @@ class WasmtimeCmCubeInstrumentedTest {
                 found.set(resumed.filterIsInstance<MainActivity>().firstOrNull())
             }
             found.get()?.let { return it }
+            val remaining = deadline - SystemClock.uptimeMillis()
+            if (!relaunched && remaining in 1 until timeoutMs / 2) {
+                relaunched = true
+                val retry = Intent(context, MainActivity::class.java).apply {
+                    putExtra(MainActivity.EXTRA_SKIP_DEMO_AUTORUN, true)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                }
+                context.startActivity(retry)
+            }
             Thread.sleep(50)
         }
         error("MainActivity not RESUMED within ${timeoutMs}ms")
@@ -200,6 +229,7 @@ class WasmtimeCmCubeInstrumentedTest {
         private const val SURFACE_RELEASE_SETTLE_MS = 400L
         private const val SURFACE_READY_SETTLE_MS = 300L
         private const val ACTIVITY_TEARDOWN_SETTLE_MS = 500L
+        private const val SAME_SESSION_CUBE_REPEAT = 3
 
         private val sessionLock = Any()
         private var sharedHost: DawnWasiWebGpuHost? = null

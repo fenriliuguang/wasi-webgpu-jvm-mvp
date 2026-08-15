@@ -2,7 +2,7 @@
 # Use when Studio/Gradle :connectedDebugAndroidTest reports "Process crashed"
 # while `am instrument` is green — common on vivo when UTP reinstall races.
 #
-# Default: CM cube acceptance (one-shot + short frame loop).
+# Default: CM cube acceptance (one-shot + short frame loop + same-Session runCube ×3).
 # Force-stop between custom class filters if you add more CM guests later —
 # wasmtime4j CM host callbacks are process-global (D6).
 param(
@@ -66,7 +66,7 @@ $appId = "io.github.fenriliuguang.wasi.webgpu.demo"
 
 function Invoke-Instrument([string]$classFilter, [string]$label) {
     & $adb shell am force-stop $appId 2>$null | Out-Null
-    Start-Sleep -Milliseconds 400
+    Start-Sleep -Milliseconds 1200
     $argList = @("shell", "am", "instrument", "-w", "-r")
     if ($classFilter) {
         $argList += @("-e", "class", $classFilter)

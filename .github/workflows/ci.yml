@@ -26,7 +26,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Unit tests (CM skips without desktop-natives)
-        run: ./gradlew :host-api:test :abi-mvp:test :runtime-wasmtime:test --no-daemon
+        run: ./gradlew :host-api:test :abi-mvp:test :abi-cm:test :abi-wasi:test :runtime-wasmtime:test --no-daemon
 
   android-assemble:
     name: Android assembleDebug
@@ -48,3 +48,6 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew :android-demo:assembleDebug --no-daemon
+
+      - name: Engineered Maven local self-check (no remote upload)
+        run: ./gradlew publishEngineeredToMavenLocal --no-daemon

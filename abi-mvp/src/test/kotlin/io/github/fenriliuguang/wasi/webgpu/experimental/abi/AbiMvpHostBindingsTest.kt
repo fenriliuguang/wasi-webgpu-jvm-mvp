@@ -1,9 +1,13 @@
 package io.github.fenriliuguang.wasi.webgpu.experimental.abi
 
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.Color
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.CpuWasiWebGpuHost
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuBufferUsage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuHandle
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureFormat
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.GpuTextureUsage
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassColorAttachment
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ResourceKind
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VectorAddScenario
@@ -114,6 +118,48 @@ class AbiMvpHostBindingsTest {
             assertEquals(baseline, host.handleCount())
             assertEquals(0, host.handleCount(ResourceKind.Texture))
             assertEquals(0, host.handleCount(ResourceKind.TextureView))
+        }
+    }
+
+    @Test
+    fun formalBeginRenderPassAndQueueSubmitListDoesNotAccumulateHandles() {
+        CpuWasiWebGpuHost().use { host ->
+            val abi = AbiMvpHostBindings(host) { error("no guest memory") }
+            val adapter = abi.requestAdapter()
+            val device = abi.adapterRequestDevice(adapter)
+            val queue = abi.deviceGetQueue(device)
+            val surface = abi.createSurfaceFromNativeWindow(0xF00DL)
+            abi.surfaceConfigure(surface, device, adapter, 32, 32)
+
+            val baseline = host.handleCount()
+            repeat(16) {
+                val view = abi.surfaceGetCurrentTextureView(surface)
+                val encoder = abi.deviceCreateCommandEncoder(device)
+                val pass = abi.commandEncoderBeginRenderPass(
+                    encoder,
+                    RenderPassDescriptor(
+                        colorAttachments = listOf(
+                            RenderPassColorAttachment(
+                                view = GpuHandle(view),
+                                clearValue = Color(0.0, 0.0, 0.0, 1.0),
+                            ),
+                        ),
+                    ),
+                )
+                assertTrue(pass > 0)
+                abi.renderPassEnd(pass)
+                val cmd = abi.commandEncoderFinish(encoder)
+                abi.queueSubmit(queue, listOf(cmd))
+                abi.surfacePresent(surface)
+                assertEquals(0, abi.trackedFramePairCount())
+            }
+
+            assertEquals(baseline, host.handleCount())
+            assertEquals(0, host.handleCount(ResourceKind.Texture))
+            assertEquals(0, host.handleCount(ResourceKind.TextureView))
+            assertEquals(0, host.handleCount(ResourceKind.CommandEncoder))
+            assertEquals(0, host.handleCount(ResourceKind.CommandBuffer))
+            assertEquals(0, host.handleCount(ResourceKind.RenderPassEncoder))
         }
     }
 

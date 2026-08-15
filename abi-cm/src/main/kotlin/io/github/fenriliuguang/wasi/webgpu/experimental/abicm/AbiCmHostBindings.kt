@@ -18,6 +18,7 @@ import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPassDescripto
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.RenderPipelineDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SamplerDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.ShaderModuleDescriptor
+import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureResult
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.SurfaceTextureStatus
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.TextureDescriptor
 import io.github.fenriliuguang.wasi.webgpu.experimental.host.VertexBufferLayout
@@ -215,6 +216,17 @@ class AbiCmHostBindings(
     fun textureCreateView(texture: Int): Int =
         host.textureCreateView(GpuHandle(texture)).raw
 
+    /**
+     * Formal two-step acquire (Track B). Does **not** record View↔Texture pairing —
+     * caller [tryDrop]s view then texture after [surfacePresent], or uses
+     * [surfaceGetCurrentTextureView] which pairs automatically.
+     */
+    fun surfaceGetCurrentTexture(surface: Int): SurfaceTextureResult {
+        releaseTrackedFrameTextures()
+        host.releaseFrameResources()
+        return host.surfaceGetCurrentTexture(GpuHandle(surface))
+    }
+
     fun surfaceConfigure(surface: Int, device: Int, adapter: Int, width: Int, height: Int): Int =
         host.surfaceConfigure(
             GpuHandle(surface),
@@ -224,6 +236,11 @@ class AbiCmHostBindings(
             height,
         )
 
+    /**
+     * Convenience one-step acquire for Guest CM cube. Internally
+     * [surfaceGetCurrentTexture] + [textureCreateView] and records the frame pair.
+     * Track B should prefer the two-step L2 names.
+     */
     fun surfaceGetCurrentTextureView(surface: Int): Int {
         // Drop prior View↔Texture pair (and sweep encoder orphans) before acquire (D5).
         releaseTrackedFrameTextures()
@@ -269,6 +286,7 @@ class AbiCmHostBindings(
     fun commandEncoderBeginComputePass(encoder: Int): Int =
         host.commandEncoderBeginComputePass(GpuHandle(encoder)).raw
 
+    /** @deprecated Prefer [commandEncoderBeginRenderPass] (Track B formal surface). */
     fun commandEncoderBeginRenderPassClear(
         encoder: Int,
         view: Int,
@@ -286,6 +304,7 @@ class AbiCmHostBindings(
             a,
         ).raw
 
+    /** Formal begin-render-pass. Track B should use this instead of [commandEncoderBeginRenderPassClear]. */
     fun commandEncoderBeginRenderPass(encoder: Int, descriptor: RenderPassDescriptor): Int =
         host.commandEncoderBeginRenderPass(GpuHandle(encoder), descriptor).raw
 
@@ -352,11 +371,12 @@ class AbiCmHostBindings(
     fun commandEncoderFinish(encoder: Int): Int =
         host.commandEncoderFinish(GpuHandle(encoder)).raw
 
+    /** Formal list submit. Track B should use this instead of [queueSubmit1]. */
     fun queueSubmit(queue: Int, commandBuffers: List<Int>) {
         host.queueSubmit(GpuHandle(queue), commandBuffers.map { GpuHandle(it) })
     }
 
-    /** @deprecated Prefer [queueSubmit] (slice C). */
+    /** @deprecated Prefer [queueSubmit] (Track B formal surface). */
     fun queueSubmit1(queue: Int, commandBuffer: Int) {
         host.queueSubmit(GpuHandle(queue), listOf(GpuHandle(commandBuffer)))
     }

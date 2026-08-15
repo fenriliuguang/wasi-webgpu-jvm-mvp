@@ -2,7 +2,7 @@
 
 [中文](track-a-baseline-host.md) | **English**
 
-> **Status: current mainline (chartered 2026-08-14; implementation not started).**  
+> **Status: complete (2026-08-15).** Slices **A→B** closed; archive [`archive-track-a-baseline-host-dod.en.md`](archive-track-a-baseline-host-dod.en.md).  
 > Follows: true CM async A-gate close-out ([`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md)) + dual-track lock ([`dual-runtime-track.en.md`](dual-runtime-track.en.md)).  
 > Stack: **A baseline care (CI / instrumented / lifetime checklist)** → **B formal Host surface (follow Track B WIT; no async)**.
 
@@ -36,31 +36,31 @@ See: [`dual-runtime-track.en.md`](dual-runtime-track.en.md) · [`render-subset.e
 
 ### A — Baseline care (reliability)
 
-- [ ] **CI:** [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) JVM job adds `:abi-cm:test` (and cheap `:abi-wasi:test`); add `publishEngineeredToMavenLocal` self-check (fail red; no remote upload)
-- [ ] **Instrumented:** [`WasmtimeCmCubeInstrumentedTest`](../../android-demo/src/androidTest/java/io/github/fenriliuguang/wasi/webgpu/demo/WasmtimeCmCubeInstrumentedTest.kt) adds **same-Session `runCube` ×N** (default 3) beyond one-shot + 8 frames; still `releaseAllGpuObjects` after
-- [ ] **Cpu non-accumulation:** harden [`AbiCmHostBindingsTest`](../../abi-cm/src/test/); instrumented stays “completes without throw” if no count API
-- [ ] **Care checklist** (this page or dual-runtime-track short section): fake WIT dtor → `tryDrop` / `releaseLifetimeSafetyNets` / `releaseAllGpuObjects`; process-global CM linker → `force-stop` between waves + Session reuse; gate commands pinned
-- [x] CHANGELOG + root README Status mark this page as **current mainline** (done in charter docs drop; code slices still not started)
+- [x] **CI:** [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) JVM job adds `:abi-cm:test` (and cheap `:abi-wasi:test`); android-assemble adds `publishEngineeredToMavenLocal` self-check (fail red; no remote upload)
+- [x] **Instrumented:** [`WasmtimeCmCubeInstrumentedTest`](../../android-demo/src/androidTest/java/io/github/fenriliuguang/wasi/webgpu/demo/WasmtimeCmCubeInstrumentedTest.kt) adds **same-Session `runCube` ×N** (default 3) beyond one-shot + 8 frames; still `releaseAllGpuObjects` after
+- [x] **Cpu non-accumulation:** harden [`AbiCmHostBindingsTest`](../../abi-cm/src/test/); instrumented stays “completes without throw” if no count API
+- [x] **Care checklist** (this page or dual-runtime-track short section): fake WIT dtor → `tryDrop` / `releaseLifetimeSafetyNets` / `releaseAllGpuObjects`; process-global CM linker → `force-stop` between waves + Session reuse; gate commands pinned
+- [x] CHANGELOG + root README Status sync; archive is this phase’s close-out
 
 ### B — Host follow for Track B (formal surface)
 
 Track B may still use deprecated / shortcut paths: `begin-render-pass-clear`, `queueSubmit1`, one-step `surface-get-current-texture-view`. L2 **already has** formal APIs; this slice makes them the dependable surface:
 
-- [ ] **Annotate formal APIs:** KDoc + [`render-subset.en.md`](../mapping/render-subset.en.md) say Track B should move to `commandEncoderBeginRenderPass(descriptor)`, `queueSubmit(list)`, `surfaceGetCurrentTexture` + `textureCreateView`; keep clear helper / `queueSubmit1` as compatibility window with deprecated migration notes
-- [ ] **Tests:** abi-cm / abi-mvp Cpu paths add formal `beginRenderPass` + `queueSubmit(list)` minimal clear→finish→submit
-- [ ] **texture / view lifetime short contract:** post-present `tryDrop` / frame-pair release documented for Track B’s two-step proposal names
-- [ ] **Do not add this round** adapter `features` / `limits` / `info`, `deviceDestroy`, `on-submitted-work-done` (open only when Track B’s next cut needs them)
-- [ ] Local `publishEngineeredToMavenLocal`; CHANGELOG; **no** Track B repo edits here
+- [x] **Annotate formal APIs:** KDoc + [`render-subset.en.md`](../mapping/render-subset.en.md) say Track B should move to `commandEncoderBeginRenderPass(descriptor)`, `queueSubmit(list)`, `surfaceGetCurrentTexture` + `textureCreateView`; keep clear helper / `queueSubmit1` as compatibility window with deprecated migration notes
+- [x] **Tests:** abi-cm / abi-mvp Cpu paths add formal `beginRenderPass` + `queueSubmit(list)` minimal clear→finish→submit
+- [x] **texture / view lifetime short contract:** post-present `tryDrop` / frame-pair release documented for Track B’s two-step proposal names
+- [x] **Do not add this round** adapter `features` / `limits` / `info`, `deviceDestroy`, `on-submitted-work-done` (open only when Track B’s next cut needs them)
+- [x] Local `publishEngineeredToMavenLocal`; CHANGELOG; **no** Track B repo edits here
 
-## Care checklist (pin before close-out; tick when executing)
+## Care checklist (executed)
 
 | Item | Command / anchor |
 |------|------------------|
-| JVM + cube-related unit tests | `./gradlew :host-api:test :abi-cm:test` (also `:abi-mvp:test :abi-wasi:test` recommended) |
-| Engineered coords self-check | `./gradlew publishEngineeredToMavenLocal` |
-| Device primary gate | `./scripts/run-android-instrumented.ps1` (**do not** rely on Studio UTP) |
-| Fake-dtor safety nets | View↔Texture `tryDrop`; Session `releaseLifetimeSafetyNets`; Demo/instrumented `releaseAllGpuObjects` |
-| Process-global CM | `am force-stop` between waves; reuse Session in-process |
+| JVM + cube-related unit tests | `./gradlew :host-api:test :abi-cm:test` (also `:abi-mvp:test :abi-wasi:test` recommended) ✅ |
+| Engineered coords self-check | `./gradlew publishEngineeredToMavenLocal` ✅ |
+| Device primary gate | `./scripts/run-android-instrumented.ps1` (**do not** rely on Studio UTP) ✅ `OK (3 tests)` |
+| Fake-dtor safety nets | View↔Texture `tryDrop`; Session `releaseLifetimeSafetyNets`; Demo/instrumented `releaseAllGpuObjects` ✅ |
+| Process-global CM | `am force-stop` between waves; reuse Session in-process ✅ |
 
 ## Out of scope
 
@@ -75,16 +75,17 @@ Track B may still use deprecated / shortcut paths: `begin-render-pass-clear`, `q
 | — | Gap-matrix long-tail sweep; consumer-less adapter metadata / queue-done expansion |
 | — | wasi-gfx / multi-window |
 
-## Landing order
+## Landing order (complete)
 
-1. **A first** (CI + repeat cube + checklist docs)  
-2. **Then B** (formal Host tests + mapping; publish self-check)  
-3. Close-out: tick DoD → `archive-track-a-baseline-host-dod.md`; sync root README / scheme / CHANGELOG  
+1. ~~**A first** (CI + repeat cube + checklist docs)~~  
+2. ~~**Then B** (formal Host tests + mapping; publish self-check)~~  
+3. ~~Close-out: tick DoD → `archive-track-a-baseline-host-dod.en.md`; sync root README / scheme / CHANGELOG~~  
 
-**Current:** plan chartered; **implementation not started** (2026-08-14).
+**Complete:** DoD → [`archive-track-a-baseline-host-dod.en.md`](archive-track-a-baseline-host-dod.en.md); root README / scheme / CHANGELOG synced (2026-08-15).
 
 ## Links
 
+- This phase archive: [`archive-track-a-baseline-host-dod.en.md`](archive-track-a-baseline-host-dod.en.md)  
 - Dual-track lock: [`dual-runtime-track.en.md`](dual-runtime-track.en.md)  
 - True async gate archive: [`archive-true-cm-async-dod.en.md`](archive-true-cm-async-dod.en.md)  
 - Stability blockers: [`demo-cm-stability-blockers.md`](demo-cm-stability-blockers.md) (ZH)  

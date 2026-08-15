@@ -20,8 +20,9 @@
 - CM 路径使用 `DawnWasiWebGpuHost` + `HandlerThread`（`webgpu-cube-cm`）；**主线程不**调用 WebGPU。  
 - 宿主驱动帧循环：同线程 `init-cube` → 循环 `draw-frame` → `drop-cube`（见 `WasmtimeCmCube.Session.runFrameLoop`）。  
 - Demo `CubeCmOneShot`：复用 Host + Session；每轮前后 `releaseAllGpuObjects` 交还 ANativeWindow（避免背靠背关 linker）；Session 末尾 `releaseLifetimeSafetyNets`。  
-- **仪器**：`WasmtimeCmCubeInstrumentedTest`（复用 Session）。  
+- **仪器**：`WasmtimeCmCubeInstrumentedTest`（复用 Session；one-shot + 8 帧 + 同 Session `runCube` ×3 / D6）。  
 - 帧资源：present / unconfigure / Session 末尾 `tryDrop` View↔Texture 配对 + `releaseFrameResources`；**仍非真 WIT dtor**（[`patches/UPSTREAM.md`](../../patches/UPSTREAM.md) §4）。  
+- 养护门禁：[`track-a-baseline-host.md`](../scheme/track-a-baseline-host.md) 检查清单。  
 - 历史 L2↔CM pause/resume 与 triangle 两波仪器：见 [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md)。
 
 ## Instance / Device / Queue

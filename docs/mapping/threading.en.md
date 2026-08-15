@@ -20,8 +20,9 @@
 - The CM path uses `DawnWasiWebGpuHost` + `HandlerThread` (`webgpu-cube-cm`); the **UI thread does not** call WebGPU.  
 - Host-driven frame loop: same thread `init-cube` → loop `draw-frame` → `drop-cube` (see `WasmtimeCmCube.Session.runFrameLoop`).  
 - Demo `CubeCmOneShot`: reuse Host + Session; `releaseAllGpuObjects` around each press to free ANativeWindow (avoid back-to-back linker teardown); Session ends with `releaseLifetimeSafetyNets`.  
-- **Instrumented**: `WasmtimeCmCubeInstrumentedTest` (reuse Session).  
+- **Instrumented**: `WasmtimeCmCubeInstrumentedTest` (reuse Session; one-shot + 8 frames + same-Session `runCube` ×3 / D6).  
 - Frame resources: View↔Texture `tryDrop` on present / unconfigure / Session end + `releaseFrameResources`; **still not true WIT dtor** ([`patches/UPSTREAM.en.md`](../../patches/UPSTREAM.en.md) §4).  
+- Care gates: [`track-a-baseline-host.en.md`](../scheme/track-a-baseline-host.en.md) checklist.  
 - Historical L2↔CM pause/resume and two-wave triangle instrumentation: see [`demo-cm-stability-blockers.md`](../scheme/demo-cm-stability-blockers.md) (ZH).
 
 ## Instance / Device / Queue

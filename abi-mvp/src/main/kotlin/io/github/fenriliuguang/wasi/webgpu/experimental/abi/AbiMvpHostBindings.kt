@@ -159,6 +159,12 @@ class AbiMvpHostBindings(
     fun commandEncoderFinish(encoder: Int): Int =
         host.commandEncoderFinish(GpuHandle(encoder)).raw
 
+    /** Formal list submit. Track B should use this instead of [queueSubmit1]. */
+    fun queueSubmit(queue: Int, commandBuffers: List<Int>) {
+        host.queueSubmit(GpuHandle(queue), commandBuffers.map { GpuHandle(it) })
+    }
+
+    /** @deprecated Prefer [queueSubmit] (Track B formal surface). */
     fun queueSubmit1(queue: Int, commandBuffer: Int) {
         host.queueSubmit(GpuHandle(queue), listOf(GpuHandle(commandBuffer)))
     }
@@ -229,6 +235,10 @@ class AbiMvpHostBindings(
     fun textureCreateView(texture: Int): Int =
         host.textureCreateView(GpuHandle(texture)).raw
 
+    /** Formal begin-render-pass. Track B should use this instead of [commandEncoderBeginRenderPassClear]. */
+    fun commandEncoderBeginRenderPass(encoder: Int, descriptor: RenderPassDescriptor): Int =
+        host.commandEncoderBeginRenderPass(GpuHandle(encoder), descriptor).raw
+
     fun queueWriteTexture(
         queue: Int,
         texture: Int,
@@ -256,6 +266,7 @@ class AbiMvpHostBindings(
             format,
         ).raw
 
+    /** @deprecated Prefer [commandEncoderBeginRenderPass] (Track B formal surface). */
     fun commandEncoderBeginRenderPassClear(
         encoder: Int,
         view: Int,

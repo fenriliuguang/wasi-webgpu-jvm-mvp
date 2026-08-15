@@ -62,8 +62,8 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 
 ## 状态
 
-- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)；**合规 wasi:webgpu World（无 gfx，A–G，2026-08-09）**→ [归档](docs/scheme/archive-compliant-world-dod.md)；**Guest 标准 descriptor + 旋转纹理立方体（A–D，2026-08-10）**→ [归档](docs/scheme/archive-guest-descriptor-cube-dod.md)（D：**仍非真 WIT dtor**）；**工程移交**（Maven 可发布化 / abi-mvp render / 可选 perf，A–C，2026-08-10）→ [归档](docs/scheme/archive-engineering-handoff-dod.md)；**真 CM async**（A 闸门关门，2026-08-10；B–E 停止）→ [归档](docs/scheme/archive-true-cm-async-dod.md)
-- **现行主线：** [轨 A：L2 / cube 基线养护 + 跟 B 扩 Host](docs/scheme/track-a-baseline-host.md)（**已立项，实现未开工**）。仍为 **experimental**；本地 Publishing **≠** 对外发布；**真机验收基准 = CM cube**；async **锁死 sync-compat**。姊妹仓 [`wasmtime-android-kt`](../wasmtime-android-kt) 继续真 async / WIT 扩面产品线。见 [双运行时轨](docs/scheme/dual-runtime-track.md)
+- **已完成**：基线（P0–P1 / CM compute / L2 上屏）→ [归档](docs/scheme/archive-baseline-dod.md)；Guest CM 上屏（triangle-cm，2026-08-06）→ [归档](docs/scheme/archive-guest-onscreen-cm-dod.md)；Demo CM 稳性 + 帧循环（2026-08-07）→ [归档](docs/scheme/archive-demo-cm-stability-dod.md)；Demo CM **真机稳性回归**（D1–D6，2026-08-08，V2458A）→ [blockers](docs/scheme/demo-cm-stability-blockers.md)；**语义加固与工程清债**（A–E，2026-08-09）→ [归档](docs/scheme/archive-semantic-hardening-dod.md)；**合规 wasi:webgpu World（无 gfx，A–G，2026-08-09）**→ [归档](docs/scheme/archive-compliant-world-dod.md)；**Guest 标准 descriptor + 旋转纹理立方体（A–D，2026-08-10）**→ [归档](docs/scheme/archive-guest-descriptor-cube-dod.md)（D：**仍非真 WIT dtor**）；**工程移交**（Maven 可发布化 / abi-mvp render / 可选 perf，A–C，2026-08-10）→ [归档](docs/scheme/archive-engineering-handoff-dod.md)；**真 CM async**（A 闸门关门，2026-08-10；B–E 停止）→ [归档](docs/scheme/archive-true-cm-async-dod.md)；**轨 A 主线**（L2 / cube 基线养护 + 跟 B 扩 Host，A–B，2026-08-15）→ [归档](docs/scheme/archive-track-a-baseline-host-dod.md)
+- **现行：** 无新产品阶段。继续 **experimental** + **sync-compat**；本地 Publishing **≠** 对外发布；**真机验收基准 = CM cube**；养护门禁见 [轨 A 计划](docs/scheme/track-a-baseline-host.md) / [双运行时轨](docs/scheme/dual-runtime-track.md)。姊妹仓 [`wasmtime-android-kt`](../wasmtime-android-kt) 继续真 async / WIT 扩面产品线。
 
 ## 参考
 
@@ -76,7 +76,8 @@ Native / Guest 重建与踩坑：[`docs/android-wasmtime.md`](docs/android-wasmt
 |------|------|---------|
 | 根 README | [README.md](README.md) | [README.en.md](README.en.md) |
 | 方案摘要 | [docs/scheme/README.md](docs/scheme/README.md) | [docs/scheme/README.en.md](docs/scheme/README.en.md) |
-| **轨 A 主线（基线养护 + 跟 B 扩 Host）** | [track-a-baseline-host](docs/scheme/track-a-baseline-host.md) | [EN](docs/scheme/track-a-baseline-host.en.md) |
+| 轨 A 主线（计划，已完成） | [track-a-baseline-host](docs/scheme/track-a-baseline-host.md) | [EN](docs/scheme/track-a-baseline-host.en.md) |
+| 轨 A 主线 DoD 归档 | [archive-track-a-baseline-host-dod](docs/scheme/archive-track-a-baseline-host-dod.md) | [EN](docs/scheme/archive-track-a-baseline-host-dod.en.md) |
 | 工程移交 DoD 归档 | [archive-engineering-handoff-dod](docs/scheme/archive-engineering-handoff-dod.md) | [EN](docs/scheme/archive-engineering-handoff-dod.en.md) |
 | 工程移交（计划，已完成） | [engineering-handoff](docs/scheme/engineering-handoff.md) | [EN](docs/scheme/engineering-handoff.en.md) |
 | 本地 Maven 坐标（自检，非发布） | [maven-local](docs/maven-local.md) | [EN](docs/maven-local.en.md) |

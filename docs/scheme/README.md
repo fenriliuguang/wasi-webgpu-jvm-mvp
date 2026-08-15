@@ -21,7 +21,7 @@
 | **Guest 标准 descriptor 真机 + 旋转纹理立方体** | **已完成（A–D）** — 计划 [`guest-descriptor-cube.md`](guest-descriptor-cube.md)；归档 [`archive-guest-descriptor-cube-dod.md`](archive-guest-descriptor-cube-dod.md)。D：**仍非真 WIT dtor** |
 | **工程移交：Maven 可发布化（不对外发布）/ abi-mvp render / 可选 perf** | **已完成（A–C）** — 计划 [`engineering-handoff.md`](engineering-handoff.md)；归档 [`archive-engineering-handoff-dod.md`](archive-engineering-handoff-dod.md)。仍为 **experimental**；本地 Publishing **≠** 对外发布。**真机验收基准 = CM cube**（`guest/cube-cm`） |
 | **真 CM async（层 A）/ 可选 P3 Spike** | **A 闸门关门（2026-08-10；B–E 停止）** — 归档 [`archive-true-cm-async-dod.md`](archive-true-cm-async-dod.md)。本仓 **锁死 sync-compat**。真 async / 自研 Android Wasmtime L1 → 姊妹仓 [`wasmtime-android-kt`](../../../wasmtime-android-kt)（M0–M5 已归档；`wasi:webgpu` W1 已交付 → **W2+**）；契约 [`dual-runtime-track.md`](dual-runtime-track.md) |
-| **轨 A 主线：L2 / cube 基线养护 + 跟 B 扩 Host** | **现行主线（已立项，2026-08-14；实现未开工）** — 计划 [`track-a-baseline-host.md`](track-a-baseline-host.md)。切片 **A→B**：养住 CI/仪器/生命周期 → 正式 Host 面收敛。**不是**真 async / 合规产品阶段 |
+| **轨 A 主线：L2 / cube 基线养护 + 跟 B 扩 Host** | **已完成（A–B，2026-08-15）** — 计划 [`track-a-baseline-host.md`](track-a-baseline-host.md)；归档 [`archive-track-a-baseline-host-dod.md`](archive-track-a-baseline-host-dod.md)。切片 **A→B**：养住 CI/仪器/生命周期 → 正式 Host 面收敛。**不是**真 async / 合规产品阶段。无新产品阶段；继续 experimental + sync-compat |
 
 已完成计划页保留正文作史实；现行口径以根 README + 本表 + 各 `archive-*-dod` 为准。vector-add / triangle Guest 示例已移除。
 

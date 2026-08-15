@@ -79,6 +79,13 @@ interface WasiWebGpuHost : AutoCloseable {
 
     fun surfaceUnconfigure(surface: GpuHandle)
 
+    /**
+     * Acquire the current swapchain texture (status + handle).
+     *
+     * Formal Track B path: pair with [textureCreateView]. After [surfacePresent],
+     * [tryDrop] the view then the texture (AbiCm one-step helper does this pairing).
+     * Still **not** a true WIT destructor.
+     */
     fun surfaceGetCurrentTexture(surface: GpuHandle): SurfaceTextureResult
 
     fun surfacePresent(surface: GpuHandle)
@@ -110,9 +117,17 @@ interface WasiWebGpuHost : AutoCloseable {
         descriptor: RenderPipelineDescriptor,
     ): GpuHandle
 
+    /**
+     * Create a view for [texture]. Swapchain frames: [tryDrop] this view (then the texture)
+     * after [surfacePresent]. Guest-owned albedo/depth views live across frames and must not
+     * be swept by [releaseFrameResources].
+     */
     fun textureCreateView(texture: GpuHandle): GpuHandle
 
-    /** @deprecated Prefer [commandEncoderBeginRenderPass] (slice E). */
+    /**
+     * @deprecated Prefer [commandEncoderBeginRenderPass] with [RenderPassDescriptor]
+     * (Track B formal surface). Compatibility window only.
+     */
     fun commandEncoderBeginRenderPassClear(
         encoder: GpuHandle,
         view: GpuHandle,
@@ -122,6 +137,10 @@ interface WasiWebGpuHost : AutoCloseable {
         clearA: Float,
     ): GpuHandle
 
+    /**
+     * Formal begin-render-pass. Track B should use this (color + optional depth-stencil)
+     * instead of [commandEncoderBeginRenderPassClear].
+     */
     fun commandEncoderBeginRenderPass(
         encoder: GpuHandle,
         descriptor: RenderPassDescriptor,
@@ -209,6 +228,9 @@ interface WasiWebGpuHost : AutoCloseable {
         bytesPerRow: Int,
     )
 
+    /**
+     * Submit one or more command buffers. Formal Track B path (not a single-buffer helper).
+     */
     fun queueSubmit(queue: GpuHandle, commandBuffers: List<GpuHandle>)
 
     fun bufferMapAsync(buffer: GpuHandle, mode: Int, offset: Long, size: Long)
